@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+# 
+# SPDX-License-Identifier: MIT
+
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+
+# build results
+/out
+
+# visual studio caches
+/.vs
+/.vscode
+
+# debug artifacts
+*.pdb
