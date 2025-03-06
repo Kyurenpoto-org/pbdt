@@ -24,15 +24,7 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
 
 list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
 
+	enable_testing()
+
 # modules
-add_subdirectory("example")
 add_subdirectory("deps/internals")
-
-# add_subdirectory("your-module-name")
-
-# tests
-enable_testing()
-
-add_subdirectory("tests/example")
-
-# add_subdirectory("tests/your-module-name")
