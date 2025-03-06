@@ -2,14 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-
 # vcpkg
-if(DEFINED ENV{VCPKG_ROOT})
+if(DEFINED ENV{VCPKG_ROOT} AND EXISTS $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 	include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 endif()
 
 # conan
-if(DEFINED ENV{CONAN_HOME})
+if(DEFINED ENV{CONAN_HOME} AND EXISTS ${CMAKE_CURRENT_LIST_DIR}/conan.cmake)
 	include(${CMAKE_CURRENT_LIST_DIR}/conan.cmake)
 endif()
