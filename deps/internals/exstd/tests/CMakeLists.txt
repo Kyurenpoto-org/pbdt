@@ -2,20 +2,49 @@
 #
 # SPDX-License-Identifier: MIT
 
-# tests
-add_executable(callable-traits "src/callable-traits.cpp")
+# fixtures
+add_library(type-assertion INTERFACE)
 
 target_compile_features(
-    callable-traits
+    type-assertion
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    type-assertion
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# tests
+add_executable(callable-concept-header "src/callable-concept-header.cpp")
+
+target_compile_features(
+    callable-concept-header
     PRIVATE cxx_std_23
 )
 target_link_libraries(
-    callable-traits
+    callable-concept-header
     PRIVATE exstd
-    PRIVATE exstd-module
+    PRIVATE type-assertion
 )
 
 add_test(
-    NAME exstd.callable-traits
-    COMMAND callable-traits
+    NAME exstd.callable-concept.header
+    COMMAND callable-concept-header
+)
+
+add_executable(simple-callable-header "src/simple-callable-header.cpp")
+
+target_compile_features(
+    simple-callable-header
+    PRIVATE cxx_std_23
+)
+target_link_libraries(
+    simple-callable-header
+    PRIVATE exstd
+    PRIVATE type-assertion
+)
+
+add_test(
+    NAME exstd.simple-callable.header
+    COMMAND simple-callable-header
 )
