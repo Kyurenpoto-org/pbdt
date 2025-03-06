@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 3.28.2)
 
 project(
-	"your-project-name"
+	"pbdt"
 	VERSION
 	0.1.0
 	DESCRIPTION
-	"project description"
+	"Property-Behavior Driven Test for C++"
 	LANGUAGES
 	CXX
 )
