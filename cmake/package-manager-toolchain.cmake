@@ -16,12 +16,12 @@ if(DEFINED ENV{VCPKG_ROOT})
 
 	unset(vcpkg_toolchain_path)
 else()
-	message(WARNING "VCPKG_ROOT not defined. Please set the VCPKG_ROOT environment variable to the location of your Vcpkg installation. You can set it in your system environment variables.")
+	message(WARNING "VCPKG_ROOT not defined. Please set the VCPKG_ROOT environment variable to the location of your Vcpkg installation. You can set it in your system environment variables. See https://vcpkg.io for more information.")
 endif()
 
 # conan
 if(DEFINED ENV{CONAN_HOME})
 	include(${CMAKE_CURRENT_LIST_DIR}/conan.cmake)
 else()
-	message(WARNING "CONAN_HOME not defined. Please set the CONAN_HOME environment variable to the location of your Conan installation. You can set it in your system environment variables.")
+	message(WARNING "CONAN_HOME not defined. Please set the CONAN_HOME environment variable to the location of your Conan installation. You can set it in your system environment variables. See https://docs.conan.io for more information.")
 endif()
