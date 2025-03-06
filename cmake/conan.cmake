@@ -30,5 +30,11 @@ execute_process(
 
 # Include toolchain
 if(DEFINED CACHE{CMAKE_BUILD_TYPE})
-    include(${CMAKE_BINARY_DIR}/conan_installed/build/$CACHE{CMAKE_BUILD_TYPE}/generators/conan_toolchain.cmake)
+    set(conan-toolchain-path ${CMAKE_BINARY_DIR}/conan_installed/build/$CACHE{CMAKE_BUILD_TYPE}/generators/conan_toolchain.cmake)
+
+    if(EXISTS ${conan-toolchain-path})
+        include(${conan-toolchain-path})
+    endif()
+
+    unset(conan-toolchain-path)
 endif()
