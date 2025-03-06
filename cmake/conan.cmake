@@ -29,12 +29,12 @@ execute_process(
 )
 
 # Include toolchain
-set(conan-toolchain-path ${CMAKE_BINARY_DIR}/conan_installed/build/${CMAKE_BUILD_TYPE}/generators/conan_toolchain.cmake)
+set(conan_toolchain_path ${CMAKE_BINARY_DIR}/conan_installed/build/${CMAKE_BUILD_TYPE}/generators/conan_toolchain.cmake)
 
-if(EXISTS ${conan-toolchain-path})
-    include(${conan-toolchain-path})
+if(EXISTS ${conan_toolchain_path})
+    include(${conan_toolchain_path})
 else()
-    message(WARNING "Conan toolchain file not found at ${conan-toolchain-path}")
+    message(WARNING "Conan toolchain file not found at ${conan_toolchain_path}")
 endif()
 
-unset(conan-toolchain-path)
+unset(conan_toolchain_path)
