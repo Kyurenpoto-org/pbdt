@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MIT
 
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+
 # vcpkg
 if(DEFINED ENV{VCPKG_ROOT})
 	set(vcpkg_toolchain_path $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
@@ -9,7 +11,7 @@ if(DEFINED ENV{VCPKG_ROOT})
 	if(EXISTS ${vcpkg_toolchain_path})
 		include(${vcpkg_toolchain_path})
 	else()
-		message(WARNING "Vcpkg toolchain file not found at ${vcpkg_toolchain_path}. Ensure vcpkg is properly integrated.")
+		message(WARNING "Vcpkg toolchain file not found at ${vcpkg_toolchain_path}. Ensure vcpkg is properly integrated and installed correctly.")
 	endif()
 
 	unset(vcpkg_toolchain_path)
