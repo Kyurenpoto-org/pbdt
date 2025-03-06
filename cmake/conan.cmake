@@ -33,6 +33,8 @@ set(conan-toolchain-path ${CMAKE_BINARY_DIR}/conan_installed/build/${CMAKE_BUILD
 
 if(EXISTS ${conan-toolchain-path})
     include(${conan-toolchain-path})
+else()
+    message(WARNING "Conan toolchain file not found at ${conan-toolchain-path}")
 endif()
 
 unset(conan-toolchain-path)
