@@ -26,6 +26,7 @@ list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
 
 # modules
 add_subdirectory("example")
+add_subdirectory("deps/internals")
 
 # add_subdirectory("your-module-name")
 
