@@ -36,7 +36,10 @@ jobs:
         id: vcpkg
 
       - name: install conan
-        uses: hankhsu1996/setup-conan@v1
+        run: |
+          pip install conan
+          echo "CONAN_HOME=$HOME/.conan2" >> $GITHUB_ENV
+        id: conan
 
       - name: checkout
         uses: actions/checkout@v3
