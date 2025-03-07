@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+---
+name: Windows
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  setup:
+    runs-on: windows-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$(Get-Location)" >> $GITHUB_ENV
+        id: vcpkg
+
+      - name: install conan
+        run: |
+          choco install conan -y
+          echo "CONAN_HOME=C:\ProgramData\chocolatey\lib\conan\tools\bin" >> $GITHUB_ENV
+        id: conan
+
+  build:
+    needs: setup
+    runs-on: windows-latest
+    matrix:
+      preset: [x64-debug, x64-release]
+
+    steps:
+      - name: configure
+        run: |
+          cd ..
+          cmake --preset ${{ matrix.preset }}
+
+      - name: build
+        run: cmake --build --preset ${{ matrix.preset }} -j4 --verbose
+
+      - name: test
+        run: |
+          ctest --preset ${{ matrix.preset }} -j4 --verbose --output-on-failure
