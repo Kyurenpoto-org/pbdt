@@ -64,27 +64,6 @@
       }
     },
     {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "PBDT_BUILD_TESTS": "ON"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
-        }
-      }
-    },
-    {
       "name": "macos-debug",
       "displayName": "macOS Debug",
       "generator": "Ninja",
@@ -116,16 +95,6 @@
       "name": "x64-release",
       "displayName": "x64 Release",
       "configurePreset": "x64-release"
-    },
-    {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "configurePreset": "linux-debug"
-    },
-    {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "configurePreset": "linux-release"
     }
   ],
   "testPresets": [
@@ -138,16 +107,6 @@
       "name": "x64-release",
       "displayName": "x64 Release",
       "configurePreset": "x64-release"
-    },
-    {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "configurePreset": "linux-debug"
-    },
-    {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "configurePreset": "linux-release"
     }
   ]
 }
