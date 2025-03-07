@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+---
+name: windows-ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - dev
+      - release/*
+
+jobs:
+  build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        preset: [x64-debug, x64-release]
+
+    steps:
+      - name: install cmake & ninja
+        uses: lukka/get-cmake@latest
+
+      - name: install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$(Get-Location)" >> $GITHUB_ENV
+        id: vcpkg
+
+      - name: install conan
+        run: |
+          pip install conan
+        id: conan
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup msvc
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: configure
+        run: |
+          cmake --preset ${{ matrix.preset }}
+
+      - name: build
+        run: cmake --build --preset ${{ matrix.preset }} -j4 --verbose
+
+      - name: test
+        run: |
+          ctest --preset ${{ matrix.preset }} -j4 --verbose --output-on-failure

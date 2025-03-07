@@ -1,4 +1,9 @@
 {
+  "vendor": {
+    "SPDX-FileCopyrightText": "© 2025 Kyurenpoto <heal9179@gmail.com>",
+    "SPDX-License-Identifier": "MIT"
+  },
+  "version": 5,
   "configurePresets": [
     {
       "name": "windows-base",
@@ -9,7 +14,7 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl",
         "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/package-manager-toolchain.cmake"
+        "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
         "type": "equals",
@@ -78,9 +83,28 @@
       }
     }
   ],
-  "vendor": {
-    "SPDX-FileCopyrightText": "© 2025 Kyurenpoto <heal9179@gmail.com>",
-    "SPDX-License-Identifier": "MIT"
-  },
-  "version": 5
+  "buildPresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-debug"
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "configurePreset": "x64-release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-debug"
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "configurePreset": "x64-release"
+    }
+  ]
 }
