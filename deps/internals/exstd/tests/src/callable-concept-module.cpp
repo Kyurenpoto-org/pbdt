@@ -6,7 +6,7 @@
 
 #include "callable-concept-common.hpp"
 
-#include "exstd/callable-traits.hpp"
+import exstd;
 
 template <typename>
 struct Callable : std::false_type

@@ -8,7 +8,9 @@ namespace
     struct TypeList;
 
     template <template <typename> typename Eval, typename Tl>
-    struct TypeAssertion;
+    struct TypeAssertion : std::false_type
+    {
+    };
 
     template <template <typename> typename Eval, typename... Ts>
     struct TypeAssertion<Eval, TypeList<Ts...>> : std::false_type
@@ -27,8 +29,5 @@ namespace
     };
 
     template <template <typename> typename Eval, typename Tl>
-    constexpr bool TypeAssertionValue = false;
-
-    template <template <typename> typename Eval, typename... Ts>
-    constexpr bool TypeAssertionValue<Eval, TypeList<Ts...>> = TypeAssertion<Eval, TypeList<Ts...>>::value;
+    constexpr bool TypeAssertionValue = TypeAssertion<Eval, Tl>::value;
 }

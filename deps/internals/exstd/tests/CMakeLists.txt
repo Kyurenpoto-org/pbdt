@@ -32,6 +32,23 @@ add_test(
     COMMAND callable-concept-header
 )
 
+add_executable(callable-concept-module "src/callable-concept-module.cpp")
+
+target_compile_features(
+    callable-concept-module
+    PRIVATE cxx_std_23
+)
+target_link_libraries(
+    callable-concept-module
+    PRIVATE exstd-module
+    PRIVATE type-assertion
+)
+
+add_test(
+    NAME exstd.callable-concept.module
+    COMMAND callable-concept-module
+)
+
 add_executable(simple-callable-header "src/simple-callable-header.cpp")
 
 target_compile_features(
@@ -47,4 +64,21 @@ target_link_libraries(
 add_test(
     NAME exstd.simple-callable.header
     COMMAND simple-callable-header
+)
+
+add_executable(simple-callable-module "src/simple-callable-module.cpp")
+
+target_compile_features(
+    simple-callable-module
+    PRIVATE cxx_std_23
+)
+target_link_libraries(
+    simple-callable-module
+    PRIVATE exstd-module
+    PRIVATE type-assertion
+)
+
+add_test(
+    NAME exstd.simple-callable.module
+    COMMAND simple-callable-module
 )
