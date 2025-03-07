@@ -1,4 +1,9 @@
 {
+  "vendor": {
+    "SPDX-FileCopyrightText": "© 2025 Kyurenpoto <heal9179@gmail.com>",
+    "SPDX-License-Identifier": "MIT"
+  },
+  "version": 5,
   "configurePresets": [
     {
       "name": "windows-base",
@@ -80,9 +85,18 @@
       }
     }
   ],
-  "vendor": {
-    "SPDX-FileCopyrightText": "© 2025 Kyurenpoto <heal9179@gmail.com>",
-    "SPDX-License-Identifier": "MIT"
-  },
-  "version": 5
+  "buildPresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-debug"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "configurePreset": "x64-debug"
+    }
+  ]
 }
