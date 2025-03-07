@@ -38,7 +38,6 @@ jobs:
       - name: install conan
         run: |
           pip install conan
-          echo "CONAN_HOME=$HOME/.conan2" >> $GITHUB_ENV
         id: conan
 
       - name: checkout
