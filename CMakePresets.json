@@ -9,7 +9,6 @@
       "cacheVariables": {
         "CMAKE_C_COMPILER": "cl",
         "CMAKE_CXX_COMPILER": "cl",
-        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/package-manager-toolchain.cmake",
         "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
