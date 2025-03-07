@@ -28,6 +28,7 @@ list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
 
 if(PBDT_BUILD_TESTS)
 	enable_testing()
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/header-module-test.cmake)
 endif()
 
 # modules
