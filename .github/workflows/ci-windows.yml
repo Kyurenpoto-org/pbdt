@@ -3,18 +3,17 @@
 # SPDX-License-Identifier: MIT
 
 ---
-name: Windows
+name: windows-ci
 
 on:
-  workflow_dispatch:
   push:
     branches:
-      - master
-      - develop
+      - main
+      - dev
   pull_request:
     branches:
-      - master
-      - develop
+      - main
+      - dev
 
 jobs:
   build:
