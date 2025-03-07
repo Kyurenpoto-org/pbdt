@@ -16,10 +16,8 @@ on:
       - develop
 
 jobs:
-  build:
+  setup:
     runs-on: windows-latest
-    matrix:
-      preset: [x64-debug, x64-release]
 
     steps:
       - name: checkout
@@ -39,6 +37,13 @@ jobs:
           echo "CONAN_HOME=C:\ProgramData\chocolatey\lib\conan\tools\bin" >> $GITHUB_ENV
         id: conan
 
+  build:
+    needs: setup
+    runs-on: windows-latest
+    matrix:
+      preset: [x64-debug, x64-release]
+
+    steps:
       - name: configure
         run: |
           cd ..
