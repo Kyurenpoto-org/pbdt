@@ -33,4 +33,6 @@ target_sources(
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
 )
 
-add_subdirectory(tests)
+if(PBDT_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
