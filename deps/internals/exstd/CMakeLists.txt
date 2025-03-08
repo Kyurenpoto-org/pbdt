@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: MIT
 
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
-
 # For header based library
 add_library(exstd INTERFACE)
 
