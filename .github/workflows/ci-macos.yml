@@ -58,7 +58,9 @@ jobs:
           echo PATH="/opt/homebrew/opt/llvm@16/bin:$PATH" >> $GITHUB_ENV
           sudo ln -sf /opt/homebrew/opt/llvm@16/bin/clang /opt/homebrew/bin/clang
           sudo ln -sf /opt/homebrew/opt/llvm@16/bin/clang++ /opt/homebrew/bin/clang++
-          clang --version
+
+      - name: check sysroot
+        run: xcrun --sdk macosx --show-sdk-path
 
       - name: configure
         run: |
