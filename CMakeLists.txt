@@ -16,6 +16,7 @@ project(
 
 if (POLICY CMP0155)
 	cmake_policy(SET CMP0155 NEW)
+	set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 else()
 	message(FATAL_ERROR "CMP0155 not supported. Please upgrade CMake at least 3.28.2. This project uses c++ module feature.")
 endif()
