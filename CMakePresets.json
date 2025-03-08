@@ -87,8 +87,8 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "cc",
-        "CMAKE_CXX_COMPILER": "c++",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
         "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
