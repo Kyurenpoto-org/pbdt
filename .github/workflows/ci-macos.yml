@@ -55,9 +55,9 @@ jobs:
       - name: install clang
         run: |
           brew install llvm@16
-          echo 'export PATH="/usr/local/opt/llvm@16/bin:$PATH"' >> $GITHUB_ENV
-          sudo ln -sf /usr/local/opt/llvm@16/bin/clang /usr/local/bin/clang
-          sudo ln -sf /usr/local/opt/llvm@16/bin/clang++ /usr/local/bin/clang++
+          echo 'export PATH="/opt/homebrew/opt/llvm@16/bin:$PATH"' >> $GITHUB_ENV
+          # sudo ln -sf /usr/homebrew/opt/llvm@16/bin/clang /usr/homebrew/bin/clang
+          # sudo ln -sf /usr/homebrew/opt/llvm@16/bin/clang++ /usr/homebrew/bin/clang++
           clang --version
 
       - name: configure
