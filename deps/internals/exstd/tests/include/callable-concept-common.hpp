@@ -4,6 +4,9 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
+#include "lambda-traits.hpp"
 #include "type-assertion.hpp"
 
 namespace CallableConceptEvals
@@ -17,20 +20,11 @@ namespace CallableConceptEvals
 
     template <
         template <typename> typename CallableWrap, template <typename> typename FreeFunctionWrap,
-        template <typename> typename MemberFunctionWrap, template <typename> typename FunctionObjectWrap,
-        typename Ret, typename... Args>
-        requires CallableWrap<decltype([](Args...) -> Ret
-              {
-              })>::value
-              && FunctionObject<decltype([](Args...) -> Ret
-              {
-              })>::value
-              && (!FreeFunction<decltype([](Args...) -> Ret
-              {
-              })>::value)
-              && (!MemberFunction<decltype([](Args...) -> Ret
-              {
-              })>::value)
+        template <typename> typename MemberFunctionWrap, template <typename> typename FunctionObjectWrap, typename Ret,
+        typename... Args>
+        requires CallableWrap<LambdaType<Ret, Args...>>::value && FunctionObjectWrap<LambdaType<Ret, Args...>>::value
+              && (!FreeFunctionWrap<LambdaType<Ret, Args...>>::value)
+              && (!MemberFunctionWrap<LambdaType<Ret, Args...>>::value)
     struct LambdaEvalImpl<CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap, Ret(Args...)> :
         std::true_type
     {
@@ -56,18 +50,18 @@ namespace CallableConceptEvals
         template <typename> typename CallableWrap, template <typename> typename FreeFunctionWrap,
         template <typename> typename MemberFunctionWrap, template <typename> typename FunctionObjectWrap, typename Ret,
         typename... Args>
-        requires Callable<Ret(Args...)>::value && Callable<Ret (*)(Args...)>::value
-              && Callable<Ret (*&)(Args...)>::value && Callable<Ret (*&&)(Args...)>::value
-              && Callable<Ret (&)(Args...)>::value && Callable<Ret (&&)(Args...)>::value
-              && FreeFunction<Ret(Args...)>::value && FreeFunction<Ret (*)(Args...)>::value
-              && FreeFunction<Ret (*&)(Args...)>::value && FreeFunction<Ret (*&&)(Args...)>::value
-              && FreeFunction<Ret (&)(Args...)>::value && FreeFunction<Ret (&&)(Args...)>::value
-              && (!MemberFunction<Ret(Args...)>::value) && (!MemberFunction<Ret (*)(Args...)>::value)
-              && (!MemberFunction<Ret (*&)(Args...)>::value) && (!MemberFunction<Ret (*&&)(Args...)>::value)
-              && (!MemberFunction<Ret (&)(Args...)>::value) && (!MemberFunction<Ret (&&)(Args...)>::value)
-              && (!FunctionObject<Ret(Args...)>::value) && (!FunctionObject<Ret (*)(Args...)>::value)
-              && (!FunctionObject<Ret (*&)(Args...)>::value) && (!FunctionObject<Ret (*&&)(Args...)>::value)
-              && (!FunctionObject<Ret (&)(Args...)>::value) && (!FunctionObject<Ret (&&)(Args...)>::value)
+        requires CallableWrap<Ret(Args...)>::value && CallableWrap<Ret (*)(Args...)>::value
+              && CallableWrap<Ret (*&)(Args...)>::value && CallableWrap<Ret (*&&)(Args...)>::value
+              && CallableWrap<Ret (&)(Args...)>::value && CallableWrap<Ret (&&)(Args...)>::value
+              && FreeFunctionWrap<Ret(Args...)>::value && FreeFunctionWrap<Ret (*)(Args...)>::value
+              && FreeFunctionWrap<Ret (*&)(Args...)>::value && FreeFunctionWrap<Ret (*&&)(Args...)>::value
+              && FreeFunctionWrap<Ret (&)(Args...)>::value && FreeFunctionWrap<Ret (&&)(Args...)>::value
+              && (!MemberFunctionWrap<Ret(Args...)>::value) && (!MemberFunctionWrap<Ret (*)(Args...)>::value)
+              && (!MemberFunctionWrap<Ret (*&)(Args...)>::value) && (!MemberFunctionWrap<Ret (*&&)(Args...)>::value)
+              && (!MemberFunctionWrap<Ret (&)(Args...)>::value) && (!MemberFunctionWrap<Ret (&&)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret(Args...)>::value) && (!FunctionObjectWrap<Ret (*)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret (*&)(Args...)>::value) && (!FunctionObjectWrap<Ret (*&&)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret (&)(Args...)>::value) && (!FunctionObjectWrap<Ret (&&)(Args...)>::value)
     struct FreeEvalImpl<CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap, Ret(Args...)> :
         std::true_type
     {
@@ -95,146 +89,149 @@ namespace CallableConceptEvals
         template <typename> typename CallableWrap, template <typename> typename FreeFunctionWrap,
         template <typename> typename MemberFunctionWrap, template <typename> typename FunctionObjectWrap, typename Ret,
         typename... Args>
-        requires Callable<Ret (TestStruct::*)(Args...)>::value && Callable<Ret (TestStruct::*&)(Args...)>::value
-              && Callable<Ret (TestStruct::*&&)(Args...)>::value && Callable<Ret (TestStruct::*)(Args...) const>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const>::value
-              && Callable<Ret (TestStruct::*)(Args...) volatile>::value
-              && Callable<Ret (TestStruct::*&)(Args...) volatile>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) volatile>::value
-              && Callable<Ret (TestStruct::*)(Args...) const volatile>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const volatile>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const volatile>::value
-              && Callable<Ret (TestStruct::*)(Args...) &>::value && Callable<Ret (TestStruct::*&)(Args...) &>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) &>::value
-              && Callable<Ret (TestStruct::*)(Args...) const&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const&>::value
-              && Callable<Ret (TestStruct::*)(Args...) volatile&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) volatile&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) volatile&>::value
-              && Callable<Ret (TestStruct::*)(Args...) const volatile&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const volatile&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const volatile&>::value
-              && Callable<Ret (TestStruct::*)(Args...) &&>::value && Callable<Ret (TestStruct::*&)(Args...) &&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) &&>::value
-              && Callable<Ret (TestStruct::*)(Args...) const&&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const&&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const&&>::value
-              && Callable<Ret (TestStruct::*)(Args...) volatile&&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) volatile&&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) volatile&&>::value
-              && Callable<Ret (TestStruct::*)(Args...) const volatile&&>::value
-              && Callable<Ret (TestStruct::*&)(Args...) const volatile&&>::value
-              && Callable<Ret (TestStruct::*&&)(Args...) const volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...)>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...)>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...)>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) volatile>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) volatile>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) volatile>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const volatile>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const volatile>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const volatile>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) &>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) &>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) &>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) volatile&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) volatile&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) volatile&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const volatile&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const volatile&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const volatile&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) &&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) &&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) &&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const&&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const&&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const&&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*)(Args...) const volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*&)(Args...) const volatile&&>::value
-              && MemberFunction<Ret (TestStruct::*&&)(Args...) const volatile&&>::value
-              && (!FreeFunction<Ret (TestStruct::*)(Args...)>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...)>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...)>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const volatile>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) &>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) &>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) &>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const volatile&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) &&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const &&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) volatile &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) volatile &&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) volatile &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*)(Args...) const volatile &&>::value)
-              && (!FreeFunction<Ret (TestStruct::*&)(Args...) const volatile &&>::value)
-              && (!FreeFunction<Ret (TestStruct::* &&)(Args...) const volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...)>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...)>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...)>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const volatile>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) &>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) &>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) &>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const volatile&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) &&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const &&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*)(Args...) const volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::*&)(Args...) const volatile &&>::value)
-              && (!FunctionObject<Ret (TestStruct::* &&)(Args...) const volatile &&>::value)
+        requires CallableWrap<Ret (TestStruct::*)(Args...)>::value && CallableWrap<Ret (TestStruct::*&)(Args...)>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...)>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) volatile>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) volatile>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) volatile>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const volatile>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const volatile>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const volatile>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) &>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) &>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) &>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) volatile&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) volatile&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) volatile&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const volatile&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const volatile&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const volatile&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) &&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) &&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) &&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const&&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const&&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const&&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) volatile&&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) volatile&&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) volatile&&>::value
+              && CallableWrap<Ret (TestStruct::*)(Args...) const volatile&&>::value
+              && CallableWrap<Ret (TestStruct::*&)(Args...) const volatile&&>::value
+              && CallableWrap<Ret (TestStruct::*&&)(Args...) const volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...)>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...)>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...)>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const volatile>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) &>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) &>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) &>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const volatile&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) &&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) &&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) &&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*)(Args...) const volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile&&>::value
+              && MemberFunctionWrap<Ret (TestStruct::*&&)(Args...) const volatile&&>::value
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...)>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...)>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...)>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const volatile>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) &>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) &>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) &>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const volatile&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) volatile &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) volatile &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) volatile &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*)(Args...) const volatile &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::*&)(Args...) const volatile &&>::value)
+              && (!FreeFunctionWrap<Ret (TestStruct::* &&)(Args...) const volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...)>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const volatile>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) &>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) &>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) &>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const volatile&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*)(Args...) const volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::*&)(Args...) const volatile &&>::value)
+              && (!FunctionObjectWrap<Ret (TestStruct::* &&)(Args...) const volatile &&>::value)
     struct MemberEvalImpl<CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap, Ret(Args...)> :
         std::true_type
     {
@@ -260,15 +257,15 @@ void callableConcepts()
         int(int, int), int(int, int, int), int(int, int, int, int)>;
 
     static_assert(TypeAssertionValue<
-                  typename CallableConceptEvals::LambdaEval<
-                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::type,
+                  CallableConceptEvals::LambdaEval<
+                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::template type,
                   TestTypes>);
     static_assert(TypeAssertionValue<
-                  typename CallableConceptEvals::FreeEval<
-                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::type,
+                  CallableConceptEvals::FreeEval<
+                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::template type,
                   TestTypes>);
     static_assert(TypeAssertionValue<
-                  typename CallableConceptEvals::MemberEval<
-                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::type,
+                  CallableConceptEvals::MemberEval<
+                      CallableWrap, FreeFunctionWrap, MemberFunctionWrap, FunctionObjectWrap>::template type,
                   TestTypes>);
 }
