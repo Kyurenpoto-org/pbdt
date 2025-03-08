@@ -4,7 +4,11 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "type-assertion.hpp"
+
+#include "lambda-traits.hpp"
 
 namespace SimpleCallableTypeEvals
 {
@@ -14,12 +18,8 @@ namespace SimpleCallableTypeEvals
     };
 
     template <template <typename> typename SimpleCallableType, typename Ret, typename... Args>
-      struct LambdaEvalImpl<SimpleCallableType, Ret(Args...)>
-          : std::is_same<
-                Ret(Args...),
-                SimpleCallableType<decltype([](Args...) -> Ret
-                {
-                })>>
+    struct LambdaEvalImpl<SimpleCallableType, Ret(Args...)> :
+        std::is_same<Ret(Args...), SimpleCallableType<LambdaType<Ret, Args...>>>
     {
     };
 
@@ -27,7 +27,9 @@ namespace SimpleCallableTypeEvals
     struct LambdaEval
     {
         template <typename T>
-        using type = LambdaEvalImpl<SimpleCallableType, T>;
+        struct type : LambdaEvalImpl<SimpleCallableType, T>
+        {
+        };
     };
 
     template <template <typename> typename, typename>
@@ -119,8 +121,8 @@ void simpleCallableTypes()
         int(int, int), int(int, int, int), int(int, int, int, int)>;
 
     static_assert(TypeAssertionValue<
-                  typename SimpleCallableTypeEvals::LambdaEval<SimpleCallableType>::type, TestTypes>);
-    static_assert(TypeAssertionValue<typename SimpleCallableTypeEvals::FreeEval<SimpleCallableType>::type, TestTypes>);
+                  SimpleCallableTypeEvals::LambdaEval<SimpleCallableType>::template type, TestTypes>);
+    static_assert(TypeAssertionValue<SimpleCallableTypeEvals::FreeEval<SimpleCallableType>::template type, TestTypes>);
     static_assert(TypeAssertionValue<
-                  typename SimpleCallableTypeEvals::MemberEval<SimpleCallableType>::type, TestTypes>);
+                  SimpleCallableTypeEvals::MemberEval<SimpleCallableType>::template type, TestTypes>);
 }
