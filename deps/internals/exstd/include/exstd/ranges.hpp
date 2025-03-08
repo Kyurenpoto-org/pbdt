@@ -137,8 +137,11 @@ namespace exstd
         template <auto>
         struct require_constant;
 
+        template <typename>
+        struct CompileTimeSimpleRangeExtent;
+
         template <std::ranges::input_range Range>
-        struct CompileTimeSimpleRangeExtent : std::integral_constant<size_t, std::dynamic_extent>
+        struct CompileTimeSimpleRangeExtent<Range> : std::integral_constant<size_t, std::dynamic_extent>
         {
         };
 
