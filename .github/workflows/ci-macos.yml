@@ -52,6 +52,11 @@ jobs:
           pipx install conan
         id: conan
 
+      - name: install clang
+        run: |
+          brew install llvm@16
+          echo 'export PATH="/usr/local/opt/llvm@16/bin:$PATH"' >> $GITHUB_ENV
+
       - name: configure
         run: |
           cmake --preset ${{ matrix.preset }}
