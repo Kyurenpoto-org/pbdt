@@ -60,6 +60,9 @@ jobs:
           sudo ln -sf /opt/homebrew/opt/llvm@16/bin/clang++ /opt/homebrew/bin/clang++
           clang --version
 
+      - name: install xcode command line tools
+        run: xcode-select --install
+
       - name: configure
         run: |
           cmake --preset ${{ matrix.preset }}
