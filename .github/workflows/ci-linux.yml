@@ -31,6 +31,8 @@ jobs:
 
       - name: install cmake & ninja
         uses: lukka/get-cmake@latest
+        with:
+          cmake-version: latest
 
       - name: install vcpkg
         run: |
@@ -45,6 +47,13 @@ jobs:
         run: |
           pip install conan
         id: conan
+
+      - name: check version of dependencies
+        run: |
+          cmake --version
+          ninja --version
+          vcpkg version
+          conan --version
 
       - name: configure
         run: |
