@@ -40,7 +40,7 @@ if(APPLE)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 
-	set(CMAKE_OSX_SYSROOT sysroot_output)
+	set(CMAKE_OSX_SYSROOT ${sysroot_output})
 endif()
 
 # modules
