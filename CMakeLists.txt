@@ -24,6 +24,29 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
 
 list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
 
+if(PBDT_BUILD_TESTS)
+	enable_testing()
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/header-module-test.cmake)
+endif()
+
+# macos config
+if(APPLE)
+	execute_process(
+		COMMAND xcrun --sdk macosx --show-sdk-path
+		RESULT_VARIABLE sysroot_result
+		OUTPUT_VARIABLE sysroot_output
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+
+	if(sysroot_result)
+		message(FATAL_ERROR "Failed to get macOS SDK path. Command: xcrun --sdk macosx --show-sdk-path, Error code: ${sysroot_result}")
+	elseif(NOT sysroot_output)
+		message(FATAL_ERROR "macOS SDK path is empty. Check your Xcode installation and ensure command line tools are installed (`xcode-select --install`).")
+	else()
+		set(CMAKE_OSX_SYSROOT ${sysroot_output})
+	endif()
+endif()
+
 # modules
 add_subdirectory("example")
 
