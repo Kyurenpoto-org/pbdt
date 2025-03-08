@@ -50,9 +50,22 @@ jobs:
 
       - name: install gcc
         run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
           sudo apt update
-          sudo apt install gcc g++ -y
+          sudo apt install -y build-essential wget
+
+          wget https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz
+          tar -xzf gcc-14.2.0.tar.gz
+
+          cd gcc-14.2.0
+          ./contrib/download_prerequisites
+
+          mkdir build
+          cd build
+          ../configure --enable-languages=c,c++ --disable-multilib
+          make -j$(nproc)
+          sudo make install
+
+          cd ../..
 
       - name: check version of dependencies
         run: |
