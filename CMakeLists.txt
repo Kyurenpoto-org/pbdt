@@ -41,7 +41,7 @@ if(APPLE)
 	)
 
 	if(sysroot_result)
-		message(FATAL_ERROR "Failed to get macOS SDK path.")
+		message(FATAL_ERROR "Failed to get macOS SDK path. Error code: ${sysroot_result}")
 	else()
 		set(CMAKE_OSX_SYSROOT ${sysroot_output})
 	endif()
