@@ -31,5 +31,17 @@ if(PBDT_BUILD_TESTS)
 	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/header-module-test.cmake)
 endif()
 
+# macos config
+if(APPLE)
+	execute_process(
+		COMMAND xcrun --sdk macosx --show-sdk-path
+		RESULT_VARIABLE sysroot_result
+		OUTPUT_VARIABLE sysroot_output
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+
+	set(CMAKE_OSX_SYSROOT sysroot_output)
+endif()
+
 # modules
 add_subdirectory("deps/internals")
