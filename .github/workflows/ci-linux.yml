@@ -34,6 +34,7 @@ jobs:
           git clone https://github.com/microsoft/vcpkg.git
           cd vcpkg
           ./bootstrap-vcpkg.sh
+          pwd
           echo "VCPKG_ROOT=$(pwd)" >> $GITHUB_ENV
         id: vcpkg
 
