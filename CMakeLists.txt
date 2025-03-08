@@ -42,6 +42,8 @@ if(APPLE)
 
 	if(sysroot_result)
 		message(FATAL_ERROR "Failed to get macOS SDK path. Command: xcrun --sdk macosx --show-sdk-path, Error code: ${sysroot_result}")
+	elseif(NOT sysroot_output)
+		message(FATAL_ERROR "macOS SDK path is empty. Check your Xcode installation; Use `xcode-select --install`")
 	else()
 		set(CMAKE_OSX_SYSROOT ${sysroot_output})
 	endif()
