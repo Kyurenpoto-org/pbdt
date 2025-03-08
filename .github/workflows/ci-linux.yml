@@ -49,23 +49,9 @@ jobs:
         id: conan
 
       - name: install gcc
-        run: |
-          sudo apt update
-          sudo apt install -y build-essential wget
-
-          wget https://ftp.gnu.org/gnu/gcc/gcc-14.2.0/gcc-14.2.0.tar.gz
-          tar -xzf gcc-14.2.0.tar.gz
-
-          cd gcc-14.2.0
-          ./contrib/download_prerequisites
-
-          mkdir build
-          cd build
-          ../configure --enable-languages=c,c++ --disable-multilib
-          make -j$(nproc)
-          sudo make install
-
-          cd ../..
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 14.2
 
       - name: check version of dependencies
         run: |
