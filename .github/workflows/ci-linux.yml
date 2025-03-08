@@ -48,6 +48,12 @@ jobs:
           pip install conan
         id: conan
 
+      - name: install gcc
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt update
+          sudo apt install gcc g++ -y
+
       - name: check version of dependencies
         run: |
           cmake --version
