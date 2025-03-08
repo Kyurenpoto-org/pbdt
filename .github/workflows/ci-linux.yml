@@ -49,9 +49,10 @@ jobs:
         id: conan
 
       - name: install gcc
-        uses: egor-tensin/setup-gcc@v1
-        with:
-          version: 14.2
+        run: |
+          sudo add-apt-repository universe
+          sudo apt-get update
+          sudo apt-get install -y gcc g++
 
       - name: check version of dependencies
         run: |
