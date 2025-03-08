@@ -40,7 +40,11 @@ if(APPLE)
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 	)
 
-	set(CMAKE_OSX_SYSROOT ${sysroot_output})
+	if(sysroot_result)
+		message(FATAL_ERROR "Failed to get macOS SDK path.")
+	else()
+		set(CMAKE_OSX_SYSROOT ${sysroot_output})
+	endif()
 endif()
 
 # modules
