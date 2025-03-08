@@ -81,13 +81,14 @@
       }
     },
     {
-      "name": "macos-debug",
-      "displayName": "macOS Debug",
+      "name": "macos-base",
+      "hidden": true,
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "cc",
+        "CMAKE_CXX_COMPILER": "c++",
         "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
@@ -99,6 +100,22 @@
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
           "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
         }
+      }
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "MacOS Debug",
+      "inherits": "macos-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "macos-release",
+      "displayName": "MacOS Release",
+      "inherits": "macos-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
       }
     }
   ],
@@ -122,6 +139,16 @@
       "name": "linux-release",
       "displayName": "Linux Release",
       "configurePreset": "linux-release"
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "MacOS Debug",
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "macos-release",
+      "displayName": "MacOS Release",
+      "configurePreset": "macos-release"
     }
   ],
   "testPresets": [
@@ -144,6 +171,16 @@
       "name": "linux-release",
       "displayName": "Linux Release",
       "configurePreset": "linux-release"
+    },
+    {
+      "name": "macos-debug",
+      "displayName": "MacOS Debug",
+      "configurePreset": "macos-debug"
+    },
+    {
+      "name": "macos-release",
+      "displayName": "MacOS Release",
+      "configurePreset": "macos-release"
     }
   ]
 }
