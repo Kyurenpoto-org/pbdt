@@ -14,6 +14,12 @@ project(
 	CXX
 )
 
+if (POLICY CMP0155)
+	cmake_policy(SET CMP0155 NEW)
+else()
+	message(FATAL_ERROR "CMP0155 not supported. Please upgrade CMake at least 3.28.2. This project uses c++ module feature.")
+endif()
+
 if(POLICY CMP0141)
 	cmake_policy(SET CMP0141 NEW)
 	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
