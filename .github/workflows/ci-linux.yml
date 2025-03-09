@@ -57,7 +57,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
 
       - name: run cmake
-        uses: ./.github/workflows/ci-cmake.yml
+        uses: ./.github/workflows/ci-cmake
         with:
           os: ubuntu-latest
           preset: ${{ matrix.preset }}

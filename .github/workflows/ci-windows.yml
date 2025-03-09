@@ -49,7 +49,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: run cmake
-        uses: ./.github/workflows/ci-cmake.yml
+        uses: ./.github/workflows/ci-cmake
         with:
           os: windows-latest
           preset: ${{ matrix.preset }}
