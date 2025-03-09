@@ -16,9 +16,12 @@ runs:
   steps:
     - name: configure
       run: cmake --preset ${{ inputs.preset }}
+      shell: bash
 
     - name: build
       run: cmake --build --preset ${{ inputs.preset }} -j4 --verbose
+      shell: bash
 
     - name: test
       run: ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
+      shell: bash
