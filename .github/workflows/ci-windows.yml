@@ -51,5 +51,4 @@ jobs:
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
         with:
-          os: windows-latest
           preset: ${{ matrix.preset }}

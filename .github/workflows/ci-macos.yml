@@ -61,5 +61,4 @@ jobs:
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
         with:
-          os: macos-latest
           preset: ${{ matrix.preset }}
