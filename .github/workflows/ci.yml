@@ -36,12 +36,10 @@ jobs:
           cd vcpkg
           .\bootstrap-vcpkg.bat
           echo "VCPKG_ROOT=$(Get-Location)" >> $GITHUB_ENV
-        id: vcpkg
 
       - name: install conan
         run: |
           pip install conan
-        id: conan
 
       - name: checkout
         uses: actions/checkout@v3
@@ -77,12 +75,10 @@ jobs:
           ./bootstrap-vcpkg.sh
           echo "VCPKG_ROOT=$(pwd)" >> $GITHUB_ENV
           cd ..
-        id: vcpkg
 
       - name: install conan
         run: |
           pip install conan
-        id: conan
 
       - name: install gcc
         run: |
@@ -124,12 +120,10 @@ jobs:
           ./bootstrap-vcpkg.sh
           echo "VCPKG_ROOT=$(pwd)" >> $GITHUB_ENV
           cd ..
-        id: vcpkg
 
       - name: install conan
         run: |
           pipx install conan
-        id: conan
 
       - name: install clang
         run: |
