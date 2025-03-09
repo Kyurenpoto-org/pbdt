@@ -1,0 +1,140 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+---
+name: ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dev
+      - release/*
+  pull_request:
+    branches:
+      - main
+      - dev
+      - release/*
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        preset: [x64-debug, x64-release]
+
+    steps:
+      - name: install cmake & ninja
+        uses: lukka/get-cmake@latest
+
+      - name: install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          .\bootstrap-vcpkg.bat
+          echo "VCPKG_ROOT=$(Get-Location)" >> $GITHUB_ENV
+        id: vcpkg
+
+      - name: install conan
+        run: |
+          pip install conan
+        id: conan
+
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: setup msvc
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: run cmake
+        uses: ./.github/workflows/ci-cmake
+        with:
+          preset: ${{ matrix.preset }}
+
+  linux-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        preset: [linux-debug, linux-release]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install cmake & ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmake-version: latest
+
+      - name: install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$(pwd)" >> $GITHUB_ENV
+          cd ..
+        id: vcpkg
+
+      - name: install conan
+        run: |
+          pip install conan
+        id: conan
+
+      - name: install gcc
+        run: |
+          sudo add-apt-repository universe
+          sudo apt-get update
+          sudo apt-get install -y gcc-14
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 60
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
+
+      - name: run cmake
+        uses: ./.github/workflows/ci-cmake
+        with:
+          preset: ${{ matrix.preset }}
+
+  macos-build:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        preset: [macos-debug, macos-release]
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install cmake & ninja
+        uses: lukka/get-cmake@latest
+        with:
+          cmake-version: latest
+
+      - name: install pipx
+        run: |
+          brew install pipx
+
+      - name: install vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          cd vcpkg
+          ./bootstrap-vcpkg.sh
+          echo "VCPKG_ROOT=$(pwd)" >> $GITHUB_ENV
+          cd ..
+        id: vcpkg
+
+      - name: install conan
+        run: |
+          pipx install conan
+        id: conan
+
+      - name: install clang
+        run: |
+          brew install llvm@16
+          echo PATH="/opt/homebrew/opt/llvm@16/bin:$PATH" >> $GITHUB_ENV
+          brew link --overwrite llvm@16
+
+      - name: run cmake
+        uses: ./.github/workflows/ci-cmake
+        with:
+          preset: ${{ matrix.preset }}
