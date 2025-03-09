@@ -48,13 +48,8 @@ jobs:
       - name: setup msvc
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: configure
-        run: |
-          cmake --preset ${{ matrix.preset }}
-
-      - name: build
-        run: cmake --build --preset ${{ matrix.preset }} -j4 --verbose
-
-      - name: test
-        run: |
-          ctest --preset ${{ matrix.preset }} -j4 --verbose --output-on-failure
+      - name: run cmake
+        uses: ./.github/workflows/ci-cmake.yml
+        with:
+          os: windows-latest
+          preset: ${{ matrix.preset }}
