@@ -5,28 +5,20 @@
 ---
 name: ci-cmake
 
-on:
-  workflow_call:
-    inputs:
-      os:
-        required: true
-        type: string
-        description: "os name"
-      preset:
-        required: true
-        type: string
-        description: "preset name"
+inputs:
+  preset:
+    required: true
+    type: string
+    description: "preset name"
 
-jobs:
-  build-and-test:
-    runs-on: ${{ inputs.os }}
+runs:
+  using: "composite"
+  steps:
+    - name: configure
+      run: cmake --preset ${{ inputs.preset }}
 
-    steps:
-      - name: configure
-        run: cmake --preset ${{ inputs.preset }}
+    - name: build
+      run: cmake --build --preset ${{ inputs.preset }} -j4 --verbose
 
-      - name: build
-        run: cmake --build --preset ${{ inputs.preset }} -j4 --verbose
-
-      - name: test
-        run: ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
+    - name: test
+      run: ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
