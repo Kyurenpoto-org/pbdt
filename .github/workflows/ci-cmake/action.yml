@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+---
+name: ci-cmake
+
+inputs:
+  preset:
+    required: true
+    type: string
+    description: "preset name"
+
+runs:
+  using: "composite"
+  steps:
+    - name: configure
+      run: cmake --preset ${{ inputs.preset }}
+      shell: bash
+
+    - name: build
+      run: cmake --build --preset ${{ inputs.preset }} -j4 --verbose
+      shell: bash
+
+    - name: test
+      run: ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
+      shell: bash
