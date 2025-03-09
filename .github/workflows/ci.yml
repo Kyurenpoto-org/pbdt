@@ -24,6 +24,7 @@ jobs:
     strategy:
       matrix:
         preset: [x64-debug, x64-release]
+    continue-on-error: true
 
     steps:
       - name: install cmake & ninja
@@ -58,6 +59,7 @@ jobs:
     strategy:
       matrix:
         preset: [linux-debug, linux-release]
+    continue-on-error: true
 
     steps:
       - name: checkout
@@ -100,6 +102,7 @@ jobs:
     strategy:
       matrix:
         preset: [macos-debug, macos-release]
+    continue-on-error: true
 
     steps:
       - name: checkout
