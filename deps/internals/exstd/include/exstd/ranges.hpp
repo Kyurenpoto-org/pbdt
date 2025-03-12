@@ -230,7 +230,6 @@ namespace exstd
             std::integral_constant<size_t, std::min({ CompileTimeViewExtent<std::remove_cvref_t<Ranges>>::value... })>
         {
         };
-#endif
 
         template <std::ranges::forward_range Range, size_t N>
         struct CompileTimeViewExtent<std::ranges::adjacent_view<Range, N>> :
@@ -249,6 +248,7 @@ namespace exstd
                             : CompileTimeViewExtent<std::remove_cvref_t<Range>>::value - N + 1>
         {
         };
+#endif
 
         template <std::ranges::input_range First, std::ranges::forward_range... Rests>
         struct CompileTimeViewExtent<CartesianProductView<First, Rests...>> :
