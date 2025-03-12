@@ -96,7 +96,7 @@ namespace exstd
 
             constexpr FlattenCartesianProductView(Ranges... ranges) :
                 base{
-                    std::ranges::cartesian_product_view<Ranges...>{ std::move(ranges)... },
+                    CartesianProductView<Ranges...>{ std::move(ranges)... },
                     FlatTuple{},
                 }
             {
