@@ -47,6 +47,12 @@ namespace exstd
             }
         };
 
+#if __cpp_lib_ranges_cartesian_product >= 202207L
+        template <typename... Ranges>
+        using CartesianProductView = std::ranges::cartesian_product_view<Ranges...>;
+#else
+#endif
+
         template <typename... Ranges>
         struct FlattenCartesianProductView : std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
         {
@@ -78,7 +84,7 @@ namespace exstd
             }
 
         private:
-            std::ranges::cartesian_product_view<Ranges...> base;
+            CartesianProductView<Ranges...> base;
         };
 
         template <typename... Ranges>
@@ -117,7 +123,7 @@ namespace exstd
             }
 
         private:
-            std::ranges::transform_view<std::ranges::cartesian_product_view<Ranges...>, FlatTuple> base;
+            std::ranges::transform_view<CartesianProductView<Ranges...>, FlatTuple> base;
         };
 
         template <typename... Ranges>
@@ -191,12 +197,14 @@ namespace exstd
         {
         };
 
+#if __cpp_lib_ranges_enumerate >= 202302L
         template <typename View>
             requires std::ranges::view<std::remove_cvref_t<View>>
         struct CompileTimeViewExtent<std::ranges::enumerate_view<View>> :
             CompileTimeViewExtent<std::remove_cvref_t<View>>
         {
         };
+#endif
 
         template <std::ranges::input_range Range, size_t N>
         struct CompileTimeViewExtent<std::ranges::elements_view<Range, N>> :
@@ -216,11 +224,13 @@ namespace exstd
         {
         };
 
+#if __cpp_lib_ranges_zip >= 202110L
         template <typename F, std::ranges::input_range... Ranges>
         struct CompileTimeViewExtent<std::ranges::zip_transform_view<F, Ranges...>> :
             std::integral_constant<size_t, std::min({ CompileTimeViewExtent<std::remove_cvref_t<Ranges>>::value... })>
         {
         };
+#endif
 
         template <std::ranges::forward_range Range, size_t N>
         struct CompileTimeViewExtent<std::ranges::adjacent_view<Range, N>> :
@@ -241,7 +251,7 @@ namespace exstd
         };
 
         template <std::ranges::input_range First, std::ranges::forward_range... Rests>
-        struct CompileTimeViewExtent<std::ranges::cartesian_product_view<First, Rests...>> :
+        struct CompileTimeViewExtent<CartesianProductView<First, Rests...>> :
             std::integral_constant<
                 size_t, (((CompileTimeViewExtent<std::remove_cvref_t<First>>::value == std::dynamic_extent) || ...
                           || (CompileTimeViewExtent<std::remove_cvref_t<Rests>>::value == std::dynamic_extent))
@@ -253,15 +263,14 @@ namespace exstd
 
         template <typename... Ranges>
         struct CompileTimeViewExtent<FlattenCartesianProductView<Ranges...>> :
-            CompileTimeViewExtent<std::ranges::cartesian_product_view<Ranges...>>
+            CompileTimeViewExtent<CartesianProductView<Ranges...>>
         {
         };
 
         template <typename... Ranges>
             requires(TupleForm<std::ranges::range_value_t<Ranges>> || ...)
         struct CompileTimeViewExtent<FlattenCartesianProductView<Ranges...>> :
-            CompileTimeViewExtent<
-                std::ranges::transform_view<std::ranges::cartesian_product_view<Ranges...>, FlatTuple>>
+            CompileTimeViewExtent<std::ranges::transform_view<CartesianProductView<Ranges...>, FlatTuple>>
         {
         };
 
