@@ -49,5 +49,16 @@ if(APPLE)
 	endif()
 endif()
 
+# clang config
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	find_program(CLANG_SCAN_DEPS_EXECUTABLE NAMES clang-scan-deps)
+
+	if(NOT CLANG_SCAN_DEPS_EXECUTABLE)
+		message(FATAL_ERROR "clang-scan-deps not found")
+	else()
+		set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS ${CLANG_SCAN_DEPS_EXECUTABLE})
+	endif()
+endif()
+
 # modules
 add_subdirectory("deps/internals")
