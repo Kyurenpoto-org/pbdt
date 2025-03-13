@@ -23,7 +23,8 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        preset: [x64-debug, x64-release]
+        preset:
+          [x64-msvc-debug, x64-msvc-release, x64-clang-debug, x64-clang-release]
     continue-on-error: true
 
     steps:
@@ -59,7 +60,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        preset: [linux-debug, linux-release]
+        preset:
+          [
+            linux-gcc-debug,
+            linux-gcc-release,
+            linux-clang-debug,
+            linux-clang-release,
+          ]
     continue-on-error: true
 
     steps:
@@ -105,7 +112,13 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        preset: [macos-debug, macos-release]
+        preset:
+          [
+            macos-clang-debug,
+            macos-clang-release,
+            macos-gcc-debug,
+            macos-gcc-release,
+          ]
     continue-on-error: true
 
     steps:
