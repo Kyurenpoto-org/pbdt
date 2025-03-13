@@ -47,6 +47,139 @@ namespace exstd
             }
         };
 
+#if __cpp_lib_ranges_cartesian_product >= 202207L
+        template <typename... Ranges>
+        using CartesianProductView = std::ranges::cartesian_product_view<Ranges...>;
+#else
+        template <std::ranges::input_range First, std::ranges::forward_range... Rests>
+        class CartesianProductView
+        {
+        private:
+            struct iterator
+            {
+                using value_type = std::tuple<std::ranges::range_value_t<First>, std::ranges::range_value_t<Rests>...>;
+                using reference =
+                    std::tuple<std::ranges::range_reference_t<First>, std::ranges::range_reference_t<Rests>...>;
+                using difference_type = std::ptrdiff_t;
+                using iterator_category = std::input_iterator_tag;
+
+                constexpr iterator() = default;
+
+                constexpr iterator& operator++()
+                {
+                    next();
+                    return *this;
+                }
+
+                constexpr void operator++(int)
+                {
+                    ++*this;
+                }
+
+                constexpr iterator operator++(int)
+                    requires std::ranges::forward_range<First>
+                {
+                    auto tmp = *this;
+                    ++*this;
+                    return tmp;
+                }
+
+                [[nodiscard]]
+                constexpr auto operator*() const
+                {
+                    return std::apply(
+                        []<typename... Args>(Args&&... args)
+                        {
+                            return std::tuple{ *std::forward<Args>(args)... };
+                        },
+                        current
+                    );
+                }
+
+                [[nodiscard]]
+                constexpr bool operator==(const iterator& other) const
+                    requires std::equality_comparable<std::ranges::iterator_t<First>>
+                {
+                    return current == other.current;
+                }
+
+                [[nodiscard]]
+                constexpr bool operator==(std::default_sentinel_t) const
+                {
+                    return lastElement(std::make_index_sequence<sizeof...(Rests)>{});
+                }
+
+                [[nodiscard]]
+                constexpr bool operator<=>(const iterator& other) const
+                {
+                    return current <=> other.current;
+                }
+
+            private:
+                constexpr iterator(
+                    CartesianProductView& parent,
+                    std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current
+                ) :
+                    parent{ parent },
+                    current{ std::move(current) }
+                {
+                }
+
+                template <size_t Idx = sizeof...(Rests)>
+                constexpr void next()
+                {
+                    auto& it = std::get<Idx>(current);
+                    ++it;
+                    if constexpr (Idx > 0)
+                    {
+                        auto& range = std::get<Idx>(parent.ranges);
+                        if (it == std::end(range))
+                        {
+                            it = std::begin(range);
+                            next<Idx - 1>();
+                        }
+                    }
+                }
+
+                template <size_t... Indice>
+                constexpr bool lastElement(std::index_sequence<Indice...>) const
+                {
+                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(parent.ranges))) || ...);
+                }
+
+                CartesianProductView& parent;
+                std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current;
+            };
+
+        public:
+            constexpr CartesianProductView() = default;
+
+            constexpr CartesianProductView(First first, Rests... rests) :
+                ranges{ std::move(first), std::move(rests)... }
+            {
+            }
+
+            constexpr iterator begin() const
+            {
+                return iterator{ *this, std::apply(
+                                            [](auto&&... args)
+                                            {
+                                                return std::tuple{ std::ranges::begin(args)... };
+                                            },
+                                            ranges
+                                        ) };
+            }
+
+            constexpr std::default_sentinel_t end() const
+            {
+                return std::default_sentinel;
+            }
+
+        private:
+            std::tuple<First, Rests...> ranges;
+        };
+#endif
+
         template <typename... Ranges>
         struct FlattenCartesianProductView : std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
         {
@@ -78,7 +211,7 @@ namespace exstd
             }
 
         private:
-            std::ranges::cartesian_product_view<Ranges...> base;
+            CartesianProductView<Ranges...> base;
         };
 
         template <typename... Ranges>
@@ -90,7 +223,7 @@ namespace exstd
 
             constexpr FlattenCartesianProductView(Ranges... ranges) :
                 base{
-                    std::ranges::cartesian_product_view<Ranges...>{ std::move(ranges)... },
+                    CartesianProductView<Ranges...>{ std::move(ranges)... },
                     FlatTuple{},
                 }
             {
@@ -117,7 +250,7 @@ namespace exstd
             }
 
         private:
-            std::ranges::transform_view<std::ranges::cartesian_product_view<Ranges...>, FlatTuple> base;
+            std::ranges::transform_view<CartesianProductView<Ranges...>, FlatTuple> base;
         };
 
         template <typename... Ranges>
@@ -191,12 +324,14 @@ namespace exstd
         {
         };
 
+#if __cpp_lib_ranges_enumerate >= 202302L
         template <typename View>
             requires std::ranges::view<std::remove_cvref_t<View>>
         struct CompileTimeViewExtent<std::ranges::enumerate_view<View>> :
             CompileTimeViewExtent<std::remove_cvref_t<View>>
         {
         };
+#endif
 
         template <std::ranges::input_range Range, size_t N>
         struct CompileTimeViewExtent<std::ranges::elements_view<Range, N>> :
@@ -216,6 +351,7 @@ namespace exstd
         {
         };
 
+#if __cpp_lib_ranges_zip >= 202110L
         template <typename F, std::ranges::input_range... Ranges>
         struct CompileTimeViewExtent<std::ranges::zip_transform_view<F, Ranges...>> :
             std::integral_constant<size_t, std::min({ CompileTimeViewExtent<std::remove_cvref_t<Ranges>>::value... })>
@@ -239,9 +375,10 @@ namespace exstd
                             : CompileTimeViewExtent<std::remove_cvref_t<Range>>::value - N + 1>
         {
         };
+#endif
 
         template <std::ranges::input_range First, std::ranges::forward_range... Rests>
-        struct CompileTimeViewExtent<std::ranges::cartesian_product_view<First, Rests...>> :
+        struct CompileTimeViewExtent<CartesianProductView<First, Rests...>> :
             std::integral_constant<
                 size_t, (((CompileTimeViewExtent<std::remove_cvref_t<First>>::value == std::dynamic_extent) || ...
                           || (CompileTimeViewExtent<std::remove_cvref_t<Rests>>::value == std::dynamic_extent))
@@ -253,15 +390,14 @@ namespace exstd
 
         template <typename... Ranges>
         struct CompileTimeViewExtent<FlattenCartesianProductView<Ranges...>> :
-            CompileTimeViewExtent<std::ranges::cartesian_product_view<Ranges...>>
+            CompileTimeViewExtent<CartesianProductView<Ranges...>>
         {
         };
 
         template <typename... Ranges>
             requires(TupleForm<std::ranges::range_value_t<Ranges>> || ...)
         struct CompileTimeViewExtent<FlattenCartesianProductView<Ranges...>> :
-            CompileTimeViewExtent<
-                std::ranges::transform_view<std::ranges::cartesian_product_view<Ranges...>, FlatTuple>>
+            CompileTimeViewExtent<std::ranges::transform_view<CartesianProductView<Ranges...>, FlatTuple>>
         {
         };
 
