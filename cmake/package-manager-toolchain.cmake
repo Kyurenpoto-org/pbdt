@@ -6,7 +6,17 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 # vcpkg
 if(DEFINED ENV{VCPKG_ROOT})
-	include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+	set(vcpkg_toolchain_path $ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+
+	if(EXISTS ${vcpkg_toolchain_path})
+		include(${vcpkg_toolchain_path})
+	else()
+		message(FATAL_ERROR "Vcpkg toolchain file not found at ${vcpkg_toolchain_path}. Ensure vcpkg is properly integrated and installed correctly. See https://learn.microsoft.com/en-us/vcpkg/get_started/get-started#1---set-up-vcpkg for more information.")
+	endif()
+
+	unset(vcpkg_toolchain_path)
+else()
+	message(FATAL_ERROR "VCPKG_ROOT not defined. Please set the VCPKG_ROOT environment variable to the location of your Vcpkg installation. You can set it in your system environment variables. See https://learn.microsoft.com/en-us/vcpkg/get_started/get-started#2---set-up-the-project for more information.")
 endif()
 
 # conan
