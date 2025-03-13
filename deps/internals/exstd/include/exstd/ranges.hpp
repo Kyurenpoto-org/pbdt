@@ -51,6 +51,133 @@ namespace exstd
         template <typename... Ranges>
         using CartesianProductView = std::ranges::cartesian_product_view<Ranges...>;
 #else
+        template <std::ranges::input_range First, std::ranges::forward_range... Rests>
+        class CartesianProductView
+        {
+        private:
+            struct iterator
+            {
+                using value_type = std::tuple<std::ranges::range_value_t<First>, std::ranges::range_value_t<Rests>...>;
+                using reference =
+                    std::tuple<std::ranges::range_reference_t<First>, std::ranges::range_reference_t<Rests>...>;
+                using difference_type = std::ptrdiff_t;
+                using iterator_category = std::input_iterator_tag;
+
+                constexpr iterator() = default;
+
+                constexpr iterator& operator++()
+                {
+                    next();
+                    return *this;
+                }
+
+                constexpr void operator++(int)
+                {
+                    ++*this;
+                }
+
+                constexpr iterator operator++(int)
+                    requires std::ranges::forward_range<First>
+                {
+                    auto tmp = *this;
+                    ++*this;
+                    return tmp;
+                }
+
+                [[nodiscard]]
+                constexpr auto operator*() const
+                {
+                    return std::apply(
+                        []<typename... Args>(Args&&... args)
+                        {
+                            return std::tuple{ *std::forward<Args>(args)... };
+                        },
+                        current
+                    );
+                }
+
+                [[nodiscard]]
+                constexpr bool operator==(const iterator& other) const
+                    requires std::equality_comparable<std::ranges::iterator_t<First>>
+                {
+                    return current == other.current;
+                }
+
+                [[nodiscard]]
+                constexpr bool operator==(std::default_sentinel_t) const
+                {
+                    return lastElement(std::make_index_sequence<sizeof...(Rests)>{});
+                }
+
+                [[nodiscard]]
+                constexpr bool operator<=>(const iterator& other) const
+                {
+                    return current <=> other.current;
+                }
+
+            private:
+                constexpr iterator(
+                    CartesianProductView& parent,
+                    std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current
+                ) :
+                    parent{ parent },
+                    current{ std::move(current) }
+                {
+                }
+
+                template <size_t Idx = sizeof...(Rests)>
+                constexpr void next()
+                {
+                    auto& it = std::get<Idx>(current);
+                    ++it;
+                    if constexpr (Idx > 0)
+                    {
+                        auto& range = std::get<Idx>(parent.ranges);
+                        if (it == std::end(range))
+                        {
+                            it = std::begin(range);
+                            next<Idx - 1>();
+                        }
+                    }
+                }
+
+                template <size_t... Indice>
+                constexpr bool lastElement(std::index_sequence<Indice...>) const
+                {
+                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(ranges))) || ...);
+                }
+
+                CartesianProductView& parent;
+                std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current;
+            };
+
+        public:
+            constexpr CartesianProductView() = default;
+
+            constexpr CartesianProductView(First first, Rests... rests) :
+                ranges{ std::move(first), std::move(rests)... }
+            {
+            }
+
+            constexpr iterator begin() const
+            {
+                return iterator{ *this, std::apply(
+                                            [](auto&&... args)
+                                            {
+                                                return std::tuple{ std::ranges::begin(args)... };
+                                            },
+                                            ranges
+                                        ) };
+            }
+
+            constexpr std::default_sentinel_t end() const
+            {
+                return std::default_sentinel;
+            }
+
+        private:
+            std::tuple<First, Rests...> ranges;
+        };
 #endif
 
         template <typename... Ranges>
