@@ -49,8 +49,6 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
-        "CMAKE_CXX_COMPILER": "g++",
         "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
@@ -65,17 +63,37 @@
       }
     },
     {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
+      "name": "linux-gcc-debug",
+      "displayName": "Linux GCC Debug",
       "inherits": "linux-base",
       "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "linux-release",
-      "displayName": "Linux Release",
+      "name": "linux-gcc-release",
+      "displayName": "Linux GCC Release",
+      "inherits": "linux-gcc-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "linux-clang-debug",
+      "displayName": "Linux Clang Debug",
       "inherits": "linux-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "linux-clang-release",
+      "displayName": "Linux Clang Release",
+      "inherits": "linux-clang-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -131,14 +149,14 @@
       "configurePreset": "x64-release"
     },
     {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "configurePreset": "linux-debug"
+      "name": "linux-gcc-debug",
+      "displayName": "Linux GCC Debug",
+      "configurePreset": "linux-gcc-debug"
     },
     {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "configurePreset": "linux-release"
+      "name": "linux-gcc-release",
+      "displayName": "Linux GCC Release",
+      "configurePreset": "linux-gcc-release"
     },
     {
       "name": "macos-debug",
@@ -163,14 +181,14 @@
       "configurePreset": "x64-release"
     },
     {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
-      "configurePreset": "linux-debug"
+      "name": "linux-gcc-debug",
+      "displayName": "Linux GCC Debug",
+      "configurePreset": "linux-gcc-debug"
     },
     {
-      "name": "linux-release",
-      "displayName": "Linux Release",
-      "configurePreset": "linux-release"
+      "name": "linux-gcc-release",
+      "displayName": "Linux GCC Release",
+      "configurePreset": "linux-gcc-release"
     },
     {
       "name": "macos-debug",
