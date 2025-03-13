@@ -14,23 +14,6 @@ project(
 	CXX
 )
 
-if(POLICY CMP0141)
-	cmake_policy(SET CMP0141 NEW)
-	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
-endif()
-
-option(PBDT_BUILD_TESTS "Build the tests" OFF)
-
-# packages
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
-
-list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
-
-if(PBDT_BUILD_TESTS)
-	enable_testing()
-	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/header-module-test.cmake)
-endif()
-
 # macos config
 if(APPLE)
 	execute_process(
@@ -58,6 +41,24 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	else()
 		set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS ${CLANG_SCAN_DEPS_EXECUTABLE})
 	endif()
+endif()
+
+# msvc config
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND POLICY CMP0141)
+	cmake_policy(SET CMP0141 NEW)
+	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
+endif()
+
+option(PBDT_BUILD_TESTS "Build the tests" OFF)
+
+# packages
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
+
+list(PREPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/prefix/)
+
+if(PBDT_BUILD_TESTS)
+	enable_testing()
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/header-module-test.cmake)
 endif()
 
 # modules
