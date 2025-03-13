@@ -2,20 +2,18 @@
 #
 # SPDX-License-Identifier: MIT
 
-# tests
-add_executable(callable-traits "src/callable-traits.cpp")
+# fixtures
+add_library(exstd-fixture INTERFACE)
 
 target_compile_features(
-    callable-traits
-    PRIVATE cxx_std_23
+    exstd-fixture
+    INTERFACE cxx_std_23
 )
-target_link_libraries(
-    callable-traits
-    PRIVATE exstd
-    PRIVATE exstd-module
+target_include_directories(
+    exstd-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_test(
-    NAME exstd.callable-traits
-    COMMAND callable-traits
-)
+# tests
+add_header_module_tests("exstd" "exstd-fixture" "callable-concept")
+add_header_module_tests("exstd" "exstd-fixture" "simple-callable")

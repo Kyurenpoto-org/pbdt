@@ -32,3 +32,7 @@ target_sources(
     TYPE CXX_MODULES
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
 )
+
+if(PBDT_BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
