@@ -127,8 +127,6 @@
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "clang",
-        "CMAKE_CXX_COMPILER": "clang++",
         "PBDT_BUILD_TESTS": "ON"
       },
       "condition": {
@@ -143,17 +141,37 @@
       }
     },
     {
-      "name": "macos-debug",
-      "displayName": "MacOS Debug",
+      "name": "macos-clang-debug",
+      "displayName": "MacOS Clang Debug",
       "inherits": "macos-base",
       "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
-      "name": "macos-release",
-      "displayName": "MacOS Release",
+      "name": "macos-clang-release",
+      "displayName": "MacOS Clang Release",
+      "inherits": "macos-clang-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "macos-gcc-debug",
+      "displayName": "MacOS GCC Debug",
       "inherits": "macos-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "macos-gcc-release",
+      "displayName": "MacOS GCC Release",
+      "inherits": "macos-gcc-debug",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release"
       }
@@ -191,14 +209,24 @@
       "configurePreset": "linux-gcc-release"
     },
     {
-      "name": "macos-debug",
-      "displayName": "MacOS Debug",
-      "configurePreset": "macos-debug"
+      "name": "macos-clang-debug",
+      "displayName": "MacOS Clang Debug",
+      "configurePreset": "macos-clang-debug"
     },
     {
-      "name": "macos-release",
-      "displayName": "MacOS Release",
-      "configurePreset": "macos-release"
+      "name": "macos-clang-release",
+      "displayName": "MacOS Clang Release",
+      "configurePreset": "macos-clang-release"
+    },
+    {
+      "name": "macos-gcc-debug",
+      "displayName": "MacOS GCC Debug",
+      "configurePreset": "macos-gcc-debug"
+    },
+    {
+      "name": "macos-gcc-release",
+      "displayName": "MacOS GCC Release",
+      "configurePreset": "macos-gcc-release"
     }
   ],
   "testPresets": [
@@ -233,14 +261,24 @@
       "configurePreset": "linux-gcc-release"
     },
     {
-      "name": "macos-debug",
-      "displayName": "MacOS Debug",
-      "configurePreset": "macos-debug"
+      "name": "macos-clang-debug",
+      "displayName": "MacOS Clang Debug",
+      "configurePreset": "macos-clang-debug"
     },
     {
-      "name": "macos-release",
-      "displayName": "MacOS Release",
-      "configurePreset": "macos-release"
+      "name": "macos-clang-release",
+      "displayName": "MacOS Clang Release",
+      "configurePreset": "macos-clang-release"
+    },
+    {
+      "name": "macos-gcc-debug",
+      "displayName": "MacOS GCC Debug",
+      "configurePreset": "macos-gcc-debug"
+    },
+    {
+      "name": "macos-gcc-release",
+      "displayName": "MacOS GCC Release",
+      "configurePreset": "macos-gcc-release"
     }
   ]
 }
