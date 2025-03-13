@@ -27,6 +27,9 @@ jobs:
     continue-on-error: true
 
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
       - name: install cmake & ninja
         uses: lukka/get-cmake@latest
 
@@ -36,13 +39,13 @@ jobs:
           cd vcpkg
           .\bootstrap-vcpkg.bat
           echo "VCPKG_ROOT=$(Get-Location)" >> $GITHUB_ENV
+          cd ..
 
       - name: install conan
-        run: |
-          pip install conan
+        run: pip install conan
 
-      - name: checkout
-        uses: actions/checkout@v3
+      - name: install clang
+        run: choco install llvm
 
       - name: setup msvc
         uses: ilammy/msvc-dev-cmd@v1
@@ -77,8 +80,7 @@ jobs:
           cd ..
 
       - name: install conan
-        run: |
-          pip install conan
+        run: pip install conan
 
       - name: install gcc
         run: |
@@ -87,6 +89,12 @@ jobs:
           sudo apt-get install -y gcc-14
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 60
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
+
+      - name: install clang
+        run: |
+          sudo apt-get install -y clang-16
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-16 60
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-16 60
 
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
@@ -110,8 +118,7 @@ jobs:
           cmake-version: latest
 
       - name: install pipx
-        run: |
-          brew install pipx
+        run: brew install pipx
 
       - name: install vcpkg
         run: |
@@ -122,14 +129,19 @@ jobs:
           cd ..
 
       - name: install conan
-        run: |
-          pipx install conan
+        run: pipx install conan
 
       - name: install clang
         run: |
           brew install llvm@16
           echo PATH="/opt/homebrew/opt/llvm@16/bin:$PATH" >> $GITHUB_ENV
           brew link --overwrite llvm@16
+
+      - name: install gcc
+        run: |
+          brew install gcc@14
+          echo PATH="/opt/homebrew/opt/gcc@14/bin:$PATH" >> $GITHUB_ENV
+          brew link --overwrite gcc@14
 
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
