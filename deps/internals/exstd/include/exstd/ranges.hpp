@@ -144,7 +144,7 @@ namespace exstd
                 template <size_t... Indice>
                 constexpr bool lastElement(std::index_sequence<Indice...>) const
                 {
-                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(ranges))) || ...);
+                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(parent.ranges))) || ...);
                 }
 
                 CartesianProductView& parent;
