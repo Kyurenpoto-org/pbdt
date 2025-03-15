@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: © 2025 Kyurenpoto <heal9179@gmail.com>
+#
+# SPDX-License-Identifier: MIT
+
+---
+name: dev/stage test result
+
+on:
+  workflow_run:
+    workflows: ["ci"]
+    types:
+      - completed
+
+jobs:
+  post-comment:
+    runs-on: ubuntu-latest
+    if: ${{ (github.event.workflow_run.head_branch == 'dev' || startsWith(github.event.workflow_run.head_branch, 'release/')) && github.event.workflow_run.head_ref == '' }}
+    steps:
+      - name: target environment
+        run: |
+          if [ "${{ github.event.workflow_run.head_branch }}" == "dev" ]; then
+            echo "env=dev"
+          else
+            echo "env=staging"
+          fi
+
+      - name: set comment message
+        run: |
+          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
+            echo "message=✅ ${{ env.env }} test completed successfully!" >> $GITHUB_ENV
+          else
+            echo "message=❌ ${{ env.env }} test failed. Please check the details at: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> $GITHUB_ENV
+          fi
+
+      - name: extract issue number from commit message
+        run: |
+          ISSUE_NUMBER=$(echo '${{ github.event.workflow_run.head_commit.message }}' | sed -n '2p' | grep -o '#[0-9]*' | tr -d '#')
+          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+
+      - name: post comment
+        uses: ./.github/actions/post-comment
+        with:
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          body: ${{ env.message }}
