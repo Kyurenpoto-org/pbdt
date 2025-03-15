@@ -41,7 +41,7 @@ jobs:
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
 
       - name: post comment
-        uses: ./.github/actions/post-comment
+        uses: peter-evans/create-or-update-comment@v1
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           body: ${{ env.message }}
