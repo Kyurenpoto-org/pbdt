@@ -45,3 +45,5 @@ jobs:
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           body: ${{ env.message }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ISSUE_WRITE_ACTIONS }}
