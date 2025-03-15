@@ -23,9 +23,5 @@ runs:
       shell: bash
 
     - name: test
-      run: |
-        ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
-        if [[ $? -ne 0 ]]; then
-          exit 1
-        fi
+      run: ctest --preset ${{ inputs.preset }} -j4 --verbose --output-on-failure
       shell: bash
