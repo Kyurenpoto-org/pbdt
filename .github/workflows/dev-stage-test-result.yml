@@ -14,7 +14,10 @@ on:
 jobs:
   post-comment:
     runs-on: ubuntu-latest
-    if: ${{ (github.event.workflow_run.head_branch == 'dev' || startsWith(github.event.workflow_run.head_branch, 'release/')) && github.event.workflow_run.head_ref == '' }}
+    if: >
+      github.event.workflow_run.head_branch == 'dev' || 
+      startsWith(github.event.workflow_run.head_branch, 'release/') && 
+      github.event.workflow_run.head_ref == ''
     steps:
       - name: target environment
         run: |
