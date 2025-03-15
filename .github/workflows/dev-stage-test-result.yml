@@ -37,11 +37,11 @@ jobs:
 
       - name: extract issue number from commit message
         run: |
-          ISSUE_NUMBER=$(echo '${{ github.event.workflow_run.head_commit.message }}' | sed -n '2p' | grep -o '#[0-9]*' | tr -d '#')
+          ISSUE_NUMBER=$(echo '${{ github.event.workflow_run.head_commit.message }}' | sed -n '3p' | grep -o '#[0-9]*' | tr -d '#')
           echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
 
       - name: post comment
-        uses: peter-evans/create-or-update-comment@v1
+        uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           body: ${{ env.message }}
