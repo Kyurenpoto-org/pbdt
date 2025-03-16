@@ -62,3 +62,42 @@ endif()
 
 # modules
 add_subdirectory("deps/internals")
+
+# For header based library
+add_library(prop-pp INTERFACE)
+
+target_compile_features(
+	prop-pp
+	INTERFACE cxx_std_23
+)
+target_link_libraries(
+	prop-pp
+	INTERFACE exstd
+)
+target_include_directories(
+	prop-pp
+	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+# For module based library
+add_library(prop-pp-module STATIC)
+
+target_compile_features(
+	prop-pp-module
+	PUBLIC cxx_std_23
+)
+target_link_libraries(
+	prop-pp-module
+	PRIVATE prop-pp
+)
+target_sources(
+	prop-pp-module
+	PUBLIC
+	FILE_SET prop_pp_modules
+	TYPE CXX_MODULES
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
+)
+
+if(PBDT_BUILD_TESTS)
+	add_subdirectory(tests)
+endif()
