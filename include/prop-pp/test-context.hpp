@@ -10,7 +10,11 @@
 #include <source_location>
 #include <string>
 
+#ifndef PBDT_MODULE
+
 #include "exstd/functional.hpp"
+
+#endif
 
 namespace prop_pp::test_context
 {

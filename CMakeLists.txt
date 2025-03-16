@@ -89,8 +89,7 @@ target_compile_features(
 target_link_libraries(
 	prop-pp-module
 	PRIVATE prop-pp
-
-	# PRIVATE exstd-module
+	PRIVATE exstd-module
 )
 target_sources(
 	prop-pp-module

@@ -25,7 +25,9 @@ module;
 
 export module prop_pp;
 
-// import exstd;
+#define PBDT_MODULE
+
+import exstd;
 
 export
 {

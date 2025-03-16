@@ -13,9 +13,13 @@
 #include <tuple>
 #include <type_traits>
 
+#ifndef PBDT_MODULE
+
 #include "exstd/callable-traits.hpp"
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"
+
+#endif
 
 #include "prop-pp/test-context.hpp"
 
