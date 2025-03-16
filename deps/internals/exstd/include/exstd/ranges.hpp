@@ -57,6 +57,8 @@ namespace exstd
         private:
             struct iterator
             {
+                friend CartesianProductView;
+
                 using value_type = std::tuple<std::ranges::range_value_t<First>, std::ranges::range_value_t<Rests>...>;
                 using reference =
                     std::tuple<std::ranges::range_reference_t<First>, std::ranges::range_reference_t<Rests>...>;
