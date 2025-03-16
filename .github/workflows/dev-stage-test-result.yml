@@ -11,6 +11,10 @@ on:
     types:
       - completed
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   post-comment:
     runs-on: ubuntu-latest
@@ -45,5 +49,3 @@ jobs:
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           body: ${{ env.message }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ISSUE_WRITE_ACTIONS }}
