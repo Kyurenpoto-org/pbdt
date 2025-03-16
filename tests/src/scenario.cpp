@@ -4,8 +4,6 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <print>
-
 #include "prop-pp/bdd.hpp"
 
 #include "fixtures.hpp"
