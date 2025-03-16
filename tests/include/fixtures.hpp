@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <ostream>
+#include <iostream>
 
 #if __cpp_lib_print >= 202207L
 
