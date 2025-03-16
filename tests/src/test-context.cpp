@@ -58,28 +58,29 @@ void examples()
         natural_components::domain::viewDomain
     );
 
+#if __cpp_lib_ranges_cartesian_product >= 202207L
     ASSERT_COMBINATION(
         natural_components::target2::freeFuncTarget, natural_components::prop2::freeFuncProp,
-#if __cpp_lib_ranges_cartesian_product >= 202207L
         std::views::cartesian_product(
             natural_components::domain2::containerDomain, natural_components::domain2::containerDomain
         )
-#else
-        [&natural_components::domain2::containerDomain]()
-        {
-            std::array<std::tuple<int, int>, 25> result{};
-            for (size_t i = 0; i < 5; ++i)
-            {
-                for (size_t j = 0; j < 5; ++j)
-                {
-                    result[i * 5 + j] = { natural_components::domain2::containerDomain[i],
-                                          natural_components::domain2::containerDomain[j] };
-                }
-            }
-            return result;
-        }()
-#endif
     );
+#else
+    constexpr auto product = [&]()
+    {
+        std::array<std::tuple<int, int>, 25> result{};
+        for (size_t i = 0; i < 5; ++i)
+        {
+            for (size_t j = 0; j < 5; ++j)
+            {
+                result[i * 5 + j] = { natural_components::domain2::containerDomain[i],
+                                      natural_components::domain2::containerDomain[j] };
+            }
+        }
+        return result;
+    }();
+    ASSERT_COMBINATION(natural_components::target2::freeFuncTarget, natural_components::prop2::freeFuncProp, product);
+#endif
 }
 
 int main()
