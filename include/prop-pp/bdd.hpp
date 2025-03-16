@@ -43,13 +43,14 @@ namespace prop_pp::bdd
             }
 
             template <typename Element>
-            constexpr auto expand(const std::string_view step, Element&& element) const
+            constexpr ComponentContext<Elements..., std::decay_t<Element>>
+            expand(const std::string_view step, Element&& element) const
             {
                 std::array<std::string_view, sizeof...(Elements) + 1> newSteps;
                 std::copy(steps.begin(), steps.end(), newSteps.begin());
                 newSteps[sizeof...(Elements)] = step;
 
-                return ComponentContext<Elements..., std::decay_t<Element>>{
+                return {
                     newSteps,
                     std::tuple_cat(elements, std::tuple{ element }),
                 };
@@ -105,7 +106,7 @@ namespace prop_pp::bdd
 
             constexpr std::string description(const std::string_view name) const
             {
-                return "[" + std::string(name) + "] " + step + "\n";
+                return "[" + std::string(name) + "] " + std::string(step) + "\n";
             }
 
         private:
@@ -163,7 +164,7 @@ namespace prop_pp::bdd
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -272,7 +273,7 @@ namespace prop_pp::bdd
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -368,14 +369,14 @@ namespace prop_pp::bdd
             constexpr ThenContext<Props..., std::decay_t<Prop>>
             andThen(const std::string_view step, Prop&& property) const
             {
-                return { core.expand(step, std::forward<Prop>(property)) };
+                return { core.expand(step, static_cast<std::decay_t<Prop>>(property)) };
             }
 
             using Completion = PropertyCompletion<std::tuple<Props...>, SampleType, ResultType>;
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -405,7 +406,7 @@ namespace prop_pp::bdd
             constexpr ThenContext<Prop, std::decay_t<NextProp>>
             andThen(const std::string_view step, NextProp&& property) const
             {
-                return { core.expand(step, std::forward<NextProp>(property)) };
+                return { core.expand(step, static_cast<std::decay_t<NextProp>>(property)) };
             }
 
             constexpr Prop complete() const
@@ -461,7 +462,7 @@ namespace prop_pp::bdd
         {
             constexpr auto test() const
             {
-                return test_context::propertyContext(given.complete(), then.complete(), when.complete());
+                // return test_context::propertyContext(given.complete(), then.complete(), when.complete());
             }
         };
 
@@ -550,7 +551,7 @@ namespace prop_pp::bdd
     {
     }
 
-    constexpr detail::ScenarioBuilder<nullptr_t, nullptr_t, nullptr_t> builder{
+    constexpr detail::ScenarioBuilder<std::nullptr_t, std::nullptr_t, std::nullptr_t> builder{
         nullptr,
         nullptr,
         nullptr,
