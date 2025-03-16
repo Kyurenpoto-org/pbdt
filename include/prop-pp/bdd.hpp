@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <array>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <tuple>
