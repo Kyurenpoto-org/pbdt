@@ -14,7 +14,10 @@ module;
 #include <functional>
 #include <optional>
 #include <ranges>
+#include <source_location>
 #include <span>
+#include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <variant>
@@ -22,7 +25,7 @@ module;
 
 export module prop_pp;
 
-import exstd;
+// import exstd;
 
 export
 {
