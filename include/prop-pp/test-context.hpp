@@ -274,7 +274,7 @@ namespace prop_pp::test_context
     template <typename Samples, typename Test>
     constexpr detail::SampledTestContext parameterizedContext(Samples&& samples, Test&& test)
     {
-#ifdef __cpp_lib_ranges_fold >= 202207L
+#if __cpp_lib_ranges_fold >= 202207L
         return std::ranges::fold_left(
             std::forward<Samples>(samples), detail::SampledTestContext::prototype(),
             [&test](const detail::SampledTestContext context, const auto sample)
