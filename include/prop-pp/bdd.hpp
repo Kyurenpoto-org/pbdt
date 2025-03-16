@@ -224,7 +224,7 @@ namespace prop_pp::bdd
 
         template <typename... Domains, typename Base>
         struct DomainCompletion<std::tuple<Domains...>, Base> :
-            std::ranges::view_interface<DomainCompletion<Domains...>>
+            std::ranges::view_interface<DomainCompletion<std::tuple<Domains...>, Base>>
         {
             constexpr DomainCompletion(const std::tuple<Domains...> domains) :
                 base(std::apply(
