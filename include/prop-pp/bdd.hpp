@@ -17,7 +17,7 @@
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"
 
-#include "prop-pp/impl/test-context.hpp"
+#include "prop-pp/test-context.hpp"
 
 namespace prop_pp::bdd
 {

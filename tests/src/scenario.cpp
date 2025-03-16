@@ -6,7 +6,7 @@
 
 #include <print>
 
-#include "prop-pp/impl/bdd.hpp"
+#include "prop-pp/bdd.hpp"
 
 #include "fixtures.hpp"
 

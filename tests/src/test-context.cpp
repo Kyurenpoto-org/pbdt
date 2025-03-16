@@ -6,7 +6,7 @@
 
 #include <print>
 
-#include "prop-pp/impl/test-context.hpp"
+#include "prop-pp/test-context.hpp"
 
 #include "fixtures.hpp"
 
