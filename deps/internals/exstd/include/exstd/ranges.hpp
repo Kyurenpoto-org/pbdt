@@ -56,7 +56,7 @@ namespace exstd
 
         template <std::ranges::input_range First, std::ranges::forward_range... Rests>
             requires(std::ranges::view<First> && ... && std::ranges::view<Rests>)
-        class CartesianProductView : std::ranges::view_interface<CartesianProductView<First, Rests...>>
+        class CartesianProductView : public std::ranges::view_interface<CartesianProductView<First, Rests...>>
         {
         private:
             template <bool Const>
@@ -189,6 +189,7 @@ namespace exstd
             }
 
             constexpr iterator<true> begin() const
+                requires(std::ranges::range<First> && ... && std::ranges::range<Rests>)
             {
                 return {
                     *this,
@@ -217,6 +218,10 @@ namespace exstd
             }
 
             constexpr iterator<true> end() const
+                requires(
+                    std::ranges::common_range<First>
+                    || (std::ranges::sized_range<First> && std::ranges::random_access_range<First>)
+                )
             {
                 return {
                     *this,
@@ -228,6 +233,11 @@ namespace exstd
                         ranges
                     ),
                 };
+            }
+
+            constexpr std::default_sentinel_t end() const noexcept
+            {
+                return std::default_sentinel;
             }
 
         private:
