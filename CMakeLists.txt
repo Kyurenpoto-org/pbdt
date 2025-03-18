@@ -58,6 +58,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	else()
 		set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS ${CLANG_SCAN_DEPS_EXECUTABLE})
 	endif()
+
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++")
 endif()
 
 # modules
