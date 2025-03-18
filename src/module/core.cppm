@@ -23,7 +23,7 @@ module;
 #include <variant>
 #include <vector>
 
-export module prop_pp;
+export module pbdt;
 
 #define PBDT_MODULE
 

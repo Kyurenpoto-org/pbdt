@@ -32,7 +32,7 @@ namespace natural_components
     {
         constexpr auto freeFuncProp(int x, int result)
         {
-            return prop_pp::test_context::expect(x == result);
+            return pbdt::test_context::expect(x == result);
         }
 
         constexpr auto funcObjProp = [](int x, int result)
@@ -70,7 +70,7 @@ namespace natural_components
     {
         constexpr auto freeFuncProp(std::tuple<int, int> args, int result)
         {
-            return prop_pp::test_context::expect(result == 0);
+            return pbdt::test_context::expect(result == 0);
         }
     }
 

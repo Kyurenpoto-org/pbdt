@@ -11,7 +11,7 @@
 
 #include "fixtures.hpp"
 
-namespace prop_pp::bdd::detail
+namespace pbdt::bdd::detail
 {
     template <typename... Targets, typename Target>
     constexpr auto operator+(GivenContext<Targets...>&& context, Target&& target)
@@ -30,7 +30,7 @@ namespace
 
     template <typename... Targets, typename Ret, typename Args>
     constexpr std::tuple<Targets...>
-    toTuple(const prop_pp::bdd::detail::TargetCompletion<std::tuple<Targets...>, Ret, Args> completion)
+    toTuple(const pbdt::bdd::detail::TargetCompletion<std::tuple<Targets...>, Ret, Args> completion)
     {
         return { completion };
     }
@@ -197,7 +197,7 @@ namespace Idempotent
                     return std::apply(
                         []<typename Target, typename... Targets>(Target&& target, Targets&&... targets)
                         {
-                            return (prop_pp::bdd::given("", std::forward<Target>(target)) + ...
+                            return (pbdt::bdd::given("", std::forward<Target>(target)) + ...
                                     + std::forward<Targets>(targets))
                                 .complete();
                         },
@@ -206,10 +206,10 @@ namespace Idempotent
                 };
 
                 constexpr auto compileTimeCompleted = completeContext();
-                static_assert(compileTimeCompleted == prop_pp::bdd::given("", compileTimeCompleted).complete());
+                static_assert(compileTimeCompleted == pbdt::bdd::given("", compileTimeCompleted).complete());
 
                 const auto runTimeCompleted = completeContext();
-                dynamic_assert(runTimeCompleted == prop_pp::bdd::given("", runTimeCompleted).complete());
+                dynamic_assert(runTimeCompleted == pbdt::bdd::given("", runTimeCompleted).complete());
             }(),
             ...
         );
@@ -286,21 +286,16 @@ namespace Associative
                 constexpr auto b = std::get<1>(combination);
                 constexpr auto c = std::get<2>(combination);
 
-                constexpr auto compileTimeLhs = prop_pp::bdd::given("", a)
-                                                    .andGiven("", prop_pp::bdd::given("", b).andGiven("", c).complete())
-                                                    .complete();
+                constexpr auto compileTimeLhs =
+                    pbdt::bdd::given("", a).andGiven("", pbdt::bdd::given("", b).andGiven("", c).complete()).complete();
                 constexpr auto compileTimeRhs =
-                    prop_pp::bdd::given("", prop_pp::bdd::given("", a).andGiven("", b).complete())
-                        .andGiven("", c)
-                        .complete();
+                    pbdt::bdd::given("", pbdt::bdd::given("", a).andGiven("", b).complete()).andGiven("", c).complete();
                 static_assert(flatTuple(toTuple(compileTimeLhs)) == flatTuple(toTuple(compileTimeRhs)));
 
-                const auto runTimeLhs = prop_pp::bdd::given("", a)
-                                            .andGiven("", prop_pp::bdd::given("", b).andGiven("", c).complete())
-                                            .complete();
-                const auto runTimeRhs = prop_pp::bdd::given("", prop_pp::bdd::given("", a).andGiven("", b).complete())
-                                            .andGiven("", c)
-                                            .complete();
+                const auto runTimeLhs =
+                    pbdt::bdd::given("", a).andGiven("", pbdt::bdd::given("", b).andGiven("", c).complete()).complete();
+                const auto runTimeRhs =
+                    pbdt::bdd::given("", pbdt::bdd::given("", a).andGiven("", b).complete()).andGiven("", c).complete();
                 dynamic_assert(flatTuple(toTuple(runTimeLhs)) == flatTuple(toTuple(runTimeRhs)));
             }(),
             ...
