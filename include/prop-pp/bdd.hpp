@@ -219,13 +219,15 @@ namespace prop_pp::bdd
         template <typename... Domains>
         struct WhenContext;
 
-        template <typename, typename>
+        template <typename>
         struct DomainCompletion;
 
-        template <typename... Domains, typename Base>
-        struct DomainCompletion<std::tuple<Domains...>, Base> :
-            std::ranges::view_interface<DomainCompletion<std::tuple<Domains...>, Base>>
+        template <typename... Domains>
+        struct DomainCompletion<std::tuple<Domains...>> :
+            public std::ranges::view_interface<DomainCompletion<std::tuple<Domains...>>>
         {
+            using BaseType = decltype(exstd::flattenCartesianProduct(std::declval<Domains>()...));
+
             constexpr DomainCompletion(const std::tuple<Domains...> domains) :
                 base(std::apply(
                     [](Domains... domains)
@@ -248,7 +250,7 @@ namespace prop_pp::bdd
             }
 
         private:
-            Base base;
+            BaseType base;
         };
 
         template <typename... Domains>
@@ -270,7 +272,7 @@ namespace prop_pp::bdd
                 return { core.expand(step, exstd::toContainer(std::forward<Domain>(domain))) };
             }
 
-            using Completion = DomainCompletion<std::tuple<Domains...>, RangeType>;
+            using Completion = DomainCompletion<std::tuple<Domains...>>;
 
             constexpr Completion complete() const
             {
@@ -561,9 +563,9 @@ namespace prop_pp::bdd
 
 namespace exstd::detail
 {
-    template <typename... Domains, typename Base>
-    struct CompileTimeViewExtent<prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>, Base>> :
-        CompileTimeViewExtent<Base>
+    template <typename... Domains>
+    struct CompileTimeViewExtent<prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>> :
+        CompileTimeViewExtent<typename prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>::BaseType>
     {
     };
 }
