@@ -6,27 +6,27 @@
 
 #include <tuple>
 
-#include "prop-pp/bdd.hpp"
+#include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
 
 #define ASSERT_IDEMPOTENT(arg)                                                                                         \
     {                                                                                                                  \
         constexpr auto compileTimeProperty = arg;                                                                      \
-        static_assert(compileTimeProperty == prop_pp::bdd::then("", compileTimeProperty).complete());                  \
+        static_assert(compileTimeProperty == pbdt::bdd::then("", compileTimeProperty).complete());                     \
                                                                                                                        \
         const auto runTimeProperty = arg;                                                                              \
-        dynamic_assert(runTimeProperty == prop_pp::bdd::then("", runTimeProperty).complete());                         \
+        dynamic_assert(runTimeProperty == pbdt::bdd::then("", runTimeProperty).complete());                            \
     }
 
 void idempotent()
 {
-    ASSERT_IDEMPOTENT(prop_pp::bdd::then("", natural_components::prop::freeFuncProp).complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::then("", natural_components::prop::funcObjProp).complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::then("", natural_components::prop::freeFuncProp)
+    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::freeFuncProp).complete());
+    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::funcObjProp).complete());
+    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::freeFuncProp)
                           .andThen("", natural_components::prop::funcObjProp)
                           .complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::then("", natural_components::prop::funcObjProp)
+    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::funcObjProp)
                           .andThen("", natural_components::prop::freeFuncProp)
                           .complete());
 }
@@ -41,7 +41,7 @@ namespace
 
     template <typename... Props, typename Sample, typename Result>
     constexpr std::tuple<Props...>
-    toTuple(const prop_pp::bdd::detail::PropertyCompletion<std::tuple<Props...>, Sample, Result> completion)
+    toTuple(const pbdt::bdd::detail::PropertyCompletion<std::tuple<Props...>, Sample, Result> completion)
     {
         return { completion };
     }
@@ -60,7 +60,7 @@ namespace
     template <size_t N, typename Sample, typename Result>
     constexpr auto freeFunction(Sample, Result)
     {
-        return prop_pp::test_context::expect(N == 0);
+        return pbdt::test_context::expect(N == 0);
     }
 
     template <size_t N, typename Sample, typename Result>
@@ -68,7 +68,7 @@ namespace
     {
         constexpr auto operator()(Sample, Result)
         {
-            return prop_pp::test_context::expect(N == 0);
+            return pbdt::test_context::expect(N == 0);
         }
 
         constexpr bool operator==(const Functor) const
@@ -154,21 +154,16 @@ namespace Associative
                 constexpr auto b = std::get<1>(combination);
                 constexpr auto c = std::get<2>(combination);
 
-                constexpr auto compileTimeLhs = prop_pp::bdd::then("", a)
-                                                    .andThen("", prop_pp::bdd::then("", b).andThen("", c).complete())
-                                                    .complete();
+                constexpr auto compileTimeLhs =
+                    pbdt::bdd::then("", a).andThen("", pbdt::bdd::then("", b).andThen("", c).complete()).complete();
                 constexpr auto compileTimeRhs =
-                    prop_pp::bdd::then("", prop_pp::bdd::then("", a).andThen("", b).complete())
-                        .andThen("", c)
-                        .complete();
+                    pbdt::bdd::then("", pbdt::bdd::then("", a).andThen("", b).complete()).andThen("", c).complete();
                 static_assert(flatTuple(toTuple(compileTimeLhs)) == flatTuple(toTuple(compileTimeRhs)));
 
-                const auto runTimeLhs = prop_pp::bdd::then("", a)
-                                            .andThen("", prop_pp::bdd::then("", b).andThen("", c).complete())
-                                            .complete();
-                const auto runTimeRhs = prop_pp::bdd::then("", prop_pp::bdd::then("", a).andThen("", b).complete())
-                                            .andThen("", c)
-                                            .complete();
+                const auto runTimeLhs =
+                    pbdt::bdd::then("", a).andThen("", pbdt::bdd::then("", b).andThen("", c).complete()).complete();
+                const auto runTimeRhs =
+                    pbdt::bdd::then("", pbdt::bdd::then("", a).andThen("", b).complete()).andThen("", c).complete();
                 dynamic_assert(flatTuple(toTuple(runTimeLhs)) == flatTuple(toTuple(runTimeRhs)));
             }(),
             ...

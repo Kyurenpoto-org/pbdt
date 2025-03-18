@@ -9,7 +9,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "prop-pp/bdd.hpp"
+#include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
 
@@ -18,30 +18,29 @@
         constexpr auto compileTimeSamples = arg;                                                                       \
         static_assert(                                                                                                 \
             exstd::toContainer(compileTimeSamples)                                                                     \
-            == exstd::toContainer(prop_pp::bdd::when("", compileTimeSamples).complete())                               \
+            == exstd::toContainer(pbdt::bdd::when("", compileTimeSamples).complete())                                  \
         );                                                                                                             \
                                                                                                                        \
         const auto runTimeSamples = arg;                                                                               \
         dynamic_assert(                                                                                                \
-            exstd::toContainer(runTimeSamples)                                                                         \
-            == exstd::toContainer(prop_pp::bdd::when("", runTimeSamples).complete())                                   \
+            exstd::toContainer(runTimeSamples) == exstd::toContainer(pbdt::bdd::when("", runTimeSamples).complete())   \
         );                                                                                                             \
     }
 
 void idempotent()
 {
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain::containerDomain).complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain::viewDomain).complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain2::containerDomain)
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain::containerDomain).complete());
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain::viewDomain).complete());
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::containerDomain)
                           .andWhen("", natural_components::domain2::containerDomain)
                           .complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain2::viewDomain)
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::viewDomain)
                           .andWhen("", natural_components::domain2::containerDomain)
                           .complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain2::containerDomain)
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::containerDomain)
                           .andWhen("", natural_components::domain2::viewDomain)
                           .complete());
-    ASSERT_IDEMPOTENT(prop_pp::bdd::when("", natural_components::domain2::viewDomain)
+    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::viewDomain)
                           .andWhen("", natural_components::domain2::viewDomain)
                           .complete());
 }
@@ -200,21 +199,16 @@ namespace Associative
                 constexpr auto b = std::get<1>(combination);
                 constexpr auto c = std::get<2>(combination);
 
-                constexpr auto compileTimeLhs = prop_pp::bdd::when("", a)
-                                                    .andWhen("", prop_pp::bdd::when("", b).andWhen("", c).complete())
-                                                    .complete();
+                constexpr auto compileTimeLhs =
+                    pbdt::bdd::when("", a).andWhen("", pbdt::bdd::when("", b).andWhen("", c).complete()).complete();
                 constexpr auto compileTimeRhs =
-                    prop_pp::bdd::when("", prop_pp::bdd::when("", a).andWhen("", b).complete())
-                        .andWhen("", c)
-                        .complete();
+                    pbdt::bdd::when("", pbdt::bdd::when("", a).andWhen("", b).complete()).andWhen("", c).complete();
                 static_assert(exstd::toContainer(compileTimeLhs) == exstd::toContainer(compileTimeRhs));
 
-                const auto runTimeLhs = prop_pp::bdd::when("", a)
-                                            .andWhen("", prop_pp::bdd::when("", b).andWhen("", c).complete())
-                                            .complete();
-                const auto runTimeRhs = prop_pp::bdd::when("", prop_pp::bdd::when("", a).andWhen("", b).complete())
-                                            .andWhen("", c)
-                                            .complete();
+                const auto runTimeLhs =
+                    pbdt::bdd::when("", a).andWhen("", pbdt::bdd::when("", b).andWhen("", c).complete()).complete();
+                const auto runTimeRhs =
+                    pbdt::bdd::when("", pbdt::bdd::when("", a).andWhen("", b).complete()).andWhen("", c).complete();
                 dynamic_assert(exstd::toContainer(runTimeLhs) == exstd::toContainer(runTimeRhs));
             }(),
             ...

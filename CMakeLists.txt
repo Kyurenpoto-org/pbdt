@@ -66,37 +66,37 @@ endif()
 add_subdirectory("deps/internals")
 
 # For header based library
-add_library(prop-pp INTERFACE)
+add_library(pbdt INTERFACE)
 
 target_compile_features(
-	prop-pp
+	pbdt
 	INTERFACE cxx_std_23
 )
 target_link_libraries(
-	prop-pp
+	pbdt
 	INTERFACE exstd
 )
 target_include_directories(
-	prop-pp
+	pbdt
 	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # For module based library
-add_library(prop-pp-module STATIC)
+add_library(pbdt-module STATIC)
 
 target_compile_features(
-	prop-pp-module
+	pbdt-module
 	PUBLIC cxx_std_23
 )
 target_link_libraries(
-	prop-pp-module
-	PRIVATE prop-pp
+	pbdt-module
+	PRIVATE pbdt
 	PRIVATE exstd-module
 )
 target_sources(
-	prop-pp-module
+	pbdt-module
 	PUBLIC
-	FILE_SET prop_pp_modules
+	FILE_SET pbdt_modules
 	TYPE CXX_MODULES
 	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
 )
