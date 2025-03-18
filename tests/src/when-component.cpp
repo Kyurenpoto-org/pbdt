@@ -9,7 +9,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "prop-pp/bdd.hpp"
+#include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
 
