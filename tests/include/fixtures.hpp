@@ -11,7 +11,7 @@
 #include <ranges>
 #include <tuple>
 
-#include "prop-pp/impl/test-context.hpp"
+#include "prop-pp/test-context.hpp"
 
 namespace natural_components
 {

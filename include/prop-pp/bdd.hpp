@@ -8,16 +8,21 @@
 
 #include <algorithm>
 #include <array>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
 
+#ifndef PBDT_MODULE
+
 #include "exstd/callable-traits.hpp"
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"
 
-#include "prop-pp/impl/test-context.hpp"
+#endif
+
+#include "prop-pp/test-context.hpp"
 
 namespace prop_pp::bdd
 {
@@ -39,13 +44,14 @@ namespace prop_pp::bdd
             }
 
             template <typename Element>
-            constexpr auto expand(const std::string_view step, Element&& element) const
+            constexpr ComponentContext<Elements..., std::decay_t<Element>>
+            expand(const std::string_view step, Element&& element) const
             {
                 std::array<std::string_view, sizeof...(Elements) + 1> newSteps;
                 std::copy(steps.begin(), steps.end(), newSteps.begin());
                 newSteps[sizeof...(Elements)] = step;
 
-                return ComponentContext<Elements..., std::decay_t<Element>>{
+                return {
                     newSteps,
                     std::tuple_cat(elements, std::tuple{ element }),
                 };
@@ -101,7 +107,7 @@ namespace prop_pp::bdd
 
             constexpr std::string description(const std::string_view name) const
             {
-                return "[" + std::string(name) + "] " + step + "\n";
+                return "[" + std::string(name) + "] " + std::string(step) + "\n";
             }
 
         private:
@@ -159,7 +165,7 @@ namespace prop_pp::bdd
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -213,13 +219,15 @@ namespace prop_pp::bdd
         template <typename... Domains>
         struct WhenContext;
 
-        template <typename, typename>
+        template <typename>
         struct DomainCompletion;
 
-        template <typename... Domains, typename Base>
-        struct DomainCompletion<std::tuple<Domains...>, Base> :
-            std::ranges::view_interface<DomainCompletion<Domains...>>
+        template <typename... Domains>
+        struct DomainCompletion<std::tuple<Domains...>> :
+            public std::ranges::view_interface<DomainCompletion<std::tuple<Domains...>>>
         {
+            using BaseType = decltype(exstd::flattenCartesianProduct(std::declval<Domains>()...));
+
             constexpr DomainCompletion(const std::tuple<Domains...> domains) :
                 base(std::apply(
                     [](Domains... domains)
@@ -242,7 +250,7 @@ namespace prop_pp::bdd
             }
 
         private:
-            Base base;
+            BaseType base;
         };
 
         template <typename... Domains>
@@ -264,11 +272,11 @@ namespace prop_pp::bdd
                 return { core.expand(step, exstd::toContainer(std::forward<Domain>(domain))) };
             }
 
-            using Completion = DomainCompletion<std::tuple<Domains...>, RangeType>;
+            using Completion = DomainCompletion<std::tuple<Domains...>>;
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -364,14 +372,14 @@ namespace prop_pp::bdd
             constexpr ThenContext<Props..., std::decay_t<Prop>>
             andThen(const std::string_view step, Prop&& property) const
             {
-                return { core.expand(step, std::forward<Prop>(property)) };
+                return { core.expand(step, static_cast<std::decay_t<Prop>>(property)) };
             }
 
             using Completion = PropertyCompletion<std::tuple<Props...>, SampleType, ResultType>;
 
             constexpr Completion complete() const
             {
-                return core.complete<Completion>();
+                return core.template complete<Completion>();
             }
 
             constexpr std::string description() const
@@ -401,7 +409,7 @@ namespace prop_pp::bdd
             constexpr ThenContext<Prop, std::decay_t<NextProp>>
             andThen(const std::string_view step, NextProp&& property) const
             {
-                return { core.expand(step, std::forward<NextProp>(property)) };
+                return { core.expand(step, static_cast<std::decay_t<NextProp>>(property)) };
             }
 
             constexpr Prop complete() const
@@ -457,7 +465,7 @@ namespace prop_pp::bdd
         {
             constexpr auto test() const
             {
-                return test_context::propertyContext(given.complete(), then.complete(), when.complete());
+                // return test_context::propertyContext(given.complete(), then.complete(), when.complete());
             }
         };
 
@@ -546,7 +554,7 @@ namespace prop_pp::bdd
     {
     }
 
-    constexpr detail::ScenarioBuilder<nullptr_t, nullptr_t, nullptr_t> builder{
+    constexpr detail::ScenarioBuilder<std::nullptr_t, std::nullptr_t, std::nullptr_t> builder{
         nullptr,
         nullptr,
         nullptr,
@@ -555,9 +563,9 @@ namespace prop_pp::bdd
 
 namespace exstd::detail
 {
-    template <typename... Domains, typename Base>
-    struct CompileTimeViewExtent<prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>, Base>> :
-        CompileTimeViewExtent<Base>
+    template <typename... Domains>
+    struct CompileTimeViewExtent<prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>> :
+        CompileTimeViewExtent<typename prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>::BaseType>
     {
     };
 }
