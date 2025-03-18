@@ -15,8 +15,8 @@ target_include_directories(
 )
 target_link_libraries(
     bdd-fixture
-    INTERFACE prop-pp
-    INTERFACE prop-pp-module
+    INTERFACE pbdt
+    INTERFACE pbdt-module
 )
 
 # tests
@@ -30,12 +30,12 @@ target_link_libraries(
     test-context
     PRIVATE bdd-fixture
     PRIVATE exstd
-    PRIVATE prop-pp
-    PRIVATE prop-pp-module
+    PRIVATE pbdt
+    PRIVATE pbdt-module
 )
 
 add_test(
-    NAME prop-pp.bdd.test-context
+    NAME pbdt.bdd.test-context
     COMMAND test-context
 )
 
@@ -49,12 +49,12 @@ target_link_libraries(
     given-component
     PRIVATE bdd-fixture
     PRIVATE exstd
-    PRIVATE prop-pp
-    PRIVATE prop-pp-module
+    PRIVATE pbdt
+    PRIVATE pbdt-module
 )
 
 add_test(
-    NAME prop-pp.bdd.given-component
+    NAME pbdt.bdd.given-component
     COMMAND given-component
 )
 
@@ -68,12 +68,12 @@ target_link_libraries(
     when-component
     PRIVATE bdd-fixture
     PRIVATE exstd
-    PRIVATE prop-pp
-    PRIVATE prop-pp-module
+    PRIVATE pbdt
+    PRIVATE pbdt-module
 )
 
 add_test(
-    NAME prop-pp.bdd.when-component
+    NAME pbdt.bdd.when-component
     COMMAND when-component
 )
 
@@ -87,12 +87,12 @@ target_link_libraries(
     then-component
     PRIVATE bdd-fixture
     PRIVATE exstd
-    PRIVATE prop-pp
-    PRIVATE prop-pp-module
+    PRIVATE pbdt
+    PRIVATE pbdt-module
 )
 
 add_test(
-    NAME prop-pp.bdd.then-component
+    NAME pbdt.bdd.then-component
     COMMAND then-component
 )
 
@@ -106,11 +106,11 @@ target_link_libraries(
     scenario
     PRIVATE bdd-fixture
     PRIVATE exstd
-    PRIVATE prop-pp
-    PRIVATE prop-pp-module
+    PRIVATE pbdt
+    PRIVATE pbdt-module
 )
 
 add_test(
-    NAME prop-pp.bdd.scenario
+    NAME pbdt.bdd.scenario
     COMMAND scenario
 )

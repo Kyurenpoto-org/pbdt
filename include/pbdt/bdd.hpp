@@ -22,9 +22,9 @@
 
 #endif
 
-#include "prop-pp/test-context.hpp"
+#include "pbdt/test-context.hpp"
 
-namespace prop_pp::bdd
+namespace pbdt::bdd
 {
     namespace detail
     {
@@ -564,8 +564,8 @@ namespace prop_pp::bdd
 namespace exstd::detail
 {
     template <typename... Domains>
-    struct CompileTimeViewExtent<prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>> :
-        CompileTimeViewExtent<typename prop_pp::bdd::detail::DomainCompletion<std::tuple<Domains...>>::BaseType>
+    struct CompileTimeViewExtent<pbdt::bdd::detail::DomainCompletion<std::tuple<Domains...>>> :
+        CompileTimeViewExtent<typename pbdt::bdd::detail::DomainCompletion<std::tuple<Domains...>>::BaseType>
     {
     };
 }

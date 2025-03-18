@@ -6,7 +6,7 @@
 
 #include <print>
 
-#include "prop-pp/test-context.hpp"
+#include "pbdt/test-context.hpp"
 
 #include "fixtures.hpp"
 
@@ -16,13 +16,13 @@
         constexpr auto compileTimeProp = prop;                                                                         \
         constexpr auto compileTimeDomain = domain;                                                                     \
         static_assert(                                                                                                 \
-            prop_pp::test_context::propertyContext(compileTimeTarget, compileTimeProp, compileTimeDomain).passable()   \
+            pbdt::test_context::propertyContext(compileTimeTarget, compileTimeProp, compileTimeDomain).passable()      \
         );                                                                                                             \
                                                                                                                        \
         const auto runTimeTarget = target;                                                                             \
         const auto runTimeProp = prop;                                                                                 \
         const auto runTimeDomain = domain;                                                                             \
-        dynamic_assert(prop_pp::test_context::propertyContext(runTimeTarget, runTimeProp, runTimeDomain).passable());  \
+        dynamic_assert(pbdt::test_context::propertyContext(runTimeTarget, runTimeProp, runTimeDomain).passable());     \
     }
 
 void examples()

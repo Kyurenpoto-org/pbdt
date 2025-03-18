@@ -17,7 +17,7 @@
 
 #endif
 
-namespace prop_pp::test_context
+namespace pbdt::test_context
 {
     namespace detail
     {
@@ -308,7 +308,7 @@ namespace prop_pp::test_context
     template <typename Target, typename Prop, typename Domain>
     constexpr detail::SampledTestContext propertyContext(Target&& target, Prop&& prop, Domain&& domain)
     {
-        return prop_pp::test_context::parameterizedContext(
+        return pbdt::test_context::parameterizedContext(
             std::forward<Domain>(domain),
             [&target, &prop](const auto& sample)
             {

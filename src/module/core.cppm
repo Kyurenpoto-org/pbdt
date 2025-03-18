@@ -23,7 +23,7 @@ module;
 #include <variant>
 #include <vector>
 
-export module prop_pp;
+export module pbdt;
 
 #define PBDT_MODULE
 
@@ -31,6 +31,6 @@ import exstd;
 
 export
 {
-#include "prop-pp/bdd.hpp"
-#include "prop-pp/test-context.hpp"
+#include "pbdt/bdd.hpp"
+#include "pbdt/test-context.hpp"
 }

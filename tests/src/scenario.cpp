@@ -6,7 +6,7 @@
 
 #include <print>
 
-#include "prop-pp/bdd.hpp"
+#include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
 
@@ -28,9 +28,9 @@ struct X<typename Outer<T>::Inner, T>
 
 int main()
 {
-    prop_pp::bdd::builder.withGiven(prop_pp::bdd::given("", natural_components::target::freeFuncTarget))
-        .withWhen(prop_pp::bdd::when("", natural_components::domain::containerDomain))
-        .withThen(prop_pp::bdd::then("", natural_components::prop::freeFuncProp))
+    pbdt::bdd::builder.withGiven(pbdt::bdd::given("", natural_components::target::freeFuncTarget))
+        .withWhen(pbdt::bdd::when("", natural_components::domain::containerDomain))
+        .withThen(pbdt::bdd::then("", natural_components::prop::freeFuncProp))
         .build("");
 
     // <요건 bdd가 아님>
