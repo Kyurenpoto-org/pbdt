@@ -6,41 +6,8 @@
 
 #pragma once
 
-#include <iostream>
-
-#if __cpp_lib_print >= 202207L
-
-#include <print>
-
-namespace
-{
-    void dynamic_assert(const bool expr, const std::source_location& location = std::source_location::current())
-    {
-        if (!expr)
-        {
-            std::println("{0}({1},{2})", location.file_name(), location.line(), location.column());
-            std::exit(EXIT_FAILURE);
-        }
-    }
-}
-
-#else
-
-namespace
-{
-    void dynamic_assert(const bool expr, const std::source_location& location = std::source_location::current())
-    {
-        if (!expr)
-        {
-            std::cout << location.file_name() << "(" << location.line() << "," << location.column() << ")" << std::endl;
-            std::exit(EXIT_FAILURE);
-        }
-    }
-}
-
-#endif
-
 #include <array>
+#include <print>
 #include <ranges>
 #include <tuple>
 
@@ -120,6 +87,18 @@ namespace natural_components
                                             return std::tuple{ x };
                                         }
                                   );
+    }
+}
+
+namespace
+{
+    void dynamic_assert(const bool expr, const std::source_location& location = std::source_location::current())
+    {
+        if (!expr)
+        {
+            std::println("{0}({1},{2})", location.file_name(), location.line(), location.column());
+            std::exit(EXIT_FAILURE);
+        }
     }
 }
 
