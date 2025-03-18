@@ -7,10 +7,15 @@
 #pragma once
 
 #include <algorithm>
+#include <ranges>
 #include <source_location>
 #include <string>
 
+#ifndef PBDT_MODULE
+
 #include "exstd/functional.hpp"
+
+#endif
 
 namespace prop_pp::test_context
 {
@@ -269,6 +274,7 @@ namespace prop_pp::test_context
     template <typename Samples, typename Test>
     constexpr detail::SampledTestContext parameterizedContext(Samples&& samples, Test&& test)
     {
+#if __cpp_lib_ranges_fold >= 202207L
         return std::ranges::fold_left(
             std::forward<Samples>(samples), detail::SampledTestContext::prototype(),
             [&test](const detail::SampledTestContext context, const auto sample)
@@ -282,6 +288,21 @@ namespace prop_pp::test_context
                 );
             }
         );
+#else
+        detail::SampledTestContext context = detail::SampledTestContext::prototype();
+        for (const auto& sample : samples)
+        {
+            context = context.accumulate(
+                "",
+                [&]()
+                {
+                    return test(sample);
+                }
+            );
+        }
+
+        return context;
+#endif
     }
 
     template <typename Target, typename Prop, typename Domain>

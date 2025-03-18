@@ -51,19 +51,41 @@ namespace exstd
         template <typename... Ranges>
         using CartesianProductView = std::ranges::cartesian_product_view<Ranges...>;
 #else
-        template <std::ranges::input_range First, std::ranges::forward_range... Rests>
-        class CartesianProductView
+        template <bool Const, typename T>
+        using MaybeConst = std::conditional_t<Const, const T, T>;
+
+        template <std::ranges::input_range First, std::ranges::forward_range... Rest>
+            requires(std::ranges::view<First> && ... && std::ranges::view<Rest>)
+        class CartesianProductView : public std::ranges::view_interface<CartesianProductView<First, Rest...>>
         {
         private:
+            template <bool Const>
             struct iterator
             {
-                using value_type = std::tuple<std::ranges::range_value_t<First>, std::ranges::range_value_t<Rests>...>;
+                friend CartesianProductView;
+
+                using value_type = std::tuple<std::ranges::range_value_t<First>, std::ranges::range_value_t<Rest>...>;
                 using reference =
-                    std::tuple<std::ranges::range_reference_t<First>, std::ranges::range_reference_t<Rests>...>;
-                using difference_type = std::ptrdiff_t;
+                    std::tuple<std::ranges::range_reference_t<First>, std::ranges::range_reference_t<Rest>...>;
+                using difference_type = std::common_type_t<
+                    std::ranges::range_difference_t<First>, std::ranges::range_difference_t<Rest>...>;
                 using iterator_category = std::input_iterator_tag;
+                using iterator_concept = std::conditional_t<
+                    std::ranges::forward_range<MaybeConst<Const, First>>, std::forward_iterator_tag,
+                    std::input_iterator_tag>;
 
                 constexpr iterator() = default;
+
+                constexpr iterator(iterator<!Const> other)
+                    requires(Const
+                             && (std::convertible_to<std::ranges::iterator_t<First>, std::ranges::iterator_t<First>>
+                                 && ...
+                                 && std::convertible_to<std::ranges::iterator_t<Rest>, std::ranges::iterator_t<Rest>>))
+                    :
+                    parent{ other.parent },
+                    current{ std::move(other.current) }
+                {
+                }
 
                 constexpr iterator& operator++()
                 {
@@ -77,7 +99,7 @@ namespace exstd
                 }
 
                 constexpr iterator operator++(int)
-                    requires std::ranges::forward_range<First>
+                    requires std::ranges::forward_range<MaybeConst<Const, First>>
                 {
                     auto tmp = *this;
                     ++*this;
@@ -88,9 +110,9 @@ namespace exstd
                 constexpr auto operator*() const
                 {
                     return std::apply(
-                        []<typename... Args>(Args&&... args)
+                        [](auto&... args)
                         {
-                            return std::tuple{ *std::forward<Args>(args)... };
+                            return std::tuple{ *args... };
                         },
                         current
                     );
@@ -106,7 +128,7 @@ namespace exstd
                 [[nodiscard]]
                 constexpr bool operator==(std::default_sentinel_t) const
                 {
-                    return lastElement(std::make_index_sequence<sizeof...(Rests)>{});
+                    return lastElement(std::make_index_sequence<1 + sizeof...(Rest)>{});
                 }
 
                 [[nodiscard]]
@@ -116,26 +138,28 @@ namespace exstd
                 }
 
             private:
-                constexpr iterator(
-                    CartesianProductView& parent,
-                    std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current
-                ) :
-                    parent{ parent },
+                using ParentType = MaybeConst<Const, CartesianProductView>;
+                using IterType = std::tuple<
+                    std::ranges::iterator_t<MaybeConst<Const, First>>,
+                    std::ranges::iterator_t<MaybeConst<Const, Rest>>...>;
+
+                constexpr iterator(ParentType& parent, IterType current) :
+                    parent{ std::addressof(parent) },
                     current{ std::move(current) }
                 {
                 }
 
-                template <size_t Idx = sizeof...(Rests)>
+                template <size_t Idx = sizeof...(Rest)>
                 constexpr void next()
                 {
                     auto& it = std::get<Idx>(current);
                     ++it;
                     if constexpr (Idx > 0)
                     {
-                        auto& range = std::get<Idx>(parent.ranges);
-                        if (it == std::end(range))
+                        auto& range = std::get<Idx>(parent->ranges);
+                        if (it == range.end())
                         {
-                            it = std::begin(range);
+                            it = range.begin();
                             next<Idx - 1>();
                         }
                     }
@@ -144,44 +168,97 @@ namespace exstd
                 template <size_t... Indice>
                 constexpr bool lastElement(std::index_sequence<Indice...>) const
                 {
-                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(parent.ranges))) || ...);
+                    return ((std::get<Indice>(current) == std::ranges::end(std::get<Indice>(parent->ranges))) || ...);
                 }
 
-                CartesianProductView& parent;
-                std::tuple<std::ranges::iterator_t<First>, std::ranges::iterator_t<Rests>...> current;
+                ParentType* parent = nullptr;
+                IterType current;
             };
 
         public:
             constexpr CartesianProductView() = default;
 
-            constexpr CartesianProductView(First first, Rests... rests) :
-                ranges{ std::move(first), std::move(rests)... }
+            constexpr explicit CartesianProductView(First first, Rest... rest) :
+                ranges{ std::move(first), std::move(rest)... }
             {
             }
 
-            constexpr iterator begin() const
+            constexpr iterator<false> begin()
             {
-                return iterator{ *this, std::apply(
-                                            [](auto&&... args)
-                                            {
-                                                return std::tuple{ std::ranges::begin(args)... };
-                                            },
-                                            ranges
-                                        ) };
+                return {
+                    *this,
+                    std::apply(
+                        [](auto&... args)
+                        {
+                            return std::tuple{ std::ranges::begin(args)... };
+                        },
+                        ranges
+                    ),
+                };
             }
 
-            constexpr std::default_sentinel_t end() const
+            constexpr iterator<true> begin() const
+                requires(std::ranges::range<First> && ... && std::ranges::range<Rest>)
+            {
+                return {
+                    *this,
+                    std::apply(
+                        [](auto&... args)
+                        {
+                            return std::tuple{ std::ranges::begin(args)... };
+                        },
+                        ranges
+                    ),
+                };
+            }
+
+            constexpr iterator<false> end()
+            {
+                return {
+                    *this,
+                    std::apply(
+                        [](auto& first, auto&... rest)
+                        {
+                            return std::tuple{ std::ranges::end(first), std::ranges::begin(rest)... };
+                        },
+                        ranges
+                    ),
+                };
+            }
+
+            constexpr iterator<true> end() const
+                requires(
+                    std::ranges::common_range<First>
+                    || (std::ranges::sized_range<First> && std::ranges::random_access_range<First>)
+                )
+            {
+                return {
+                    *this,
+                    std::apply(
+                        [](auto& first, auto&... rest)
+                        {
+                            return std::tuple{ std::ranges::end(first), std::ranges::begin(rest)... };
+                        },
+                        ranges
+                    ),
+                };
+            }
+
+            constexpr std::default_sentinel_t end() const noexcept
             {
                 return std::default_sentinel;
             }
 
         private:
-            std::tuple<First, Rests...> ranges;
+            std::tuple<First, Rest...> ranges;
         };
+
+        template <typename... Ranges>
+        CartesianProductView(Ranges&&...) -> CartesianProductView<std::views::all_t<Ranges>...>;
 #endif
 
         template <typename... Ranges>
-        struct FlattenCartesianProductView : std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
+        struct FlattenCartesianProductView : public std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
         {
             constexpr FlattenCartesianProductView() = default;
 
@@ -200,16 +277,6 @@ namespace exstd
                 return base.end();
             }
 
-            constexpr auto size() const
-            {
-                return base.size();
-            }
-
-            constexpr auto empty() const
-            {
-                return base.empty();
-            }
-
         private:
             CartesianProductView<Ranges...> base;
         };
@@ -217,7 +284,7 @@ namespace exstd
         template <typename... Ranges>
             requires(TupleForm<std::ranges::range_value_t<Ranges>> || ...)
         struct FlattenCartesianProductView<Ranges...> :
-            std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
+            public std::ranges::view_interface<FlattenCartesianProductView<Ranges...>>
         {
             constexpr FlattenCartesianProductView() = default;
 
@@ -237,16 +304,6 @@ namespace exstd
             constexpr auto end() const
             {
                 return base.end();
-            }
-
-            constexpr auto size() const
-            {
-                return base.size();
-            }
-
-            constexpr auto empty() const
-            {
-                return base.empty();
             }
 
         private:
@@ -377,14 +434,14 @@ namespace exstd
         };
 #endif
 
-        template <std::ranges::input_range First, std::ranges::forward_range... Rests>
-        struct CompileTimeViewExtent<CartesianProductView<First, Rests...>> :
+        template <std::ranges::input_range First, std::ranges::forward_range... Rest>
+        struct CompileTimeViewExtent<CartesianProductView<First, Rest...>> :
             std::integral_constant<
                 size_t, (((CompileTimeViewExtent<std::remove_cvref_t<First>>::value == std::dynamic_extent) || ...
-                          || (CompileTimeViewExtent<std::remove_cvref_t<Rests>>::value == std::dynamic_extent))
+                          || (CompileTimeViewExtent<std::remove_cvref_t<Rest>>::value == std::dynamic_extent))
                              ? std::dynamic_extent
                              : (CompileTimeViewExtent<std::remove_cvref_t<First>>::value * ...
-                                * CompileTimeViewExtent<std::remove_cvref_t<Rests>>::value))>
+                                * CompileTimeViewExtent<std::remove_cvref_t<Rest>>::value))>
         {
         };
 
@@ -424,7 +481,7 @@ namespace exstd
         if constexpr (size != std::dynamic_extent)
         {
             std::array<value_type, size> result;
-            std::copy(range.begin(), range.end(), result.begin());
+            std::ranges::copy(range, result.begin());
             return result;
         }
         else
@@ -434,7 +491,7 @@ namespace exstd
             {
                 result.reserve(range.size());
             }
-            std::copy(range.begin(), range.end(), std::back_inserter(result));
+            std::ranges::copy(range, std::back_inserter(result));
             return result;
         }
     }

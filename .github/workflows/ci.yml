@@ -127,9 +127,9 @@ jobs:
 
       - name: install clang
         run: |
-          brew install llvm@16
-          echo PATH="/opt/homebrew/opt/llvm@16/bin:$PATH" >> $GITHUB_ENV
-          brew link --overwrite llvm@16
+          brew install llvm@19
+          echo PATH="/opt/homebrew/opt/llvm@19/bin:$PATH" >> $GITHUB_ENV
+          brew link --overwrite llvm@19
 
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
