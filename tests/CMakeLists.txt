@@ -34,7 +34,7 @@ target_sources(
 )
 
 # tests
-add_header_module_tests("pbdt" "bdd-fixture" "test-context")
+add_header_module_tests("pbdt" "bdd-fixture" "test-context" "")
 
 add_executable(given-component "src/given-component.cpp")
 
