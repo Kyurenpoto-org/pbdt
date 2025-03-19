@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <ranges>
 #include <span>
 #include <string_view>
 #include <tuple>

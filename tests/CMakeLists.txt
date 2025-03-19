@@ -18,6 +18,21 @@ target_link_libraries(
     INTERFACE pbdt
 )
 
+add_library(when-component-fixture STATIC)
+
+target_compile_features(
+    when-component-fixture
+    PUBLIC cxx_std_23
+)
+target_include_directories(
+    when-component-fixture
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_sources(
+    when-component-fixture
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/productable-container.cpp
+)
+
 # tests
 add_header_module_tests("pbdt" "bdd-fixture" "test-context")
 
@@ -40,23 +55,42 @@ add_test(
     COMMAND given-component
 )
 
-add_executable(when-component "src/when-component.cpp")
+add_executable(when-component-idempotent "src/when-component-idempotent.cpp")
 
 target_compile_features(
-    when-component
+    when-component-idempotent
     PRIVATE cxx_std_23
 )
 target_link_libraries(
-    when-component
-    PRIVATE bdd-fixture
+    when-component-idempotent
+    PRIVATE when-component-fixture
     PRIVATE exstd
     PRIVATE pbdt
     PRIVATE pbdt-module
 )
 
 add_test(
-    NAME pbdt.bdd.when-component
-    COMMAND when-component
+    NAME pbdt.bdd.when-component.idempotent
+    COMMAND when-component-idempotent
+)
+
+add_executable(when-component-associative "src/when-component-associative.cpp")
+
+target_compile_features(
+    when-component-associative
+    PRIVATE cxx_std_23
+)
+target_link_libraries(
+    when-component-associative
+    PRIVATE when-component-fixture
+    PRIVATE exstd
+    PRIVATE pbdt
+    PRIVATE pbdt-module
+)
+
+add_test(
+    NAME pbdt.bdd.when-component.associative
+    COMMAND when-component-associative
 )
 
 add_executable(then-component "src/then-component.cpp")
