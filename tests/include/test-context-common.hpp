@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <array>
+#include <ranges>
 #include <tuple>
 
 #include "fixtures.hpp"
