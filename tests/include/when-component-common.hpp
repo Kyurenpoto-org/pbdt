@@ -78,7 +78,7 @@ namespace
     {
         static constexpr auto rvalue()
         {
-            return SequenceArray<decltype(std::make_index_sequence<N / 2 % 5 + 1>()), N % 2>::rvalue();
+            return SequenceArray<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
 
         static constexpr auto value = rvalue();
@@ -94,7 +94,7 @@ namespace
     {
         static constexpr auto rvalue()
         {
-            return SequenceArraySpan<decltype(std::make_index_sequence<N / 2 % 5 + 1>()), N % 2>::rvalue();
+            return SequenceArraySpan<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
 
         static constexpr auto value = rvalue();
@@ -110,7 +110,7 @@ namespace
     {
         static constexpr auto rvalue()
         {
-            return SequenceArrayOwningView<decltype(std::make_index_sequence<N / 2 % 5 + 1>()), N % 2>::rvalue();
+            return SequenceArrayOwningView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
 
         static constexpr auto value = rvalue();
@@ -126,7 +126,7 @@ namespace
     {
         static constexpr auto rvalue()
         {
-            return SequenceArrayRefView<decltype(std::make_index_sequence<N / 2 % 5 + 1>()), N % 2>::rvalue();
+            return SequenceArrayRefView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
 
         static constexpr auto value = rvalue();
@@ -144,7 +144,7 @@ namespace
             std::tuple{
                 []()
                 {
-                    return ProductableContainer<First % 4, First / 4 % 10>::rvalue();
+                    return ProductableContainer<First % 4, First / 4 % 6>::rvalue();
                 },
             },
             ProductableCombination<Rest...>::value
@@ -157,7 +157,7 @@ namespace
         static constexpr auto value = std::tuple{
             []()
             {
-                return ProductableContainer<N % 4, N / 4 % 10>::rvalue();
+                return ProductableContainer<N % 4, N / 4 % 6>::rvalue();
             },
         };
     };
