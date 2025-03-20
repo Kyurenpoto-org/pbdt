@@ -18,6 +18,21 @@ target_link_libraries(
     INTERFACE pbdt
 )
 
+add_library(given-component-fixture STATIC)
+
+target_compile_features(
+    given-component-fixture
+    PUBLIC cxx_std_23
+)
+target_include_directories(
+    given-component-fixture
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_sources(
+    given-component-fixture
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/composable-callable.cpp
+)
+
 add_library(when-component-fixture STATIC)
 
 target_compile_features(
@@ -44,10 +59,8 @@ target_compile_features(
 )
 target_link_libraries(
     given-component
-    PRIVATE bdd-fixture
-    PRIVATE exstd
     PRIVATE pbdt
-    PRIVATE pbdt-module
+    PRIVATE given-component-fixture
 )
 
 add_test(

@@ -9,7 +9,7 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "given-component-common.hpp"
+#include "composable-callable.hpp"
 #include "util.hpp"
 
 namespace pbdt::bdd::detail
