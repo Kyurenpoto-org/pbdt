@@ -209,10 +209,8 @@ void associative()
 
 int main()
 {
-    // Set Category
     idempotent();
     associative();
-    // Cannot test for identity
 
     return EXIT_SUCCESS;
 }

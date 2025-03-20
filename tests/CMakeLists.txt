@@ -51,6 +51,7 @@ target_sources(
 # tests
 add_header_module_tests("pbdt" "bdd-fixture" "test-context" "")
 
+# Set Category
 add_executable(given-component "src/given-component.cpp")
 
 target_compile_features(
@@ -68,9 +69,11 @@ add_test(
     COMMAND given-component
 )
 
+# Set Category that has product between any two objects
 add_header_module_tests("pbdt" "when-component-fixture" "when-component-idempotent" "pbdt.when-component.idempotent")
 add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.when-component.associative")
 
+# 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
 add_executable(then-component "src/then-component.cpp")
 
 target_compile_features(
