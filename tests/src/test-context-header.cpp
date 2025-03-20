@@ -4,9 +4,18 @@
  * SPDX - License - Identifier: MIT
  */
 
+#include "test-context-common.hpp"
+
 #include "pbdt/test-context.hpp"
 
-#include "test-context-common.hpp"
+struct Expect
+{
+    constexpr auto
+    operator()(const bool expression, const std::source_location& location = std::source_location::current())
+    {
+        return pbdt::test_context::expect(expression, location);
+    }
+};
 
 struct PropertyContext
 {
@@ -19,7 +28,7 @@ struct PropertyContext
 
 int main()
 {
-    examples<PropertyContext>();
+    examples<Expect, PropertyContext>();
 
     return EXIT_SUCCESS;
 }

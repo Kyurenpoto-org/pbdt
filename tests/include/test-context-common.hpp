@@ -30,14 +30,16 @@ namespace natural_components
 
     namespace prop
     {
+        template <typename Expect>
         constexpr auto freeFuncProp(int x, int result)
         {
-            return pbdt::test_context::expect(x == result);
+            return std::invoke(Expect{}, x == result);
         }
 
+        template <typename Expect>
         constexpr auto funcObjProp = [](int x, int result)
         {
-            return freeFuncProp(x, result);
+            return freeFuncProp<Expect>(x, result);
         };
     }
 
@@ -68,9 +70,10 @@ namespace natural_components
 
     namespace prop2
     {
+        template <typename Expect>
         constexpr auto freeFuncProp(std::tuple<int, int> args, int result)
         {
-            return pbdt::test_context::expect(result == 0);
+            return std::invoke(Expect{}, result == 0);
         }
     }
 
@@ -92,50 +95,51 @@ namespace natural_components
 
 namespace Examples
 {
+    template <typename Expect>
     constexpr auto combinations = std::tuple{
         std::tuple{
             &natural_components::target::freeFuncTarget,
-            &natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp<Expect>,
             natural_components::domain::containerDomain,
         },
         std::tuple{
             &natural_components::target::freeFuncTarget,
-            &natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp<Expect>,
             natural_components::domain::viewDomain,
         },
         std::tuple{
             &natural_components::target::freeFuncTarget,
-            natural_components::prop::funcObjProp,
+            natural_components::prop::funcObjProp<Expect>,
             natural_components::domain::containerDomain,
         },
         std::tuple{
             &natural_components::target::freeFuncTarget,
-            natural_components::prop::funcObjProp,
+            natural_components::prop::funcObjProp<Expect>,
             natural_components::domain::viewDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            &natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp<Expect>,
             natural_components::domain::containerDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            &natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp<Expect>,
             natural_components::domain::viewDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            natural_components::prop::funcObjProp,
+            natural_components::prop::funcObjProp<Expect>,
             natural_components::domain::containerDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            natural_components::prop::funcObjProp,
+            natural_components::prop::funcObjProp<Expect>,
             natural_components::domain::viewDomain,
         },
         std::tuple{
             &natural_components::target2::freeFuncTarget,
-            &natural_components::prop2::freeFuncProp,
+            &natural_components::prop2::freeFuncProp<Expect>,
 #if __cpp_lib_ranges_cartesian_product >= 202207L
             std::views::cartesian_product(
                 natural_components::domain2::containerDomain, natural_components::domain2::containerDomain
@@ -158,22 +162,22 @@ namespace Examples
         },
     };
 
-    template <typename PropertyContext, size_t... Idxs>
+    template <typename Expect, typename PropertyContext, size_t... Idxs>
     constexpr void assertCombinations(const std::index_sequence<Idxs...>)
     {
         (
             []()
             {
-                constexpr auto compileTimeTarget = std::get<0>(std::get<Idxs>(combinations));
-                constexpr auto compileTimeProp = std::get<1>(std::get<Idxs>(combinations));
-                constexpr auto compileTimeDomain = std::get<2>(std::get<Idxs>(combinations));
+                constexpr auto compileTimeTarget = std::get<0>(std::get<Idxs>(combinations<Expect>));
+                constexpr auto compileTimeProp = std::get<1>(std::get<Idxs>(combinations<Expect>));
+                constexpr auto compileTimeDomain = std::get<2>(std::get<Idxs>(combinations<Expect>));
                 static_assert(
                     std::invoke(PropertyContext{}, compileTimeTarget, compileTimeProp, compileTimeDomain).passable()
                 );
 
-                const auto runTimeTarget = std::get<0>(std::get<Idxs>(combinations));
-                const auto runTimeProp = std::get<1>(std::get<Idxs>(combinations));
-                const auto runTimeDomain = std::get<2>(std::get<Idxs>(combinations));
+                const auto runTimeTarget = std::get<0>(std::get<Idxs>(combinations<Expect>));
+                const auto runTimeProp = std::get<1>(std::get<Idxs>(combinations<Expect>));
+                const auto runTimeDomain = std::get<2>(std::get<Idxs>(combinations<Expect>));
                 dynamic_assert(std::invoke(PropertyContext{}, runTimeTarget, runTimeProp, runTimeDomain).passable());
             }(),
             ...
@@ -181,10 +185,10 @@ namespace Examples
     }
 }
 
-template <typename PropertyContext>
+template <typename Expect, typename PropertyContext>
 void examples()
 {
-    Examples::assertCombinations<PropertyContext>(
-        std::make_index_sequence<std::tuple_size_v<decltype(Examples::combinations)>>()
+    Examples::assertCombinations<Expect, PropertyContext>(
+        std::make_index_sequence<std::tuple_size_v<decltype(Examples::combinations<Expect>)>>()
     );
 }
