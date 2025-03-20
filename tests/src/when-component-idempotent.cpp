@@ -9,7 +9,7 @@
 #include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
-#include "when-component-common.hpp"
+#include "productable-container.hpp"
 
 namespace pbdt::bdd::detail
 {

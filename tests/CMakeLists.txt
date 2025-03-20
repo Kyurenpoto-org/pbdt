@@ -74,24 +74,7 @@ add_test(
     COMMAND when-component-idempotent
 )
 
-add_executable(when-component-associative "src/when-component-associative.cpp")
-
-target_compile_features(
-    when-component-associative
-    PRIVATE cxx_std_23
-)
-target_link_libraries(
-    when-component-associative
-    PRIVATE when-component-fixture
-    PRIVATE exstd
-    PRIVATE pbdt
-    PRIVATE pbdt-module
-)
-
-add_test(
-    NAME pbdt.bdd.when-component.associative
-    COMMAND when-component-associative
-)
+add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.when-component.associative")
 
 add_executable(then-component "src/then-component.cpp")
 

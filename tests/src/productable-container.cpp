@@ -10,7 +10,7 @@
 #include <string_view>
 #include <tuple>
 
-#include "when-component-common.hpp"
+#include "productable-container.hpp"
 
 ProductableContainer<0, 0>;
 ProductableContainer<0, 1>;
