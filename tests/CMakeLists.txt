@@ -16,28 +16,10 @@ target_include_directories(
 target_link_libraries(
     bdd-fixture
     INTERFACE pbdt
-    INTERFACE pbdt-module
 )
 
 # tests
-add_executable(test-context "src/test-context.cpp")
-
-target_compile_features(
-    test-context
-    PRIVATE cxx_std_23
-)
-target_link_libraries(
-    test-context
-    PRIVATE bdd-fixture
-    PRIVATE exstd
-    PRIVATE pbdt
-    PRIVATE pbdt-module
-)
-
-add_test(
-    NAME pbdt.bdd.test-context
-    COMMAND test-context
-)
+add_header_module_tests("pbdt" "bdd-fixture" "test-context")
 
 add_executable(given-component "src/given-component.cpp")
 

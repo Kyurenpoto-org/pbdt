@@ -9,26 +9,15 @@
 #include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
+#include "then-component-common.hpp"
 
-#define ASSERT_IDEMPOTENT(arg)                                                                                         \
-    {                                                                                                                  \
-        constexpr auto compileTimeProperty = arg;                                                                      \
-        static_assert(compileTimeProperty == pbdt::bdd::then("", compileTimeProperty).complete());                     \
-                                                                                                                       \
-        const auto runTimeProperty = arg;                                                                              \
-        dynamic_assert(runTimeProperty == pbdt::bdd::then("", runTimeProperty).complete());                            \
-    }
-
-void idempotent()
+namespace pbdt::bdd::detail
 {
-    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::freeFuncProp).complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::funcObjProp).complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::freeFuncProp)
-                          .andThen("", natural_components::prop::funcObjProp)
-                          .complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::then("", natural_components::prop::funcObjProp)
-                          .andThen("", natural_components::prop::freeFuncProp)
-                          .complete());
+    template <typename... Props, typename Prop>
+    constexpr auto operator+(ThenContext<Props...>&& context, Prop&& prop)
+    {
+        return context.andThen("", std::forward<Prop>(prop));
+    }
 }
 
 namespace
@@ -56,90 +45,106 @@ namespace
             tup
         );
     }
+}
 
-    template <size_t N, typename Sample, typename Result>
-    constexpr auto freeFunction(Sample, Result)
+namespace Idempotent
+{
+    constexpr auto rawContexts = std::tuple{
+        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+    };
+
+    template <size_t... Idxs>
+    constexpr void assertCombinations(const std::index_sequence<Idxs...>)
     {
-        return pbdt::test_context::expect(N == 0);
+        (
+            []()
+            {
+                constexpr auto completeContext = [&]()
+                {
+                    return std::apply(
+                        []<typename Prop, typename... Props>(Prop&& prop, Props&&... props)
+                        {
+                            return (pbdt::bdd::then("", std::forward<Prop>(prop)) + ... + std::forward<Props>(props))
+                                .complete();
+                        },
+                        std::get<Idxs>(rawContexts)
+                    );
+                };
+
+                constexpr auto compileTimeCompleted = completeContext();
+                static_assert(compileTimeCompleted == pbdt::bdd::then("", compileTimeCompleted).complete());
+
+                const auto runTimeCompleted = completeContext();
+                dynamic_assert(runTimeCompleted == pbdt::bdd::then("", runTimeCompleted).complete());
+            }(),
+            ...
+        );
     }
+}
 
-    template <size_t N, typename Sample, typename Result>
-    struct Functor
-    {
-        constexpr auto operator()(Sample, Result)
-        {
-            return pbdt::test_context::expect(N == 0);
-        }
-
-        constexpr bool operator==(const Functor) const
-        {
-            return true;
-        }
-    };
-
-    template <size_t N>
-    struct IndexToTypeImpl;
-
-    template <>
-    struct IndexToTypeImpl<0>
-    {
-        using type = int;
-    };
-
-    template <>
-    struct IndexToTypeImpl<1>
-    {
-        using type = std::string;
-    };
-
-    template <size_t N>
-    using IndexToType = typename IndexToTypeImpl<N>::type;
-
-    template <size_t, size_t>
-    struct FoldableFunc;
-
-    template <size_t N>
-    struct FoldableFunc<0, N>
-    {
-        static constexpr auto value = &freeFunction<N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>>;
-    };
-
-    template <size_t N>
-    struct FoldableFunc<1, N>
-    {
-        static constexpr auto value = Functor<N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>>{};
-    };
+void idempotent()
+{
+    Idempotent::assertCombinations(std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>());
 }
 
 namespace Associative
 {
-    template <size_t N, size_t M>
-    struct FoldableCombination
-    {
-        static constexpr auto value = std::tuple{
-            FoldableFunc<N % 2, M>::value,
-            FoldableFunc<N / 2 % 2, M>::value,
-            FoldableFunc<N / 4 % 2, M>::value,
-        };
-    };
-
     constexpr auto foldableCombinations = std::tuple{
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        FoldableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        FoldableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };
 
     template <size_t... Idxs>

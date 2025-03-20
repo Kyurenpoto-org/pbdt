@@ -4,187 +4,93 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <array>
-#include <span>
-#include <string_view>
 #include <tuple>
 
 #include "pbdt/bdd.hpp"
 
 #include "fixtures.hpp"
+#include "when-component-common.hpp"
 
-#define ASSERT_IDEMPOTENT(arg)                                                                                         \
-    {                                                                                                                  \
-        constexpr auto compileTimeSamples = arg;                                                                       \
-        static_assert(                                                                                                 \
-            exstd::toContainer(compileTimeSamples)                                                                     \
-            == exstd::toContainer(pbdt::bdd::when("", compileTimeSamples).complete())                                  \
-        );                                                                                                             \
-                                                                                                                       \
-        const auto runTimeSamples = arg;                                                                               \
-        dynamic_assert(                                                                                                \
-            exstd::toContainer(runTimeSamples) == exstd::toContainer(pbdt::bdd::when("", runTimeSamples).complete())   \
-        );                                                                                                             \
+namespace pbdt::bdd::detail
+{
+    template <typename... Domains, typename Domain>
+    constexpr auto operator+(WhenContext<Domains...>&& context, Domain&& domain)
+    {
+        return context.andWhen("", std::forward<Domain>(domain));
     }
+}
+
+namespace Idempotent
+{
+    constexpr auto rawContexts = std::tuple{
+        ProductableCombination<COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<
+            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+            COMPILE_TIME_RANDOM()>::value,
+    };
+
+    template <size_t... Idxs>
+    constexpr void assertCombinations(const std::index_sequence<Idxs...>)
+    {
+        (
+            []()
+            {
+                constexpr auto completeContext = [&]()
+                {
+                    return std::apply(
+                        []<typename Domain, typename... Domains>(Domain&& domain, Domains&&... domains)
+                        {
+                            return (pbdt::bdd::when("", domain()) + ... + (domains())).complete();
+                        },
+                        std::get<Idxs>(rawContexts)
+                    );
+                };
+
+                constexpr auto compileTimeCompleted = completeContext();
+                static_assert(
+                    exstd::toContainer(compileTimeCompleted)
+                    == exstd::toContainer(pbdt::bdd::when("", compileTimeCompleted).complete())
+                );
+
+                const auto runTimeCompleted = completeContext();
+                dynamic_assert(
+                    exstd::toContainer(runTimeCompleted)
+                    == exstd::toContainer(pbdt::bdd::when("", runTimeCompleted).complete())
+                );
+            }(),
+            ...
+        );
+    }
+}
 
 void idempotent()
 {
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain::containerDomain).complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain::viewDomain).complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::containerDomain)
-                          .andWhen("", natural_components::domain2::containerDomain)
-                          .complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::viewDomain)
-                          .andWhen("", natural_components::domain2::containerDomain)
-                          .complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::containerDomain)
-                          .andWhen("", natural_components::domain2::viewDomain)
-                          .complete());
-    ASSERT_IDEMPOTENT(pbdt::bdd::when("", natural_components::domain2::viewDomain)
-                          .andWhen("", natural_components::domain2::viewDomain)
-                          .complete());
+    Idempotent::assertCombinations(std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>());
 }
 
 namespace Associative
 {
-    template <typename, typename>
-    struct SequenceArray;
-
-    template <size_t... Ns>
-    struct SequenceArray<std::index_sequence<Ns...>, int>
-    {
-        static constexpr auto value = std::array<int, sizeof...(Ns)>{ Ns... };
-
-        static constexpr auto rvalue()
-        {
-            return value;
-        }
-    };
-
-    constexpr std::string_view charTable = "0123456789";
-
-    template <size_t... Ns>
-    struct SequenceArray<std::index_sequence<Ns...>, std::string_view>
-    {
-        static constexpr auto value = std::array{ (charTable.substr(Ns, 1))... };
-
-        static constexpr auto rvalue()
-        {
-            return value;
-        }
-    };
-
-    template <typename Seq, typename T>
-    struct SequenceArraySpan
-    {
-        static constexpr auto value = std::span{ SequenceArray<Seq, T>::value };
-
-        static constexpr auto rvalue()
-        {
-            return value;
-        }
-    };
-
-    template <typename Seq, typename T>
-    struct SequenceArrayOwningView
-    {
-        static constexpr auto rvalue()
-        {
-            return std::ranges::owning_view{ SequenceArray<Seq, T>::rvalue() };
-        }
-    };
-
-    template <typename Seq, typename T>
-    struct SequenceArrayRefView
-    {
-        static constexpr auto value = std::ranges::ref_view{ SequenceArray<Seq, T>::value };
-
-        static constexpr auto rvalue()
-        {
-            return value;
-        }
-    };
-
-    template <size_t, size_t, typename>
-    struct ProductableContainer;
-
-    template <size_t N, typename T>
-    struct ProductableContainer<0, N, T>
-    {
-        static constexpr auto value()
-        {
-            return SequenceArray<std::make_index_sequence<N>(), T>::rvalue();
-        }
-    };
-
-    template <size_t N, typename T>
-    struct ProductableContainer<1, N, T>
-    {
-        static constexpr auto value()
-        {
-            return SequenceArraySpan<std::make_index_sequence<N>(), T>::rvalue();
-        }
-    };
-
-    template <size_t N, typename T>
-    struct ProductableContainer<2, N, T>
-    {
-        static constexpr auto value()
-        {
-            return SequenceArrayOwningView<std::make_index_sequence<N>(), T>::rvalue();
-        }
-    };
-
-    template <size_t N, typename T>
-    struct ProductableContainer<3, N, T>
-    {
-        static constexpr auto value()
-        {
-            return SequenceArrayRefView<std::make_index_sequence<N>(), T>::rvalue();
-        }
-    };
-
     constexpr auto productableCombinations = std::tuple{
-        std::tuple{
-            natural_components::domain::containerDomain,
-            natural_components::domain::containerDomain,
-            natural_components::domain::containerDomain,
-        },
-        std::tuple{
-            natural_components::domain::containerDomain,
-            natural_components::domain::containerDomain,
-            natural_components::domain::viewDomain,
-        },
-        std::tuple{
-            natural_components::domain::containerDomain,
-            natural_components::domain::viewDomain,
-            natural_components::domain::containerDomain,
-        },
-        std::tuple{
-            natural_components::domain::containerDomain,
-            natural_components::domain::viewDomain,
-            natural_components::domain::viewDomain,
-        },
-        std::tuple{
-            natural_components::domain::viewDomain,
-            natural_components::domain::containerDomain,
-            natural_components::domain::containerDomain,
-        },
-        std::tuple{
-            natural_components::domain::viewDomain,
-            natural_components::domain::containerDomain,
-            natural_components::domain::viewDomain,
-        },
-        std::tuple{
-            natural_components::domain::viewDomain,
-            natural_components::domain::viewDomain,
-            natural_components::domain::containerDomain,
-        },
-        std::tuple{
-            natural_components::domain::viewDomain,
-            natural_components::domain::viewDomain,
-            natural_components::domain::viewDomain,
-        },
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };
 
     template <size_t... Idxs>
@@ -199,16 +105,21 @@ namespace Associative
                 constexpr auto b = std::get<1>(combination);
                 constexpr auto c = std::get<2>(combination);
 
-                constexpr auto compileTimeLhs =
-                    pbdt::bdd::when("", a).andWhen("", pbdt::bdd::when("", b).andWhen("", c).complete()).complete();
+                constexpr auto compileTimeLhs = pbdt::bdd::when("", a())
+                                                    .andWhen("", pbdt::bdd::when("", b()).andWhen("", c()).complete())
+                                                    .complete();
                 constexpr auto compileTimeRhs =
-                    pbdt::bdd::when("", pbdt::bdd::when("", a).andWhen("", b).complete()).andWhen("", c).complete();
+                    pbdt::bdd::when("", pbdt::bdd::when("", a()).andWhen("", b()).complete())
+                        .andWhen("", c())
+                        .complete();
                 static_assert(exstd::toContainer(compileTimeLhs) == exstd::toContainer(compileTimeRhs));
 
-                const auto runTimeLhs =
-                    pbdt::bdd::when("", a).andWhen("", pbdt::bdd::when("", b).andWhen("", c).complete()).complete();
-                const auto runTimeRhs =
-                    pbdt::bdd::when("", pbdt::bdd::when("", a).andWhen("", b).complete()).andWhen("", c).complete();
+                const auto runTimeLhs = pbdt::bdd::when("", a())
+                                            .andWhen("", pbdt::bdd::when("", b()).andWhen("", c()).complete())
+                                            .complete();
+                const auto runTimeRhs = pbdt::bdd::when("", pbdt::bdd::when("", a()).andWhen("", b()).complete())
+                                            .andWhen("", c())
+                                            .complete();
                 dynamic_assert(exstd::toContainer(runTimeLhs) == exstd::toContainer(runTimeRhs));
             }(),
             ...
