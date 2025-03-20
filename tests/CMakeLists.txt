@@ -55,25 +55,7 @@ add_test(
     COMMAND given-component
 )
 
-add_executable(when-component-idempotent "src/when-component-idempotent.cpp")
-
-target_compile_features(
-    when-component-idempotent
-    PRIVATE cxx_std_23
-)
-target_link_libraries(
-    when-component-idempotent
-    PRIVATE when-component-fixture
-    PRIVATE exstd
-    PRIVATE pbdt
-    PRIVATE pbdt-module
-)
-
-add_test(
-    NAME pbdt.bdd.when-component.idempotent
-    COMMAND when-component-idempotent
-)
-
+add_header_module_tests("pbdt" "when-component-fixture" "when-component-idempotent" "pbdt.when-component.idempotent")
 add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.when-component.associative")
 
 add_executable(then-component "src/then-component.cpp")
