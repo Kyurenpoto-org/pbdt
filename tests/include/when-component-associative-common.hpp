@@ -6,8 +6,8 @@
 
 #include <tuple>
 
-#include "fixtures.hpp"
 #include "productable-container.hpp"
+#include "util.hpp"
 
 namespace Associative
 {

@@ -11,7 +11,7 @@
 #include <ranges>
 #include <tuple>
 
-#include "fixtures.hpp"
+#include "util.hpp"
 
 namespace natural_components
 {

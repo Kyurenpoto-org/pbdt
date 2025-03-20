@@ -8,8 +8,8 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "fixtures.hpp"
 #include "productable-container.hpp"
+#include "util.hpp"
 
 namespace pbdt::bdd::detail
 {

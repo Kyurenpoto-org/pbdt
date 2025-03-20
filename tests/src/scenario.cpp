@@ -8,7 +8,7 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "fixtures.hpp"
+#include "util.hpp"
 
 template <typename, typename>
 struct X;
