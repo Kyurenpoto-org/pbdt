@@ -4,6 +4,13 @@
  * SPDX - License - Identifier: MIT
  */
 
+#include <array>
+#include <functional>
+#include <print>
+#include <ranges>
+#include <source_location>
+#include <tuple>
+
 import pbdt;
 
 #include "test-context-common.hpp"
