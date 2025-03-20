@@ -93,33 +93,33 @@ namespace Examples
 {
     constexpr auto combinations = std::tuple{
         std::tuple{
-            natural_components::target::freeFuncTarget,
-            natural_components::prop::freeFuncProp,
+            &natural_components::target::freeFuncTarget,
+            &natural_components::prop::freeFuncProp,
             natural_components::domain::containerDomain,
         },
         std::tuple{
-            natural_components::target::freeFuncTarget,
-            natural_components::prop::freeFuncProp,
+            &natural_components::target::freeFuncTarget,
+            &natural_components::prop::freeFuncProp,
             natural_components::domain::viewDomain,
         },
         std::tuple{
-            natural_components::target::freeFuncTarget,
+            &natural_components::target::freeFuncTarget,
             natural_components::prop::funcObjProp,
             natural_components::domain::containerDomain,
         },
         std::tuple{
-            natural_components::target::freeFuncTarget,
+            &natural_components::target::freeFuncTarget,
             natural_components::prop::funcObjProp,
             natural_components::domain::viewDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp,
             natural_components::domain::containerDomain,
         },
         std::tuple{
             natural_components::target::funcObjTarget,
-            natural_components::prop::freeFuncProp,
+            &natural_components::prop::freeFuncProp,
             natural_components::domain::viewDomain,
         },
         std::tuple{
@@ -133,8 +133,8 @@ namespace Examples
             natural_components::domain::viewDomain,
         },
         std::tuple{
-            natural_components::target2::freeFuncTarget,
-            natural_components::prop2::freeFuncProp,
+            &natural_components::target2::freeFuncTarget,
+            &natural_components::prop2::freeFuncProp,
 #if __cpp_lib_ranges_cartesian_product >= 202207L
             std::views::cartesian_product(
                 natural_components::domain2::containerDomain, natural_components::domain2::containerDomain
