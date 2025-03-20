@@ -80,13 +80,6 @@ namespace
         {
             return SequenceArray<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
-
-        static constexpr auto value = rvalue();
-
-        static constexpr auto& lvalue()
-        {
-            return value;
-        }
     };
 
     template <size_t N>
@@ -95,13 +88,6 @@ namespace
         static constexpr auto rvalue()
         {
             return SequenceArraySpan<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
-
-        static constexpr auto value = rvalue();
-
-        static constexpr auto& lvalue()
-        {
-            return value;
         }
     };
 
@@ -112,13 +98,6 @@ namespace
         {
             return SequenceArrayOwningView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
         }
-
-        static constexpr auto value = rvalue();
-
-        static constexpr auto& lvalue()
-        {
-            return value;
-        }
     };
 
     template <size_t N>
@@ -127,13 +106,6 @@ namespace
         static constexpr auto rvalue()
         {
             return SequenceArrayRefView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
-
-        static constexpr auto value = rvalue();
-
-        static constexpr auto& lvalue()
-        {
-            return value;
         }
     };
 
