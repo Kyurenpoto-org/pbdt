@@ -4,9 +4,11 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "pbdt/bdd.hpp"
+#include "exstd/ranges.hpp"
 
 #include "when-component-associative-common.hpp"
+
+#include "pbdt/bdd.hpp"
 
 struct When
 {

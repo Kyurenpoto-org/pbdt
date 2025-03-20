@@ -4,9 +4,11 @@
  * SPDX - License - Identifier: MIT
  */
 
-import pbdt;
+import exstd;
 
 #include "when-component-idempotent-common.hpp"
+
+import pbdt;
 
 namespace pbdt::bdd::detail
 {
