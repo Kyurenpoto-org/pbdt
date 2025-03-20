@@ -4,8 +4,6 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "exstd/ranges.hpp"
-
 #include "when-component-idempotent-common.hpp"
 
 #include "pbdt/bdd.hpp"
@@ -19,6 +17,15 @@ namespace pbdt::bdd::detail
     }
 }
 
+struct ToContainer
+{
+    template <typename T>
+    constexpr auto operator()(T&& t) const
+    {
+        return exstd::toContainer(std::forward<T>(t));
+    }
+};
+
 struct When
 {
     template <typename Domain>
@@ -31,7 +38,7 @@ struct When
 int main()
 {
     // Set Category that has product between any two objects
-    idempotent<When>();
+    idempotent<ToContainer, When>();
 
     return EXIT_SUCCESS;
 }

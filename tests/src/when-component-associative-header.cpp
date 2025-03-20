@@ -4,11 +4,18 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "exstd/ranges.hpp"
-
 #include "when-component-associative-common.hpp"
 
 #include "pbdt/bdd.hpp"
+
+struct ToContainer
+{
+    template <typename T>
+    constexpr auto operator()(T&& t) const
+    {
+        return exstd::toContainer(std::forward<T>(t));
+    }
+};
 
 struct When
 {
@@ -21,7 +28,7 @@ struct When
 
 int main()
 {
-    associative<When>();
+    associative<ToContainer, When>();
 
     return EXIT_SUCCESS;
 }

@@ -4,10 +4,9 @@
  * SPDX - License - Identifier: MIT
  */
 
-import exstd;
-
 #include "when-component-idempotent-common.hpp"
 
+import exstd;
 import pbdt;
 
 namespace pbdt::bdd::detail
@@ -18,6 +17,15 @@ namespace pbdt::bdd::detail
         return context.andWhen("", std::forward<Domain>(domain));
     }
 }
+
+struct ToContainer
+{
+    template <typename T>
+    constexpr auto operator()(T&& t) const
+    {
+        return exstd::toContainer(std::forward<T>(t));
+    }
+};
 
 struct When
 {
@@ -31,7 +39,7 @@ struct When
 int main()
 {
     // Set Category that has product between any two objects
-    idempotent<When>();
+    idempotent<ToContainer, When>();
 
     return EXIT_SUCCESS;
 }

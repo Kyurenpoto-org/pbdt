@@ -4,6 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
+#include <functional>
 #include <tuple>
 
 #include "productable-container.hpp"
@@ -28,7 +29,7 @@ namespace Idempotent
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };
 
-    template <typename When, size_t... Idxs>
+    template <typename ToContainer, typename When, size_t... Idxs>
     constexpr void assertCombinations(const std::index_sequence<Idxs...>)
     {
         (
@@ -46,15 +47,16 @@ namespace Idempotent
                 };
 
                 constexpr auto compileTimeCompleted = completeContext();
+                using tt = std::invoke_result_t<ToContainer, const std::array<int, 3>&>;
                 static_assert(
-                    exstd::toContainer(compileTimeCompleted)
-                    == exstd::toContainer(std::invoke(When{}, compileTimeCompleted).complete())
+                    std::invoke(ToContainer{}, compileTimeCompleted)
+                    == std::invoke(ToContainer{}, std::invoke(When{}, compileTimeCompleted).complete())
                 );
 
                 const auto runTimeCompleted = completeContext();
                 dynamic_assert(
-                    exstd::toContainer(runTimeCompleted)
-                    == exstd::toContainer(std::invoke(When{}, runTimeCompleted).complete())
+                    std::invoke(ToContainer{}, runTimeCompleted)
+                    == std::invoke(ToContainer{}, std::invoke(When{}, runTimeCompleted).complete())
                 );
             }(),
             ...
@@ -62,9 +64,10 @@ namespace Idempotent
     }
 }
 
-template <typename When>
+template <typename ToContainer, typename When>
 void idempotent()
 {
-    Idempotent::assertCombinations<When>(std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>(
-    ));
+    Idempotent::assertCombinations<ToContainer, When>(
+        std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>()
+    );
 }
