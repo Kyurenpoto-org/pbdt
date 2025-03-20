@@ -140,7 +140,7 @@ namespace Examples
                 natural_components::domain2::containerDomain, natural_components::domain2::containerDomain
             ),
 #else
-            [&]()
+            []()
             {
                 std::array<std::tuple<int, int>, 25> result{};
                 for (size_t i = 0; i < 5; ++i)
