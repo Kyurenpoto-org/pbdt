@@ -40,7 +40,7 @@ namespace
     }
 
     template <size_t N>
-    constexpr uint32_t hash(char const (&str)[N])
+    constexpr uint32_t hash(const std::array<char, N> str)
     {
         uint32_t result = 0;
         for (uint32_t i = 0; i < N; ++i)
@@ -51,12 +51,43 @@ namespace
         return hash(result);
     }
 
-    template <size_t N>
-    constexpr uint32_t
-    compileTimeRandomImpl(char const (&file)[N], const std::source_location& location = std::source_location::current())
+    template <auto>
+    struct CompileTimeHash;
+
+    template <uint32_t N>
+    struct CompileTimeHash<N>
     {
-        return hash(hash(__TIME__) ^ hash(file) ^ hash(location.line()) ^ hash(location.column()));
+        static constexpr uint32_t value = hash(N);
+    };
+
+    template <size_t N, std::array<char, N> Str>
+    struct CompileTimeHash<Str>
+    {
+        static constexpr uint32_t value = hash(Str);
+    };
+
+    template <std::size_t N>
+    consteval auto stringToArray(const char (&str)[N])
+    {
+        std::array<char, N> arr{};
+        for (std::size_t i = 0; i < N; ++i)
+        {
+            arr[i] = str[i];
+        }
+        return arr;
     }
 
-#define COMPILE_TIME_RANDOM() compileTimeRandomImpl(__FILE__)
+    template <auto Time, auto File, auto Line, auto Column>
+    struct CompileTimeRandomImpl
+    {
+        static constexpr uint32_t value = hash(
+            CompileTimeHash<Time>::value ^ CompileTimeHash<File>::value ^ CompileTimeHash<Line>::value
+            ^ CompileTimeHash<Column>::value
+        );
+    };
+
+#define COMPILE_TIME_RANDOM()                                                                                          \
+    CompileTimeRandomImpl<                                                                                             \
+        stringToArray(__TIME__), stringToArray(__FILE__), std::source_location::current().line(),                      \
+        std::source_location::current().column()>::value
 }
