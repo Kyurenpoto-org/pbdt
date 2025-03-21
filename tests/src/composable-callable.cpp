@@ -6,8 +6,6 @@
 
 #include "composable-callable.hpp"
 
-ComposableCallable<0, typename TypeSequence<0>::type, typename TypeSequence<0>::type>;
-
 template <size_t, size_t, typename>
 struct InstanciatedComposableCallableImpl;
 
@@ -24,9 +22,10 @@ struct InstanciatedComposableCallable;
 template <size_t N, size_t... Ns>
 struct InstanciatedComposableCallable<N, std::index_sequence<Ns...>>
 {
-    using type = std::tuple<typename InstanciatedComposableCallableImpl<
-        N, Ns, decltype(std::make_index_sequence<sizeof...(Ns)>())>::type...>;
+    using type = std::tuple<typename InstanciatedComposableCallableImpl<N, Ns, std::index_sequence<Ns...>>::type...>;
 };
 
-typename InstanciatedComposableCallable<0, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
-typename InstanciatedComposableCallable<1, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
+using InstanciatedComposableCallable0 =
+    typename InstanciatedComposableCallable<0, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
+using InstanciatedComposableCallable1 =
+    typename InstanciatedComposableCallable<1, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
