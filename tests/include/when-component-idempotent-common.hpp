@@ -13,18 +13,18 @@
 namespace Idempotent
 {
     constexpr auto rawContexts = std::tuple{
-        ProductableCombination<COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<
+        Productable::ProductableCombination<COMPILE_TIME_RANDOM()>::value,
+        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
+        Productable::ProductableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<
+        Productable::ProductableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<
+        Productable::ProductableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        ProductableCombination<
+        Productable::ProductableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };

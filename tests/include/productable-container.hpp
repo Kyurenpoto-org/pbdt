@@ -12,7 +12,7 @@
 #include <string_view>
 #include <tuple>
 
-namespace
+namespace Productable
 {
     template <typename, size_t>
     struct SequenceArray;
