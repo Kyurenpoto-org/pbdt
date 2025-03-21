@@ -48,6 +48,21 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/productable-container.cpp
 )
 
+add_library(then-component-fixture STATIC)
+
+target_compile_features(
+    then-component-fixture
+    PUBLIC cxx_std_23
+)
+target_include_directories(
+    then-component-fixture
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_sources(
+    then-component-fixture
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/foldable-callable.cpp
+)
+
 # tests
 add_header_module_tests("pbdt" "bdd-fixture" "test-context" "")
 
@@ -60,24 +75,8 @@ add_header_module_tests("pbdt" "when-component-fixture" "when-component-idempote
 add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.when-component.associative")
 
 # Then Component: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
-add_executable(then-component "src/then-component.cpp")
-
-target_compile_features(
-    then-component
-    PRIVATE cxx_std_23
-)
-target_link_libraries(
-    then-component
-    PRIVATE bdd-fixture
-    PRIVATE exstd
-    PRIVATE pbdt
-    PRIVATE pbdt-module
-)
-
-add_test(
-    NAME pbdt.bdd.then-component
-    COMMAND then-component
-)
+add_header_module_tests("pbdt" "then-component-fixture" "then-component-idempotent" "pbdt.then-component.idempotent")
+add_header_module_tests("pbdt" "then-component-fixture" "then-component-associative" "pbdt.then-component.associative")
 
 add_executable(scenario "src/scenario.cpp")
 
