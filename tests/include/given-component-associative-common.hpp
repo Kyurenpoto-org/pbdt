@@ -13,52 +13,52 @@
 namespace Associative
 {
     constexpr auto composableCombinations = std::tuple{
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
-        ComposableCombination<
+        Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
             COMPILE_TIME_RANDOM()>::value,
     };

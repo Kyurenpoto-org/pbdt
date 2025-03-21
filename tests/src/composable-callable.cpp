@@ -12,8 +12,8 @@ struct InstanciatedComposableCallableImpl;
 template <size_t N, size_t M, size_t... Ns>
 struct InstanciatedComposableCallableImpl<N, M, std::index_sequence<Ns...>>
 {
-    using type = std::tuple<
-        std::tuple<ComposableCallable<N, typename TypeSequence<M>::type, typename TypeSequence<Ns>::type>...>>;
+    using type = std::tuple<std::tuple<Composable::ComposableCallable<
+        N, typename Composable::TypeSequence<M>::type, typename Composable::TypeSequence<Ns>::type>...>>;
 };
 
 template <size_t, typename>
@@ -25,7 +25,7 @@ struct InstanciatedComposableCallable<N, std::index_sequence<Ns...>>
     using type = std::tuple<typename InstanciatedComposableCallableImpl<N, Ns, std::index_sequence<Ns...>>::type...>;
 };
 
-using InstanciatedComposableCallable0 =
-    typename InstanciatedComposableCallable<0, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
-using InstanciatedComposableCallable1 =
-    typename InstanciatedComposableCallable<1, decltype(std::make_index_sequence<typeSequenceCount>())>::type;
+using InstanciatedComposableCallable0 = typename InstanciatedComposableCallable<
+    0, decltype(std::make_index_sequence<Composable::typeSequenceCount>())>::type;
+using InstanciatedComposableCallable1 = typename InstanciatedComposableCallable<
+    1, decltype(std::make_index_sequence<Composable::typeSequenceCount>())>::type;
