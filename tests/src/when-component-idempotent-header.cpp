@@ -37,7 +37,6 @@ struct When
 
 int main()
 {
-    // Set Category that has product between any two objects
     idempotent<ToContainer, When>();
 
     return EXIT_SUCCESS;
