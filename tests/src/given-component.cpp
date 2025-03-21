@@ -10,7 +10,6 @@
 #include "pbdt/bdd.hpp"
 
 #include "composable-callable.hpp"
-#include "util.hpp"
 
 namespace pbdt::bdd::detail
 {
