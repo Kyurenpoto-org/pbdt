@@ -8,8 +8,8 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "fixtures.hpp"
 #include "then-component-common.hpp"
+#include "util.hpp"
 
 namespace pbdt::bdd::detail
 {
