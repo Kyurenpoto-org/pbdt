@@ -185,10 +185,8 @@ void associative()
 
 int main()
 {
-    // 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
     idempotent();
     associative();
-    // Cannot test for identity
 
     return EXIT_SUCCESS;
 }

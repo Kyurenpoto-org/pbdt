@@ -64,28 +64,28 @@ namespace
     };
 
     template <size_t, typename, typename>
-    struct ComposableFunc;
+    struct ComposableCallable;
 
     template <typename... Rets, typename... Args>
-    struct ComposableFunc<0, std::tuple<Rets...>, std::tuple<Args...>>
+    struct ComposableCallable<0, std::tuple<Rets...>, std::tuple<Args...>>
     {
         static constexpr std::tuple<Rets...> (*value)(Args...) = &freeFunction<std::tuple<Rets...>, Args...>;
     };
 
     template <typename Ret, typename... Args>
-    struct ComposableFunc<0, std::tuple<Ret>, std::tuple<Args...>>
+    struct ComposableCallable<0, std::tuple<Ret>, std::tuple<Args...>>
     {
         static constexpr Ret (*value)(Args...) = &freeFunction<Ret, Args...>;
     };
 
     template <typename... Rets, typename... Args>
-    struct ComposableFunc<1, std::tuple<Rets...>, std::tuple<Args...>>
+    struct ComposableCallable<1, std::tuple<Rets...>, std::tuple<Args...>>
     {
         static constexpr Functor<std::tuple<Rets...>, Args...> value = Functor<std::tuple<Rets...>, Args...>{};
     };
 
     template <typename Ret, typename... Args>
-    struct ComposableFunc<1, std::tuple<Ret>, std::tuple<Args...>>
+    struct ComposableCallable<1, std::tuple<Ret>, std::tuple<Args...>>
     {
         static constexpr Functor<Ret, Args...> value = Functor<Ret, Args...>{};
     };
@@ -95,7 +95,7 @@ namespace
     {
         static constexpr auto value = std::tuple_cat(
             std::tuple{
-                ComposableFunc<
+                ComposableCallable<
                     N % 2, typename TypeSequence<Second % typeSequenceCount>::type,
                     typename TypeSequence<First % typeSequenceCount>::type>::value,
             },
@@ -107,10 +107,10 @@ namespace
     struct ComposableCombination<N, First, Second, Third>
     {
         static constexpr auto value = std::tuple{
-            ComposableFunc<
+            ComposableCallable<
                 N % 2, typename TypeSequence<Second % typeSequenceCount>::type,
                 typename TypeSequence<First % typeSequenceCount>::type>::value,
-            ComposableFunc<
+            ComposableCallable<
                 N / 2 % 2, typename TypeSequence<Third % typeSequenceCount>::type,
                 typename TypeSequence<Second % typeSequenceCount>::type>::value,
         };
