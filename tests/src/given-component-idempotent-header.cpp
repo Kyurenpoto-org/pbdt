@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <tuple>
+#include "given-component-idempotent-common.hpp"
 
 #include "pbdt/bdd.hpp"
 
@@ -35,8 +35,6 @@ namespace
     }
 }
 
-#include "given-component-idempotent-common.hpp"
-
 namespace pbdt::bdd::detail
 {
     template <typename... Targets, typename Target>
@@ -45,6 +43,15 @@ namespace pbdt::bdd::detail
         return context.andGiven("", std::forward<Target>(target));
     }
 }
+
+struct ToFlatTuple
+{
+    template <typename T>
+    constexpr auto operator()(T&& t) const
+    {
+        return flatTuple(toTuple(t));
+    }
+};
 
 struct Given
 {
@@ -57,7 +64,7 @@ struct Given
 
 int main()
 {
-    idempotent<Given>();
+    idempotent<ToFlatTuple, Given>();
 
     return EXIT_SUCCESS;
 }

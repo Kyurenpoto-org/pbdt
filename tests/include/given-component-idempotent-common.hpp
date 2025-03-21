@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <ranges>
+#include <functional>
 #include <tuple>
 
 #include "composable-callable.hpp"
@@ -45,7 +45,7 @@ namespace Idempotent
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };
 
-    template <typename Given, size_t... Idxs>
+    template <typename ToFlatTuple, typename Given, size_t... Idxs>
     constexpr void assertCombinations(const std::index_sequence<Idxs...>)
     {
         (
@@ -65,20 +65,26 @@ namespace Idempotent
                 };
 
                 constexpr auto compileTimeCompleted = completeContext();
-                static_assert(compileTimeCompleted == std::invoke(Given{}, compileTimeCompleted).complete());
+                static_assert(
+                    std::invoke(ToFlatTuple{}, compileTimeCompleted)
+                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, compileTimeCompleted).complete())
+                );
 
                 const auto runTimeCompleted = completeContext();
-                dynamic_assert(runTimeCompleted == std::invoke(Given{}, runTimeCompleted).complete());
+                dynamic_assert(
+                    std::invoke(ToFlatTuple{}, runTimeCompleted)
+                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, runTimeCompleted).complete())
+                );
             }(),
             ...
         );
     }
 }
 
-template <typename Given>
+template <typename ToFlatTuple, typename Given>
 void idempotent()
 {
-    Idempotent::assertCombinations<Given>(
+    Idempotent::assertCombinations<ToFlatTuple, Given>(
         std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>()
     );
 }

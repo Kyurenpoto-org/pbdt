@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <ranges>
+#include <functional>
 #include <tuple>
 
 #include "composable-callable.hpp"
@@ -63,7 +63,7 @@ namespace Associative
             COMPILE_TIME_RANDOM()>::value,
     };
 
-    template <typename Given, size_t... Idxs>
+    template <typename ToFlatTuple, typename Given, size_t... Idxs>
     constexpr void assertCombinations(const std::index_sequence<Idxs...>)
     {
         (
@@ -79,23 +79,23 @@ namespace Associative
                     std::invoke(Given{}, a).andGiven("", std::invoke(Given{}, b).andGiven("", c).complete()).complete();
                 constexpr auto compileTimeRhs =
                     std::invoke(Given{}, std::invoke(Given{}, a).andGiven("", b).complete()).andGiven("", c).complete();
-                static_assert(flatTuple(toTuple(compileTimeLhs)) == flatTuple(toTuple(compileTimeRhs)));
+                static_assert(std::invoke(ToFlatTuple{}, compileTimeLhs) == std::invoke(ToFlatTuple{}, compileTimeRhs));
 
                 const auto runTimeLhs =
                     std::invoke(Given{}, a).andGiven("", std::invoke(Given{}, b).andGiven("", c).complete()).complete();
                 const auto runTimeRhs =
                     std::invoke(Given{}, std::invoke(Given{}, a).andGiven("", b).complete()).andGiven("", c).complete();
-                dynamic_assert(flatTuple(toTuple(runTimeLhs)) == flatTuple(toTuple(runTimeRhs)));
+                dynamic_assert(std::invoke(ToFlatTuple{}, runTimeLhs) == std::invoke(ToFlatTuple{}, runTimeRhs));
             }(),
             ...
         );
     }
 }
 
-template <typename Given>
+template <typename ToFlatTuple, typename Given>
 void associative()
 {
-    Associative::assertCombinations<Given>(
+    Associative::assertCombinations<ToFlatTuple, Given>(
         std::make_index_sequence<std::tuple_size_v<decltype(Associative::composableCombinations)>>()
     );
 }

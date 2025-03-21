@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <tuple>
+#include "given-component-associative-common.hpp"
 
 import pbdt;
 
@@ -35,7 +35,14 @@ namespace
     }
 }
 
-#include "given-component-associative-common.hpp"
+struct ToFlatTuple
+{
+    template <typename T>
+    constexpr auto operator()(T&& t) const
+    {
+        return flatTuple(toTuple(t));
+    }
+};
 
 struct Given
 {
@@ -48,7 +55,7 @@ struct Given
 
 int main()
 {
-    associative<Given>();
+    associative<ToFlatTuple, Given>();
 
     return EXIT_SUCCESS;
 }
