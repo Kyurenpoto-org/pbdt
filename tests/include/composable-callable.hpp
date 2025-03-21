@@ -10,7 +10,7 @@
 #include <string>
 #include <tuple>
 
-namespace
+namespace Composable
 {
     struct TestStruct
     {
