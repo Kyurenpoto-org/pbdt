@@ -8,87 +8,44 @@
 #include <tuple>
 
 #include "composable-callable.hpp"
-#include "util.hpp"
-
-template <typename ToFlatTuple, typename Given, typename CompletableRawContext>
-struct HybridValidatableIdempotentGivenComponent
-{
-    template <size_t... Idxs>
-    constexpr void validateImpl(const std::index_sequence<Idxs...>)
-    {
-        (
-            []()
-            {
-                constexpr auto compileTimeCompleted = CompletableRawContext{}.template complete<Idxs>();
-                static_assert(
-                    std::invoke(ToFlatTuple{}, compileTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, compileTimeCompleted).complete())
-                );
-
-                const auto runTimeCompleted = CompletableRawContext{}.template complete<Idxs>();
-                dynamic_assert(
-                    std::invoke(ToFlatTuple{}, runTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, runTimeCompleted).complete())
-                );
-            }(),
-            ...
-        );
-    }
-
-    constexpr void validate()
-    {
-        validateImpl(std::make_index_sequence<CompletableRawContext::size>());
-    }
-};
+#include "idempotent.hpp"
 
 template <typename Given>
 struct CompletableRawGivenContext
 {
-    static constexpr auto rawContexts = std::tuple{
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-    };
+    static constexpr auto rawContexts = Composable::ComposableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
 
-    static constexpr size_t size = std::tuple_size_v<decltype(rawContexts)>;
-
-    template <size_t Idx>
-    constexpr auto complete() const
+    template <size_t Idx, size_t... Idxs>
+    static constexpr auto complete(const std::index_sequence<Idx, Idxs...>)
     {
-        return std::apply(
-            []<typename Target, typename... Targets>(Target&& target, Targets&&... targets)
+        return (std::invoke(Given{}, std::get<Idx>(rawContexts)) + ... + std::get<Idxs>(rawContexts)).complete();
+    }
+
+    template <size_t N, typename Visitor>
+    static void acceptImpl(Visitor&& visitor)
+    {
+        std::invoke(
+            std::forward<Visitor>(visitor),
+            []()
             {
-                return (std::invoke(Given{}, std::forward<Target>(target)) + ... + std::forward<Targets>(targets))
-                    .complete();
-            },
-            std::get<Idx>(rawContexts)
+                return CompletableRawGivenContext::complete(std::make_index_sequence<N + 1>());
+            }
+        );
+
+        if constexpr (N > 0)
+        {
+            acceptImpl<N - 1>(std::forward<Visitor>(visitor));
+        }
+    }
+
+    template <typename Visitor>
+    static void accept(Visitor&& visitor)
+    {
+        CompletableRawGivenContext::acceptImpl<std::tuple_size_v<decltype(rawContexts)> - 1>(
+            std::forward<Visitor>(visitor)
         );
     }
 };
@@ -96,5 +53,5 @@ struct CompletableRawGivenContext
 template <typename ToFlatTuple, typename Given>
 void idempotent()
 {
-    HybridValidatableIdempotentGivenComponent<ToFlatTuple, Given, CompletableRawGivenContext<Given>>{}.validate();
+    CompletableRawGivenContext<Given>::accept(IdempotentValidator<IdempotentProperty<ToFlatTuple, Given>>{});
 }
