@@ -10,9 +10,41 @@
 #include "composable-callable.hpp"
 #include "util.hpp"
 
-namespace Idempotent
+template <typename ToFlatTuple, typename Given, typename CompletableRawContext>
+struct HybridValidatableIdempotentGivenComponent
 {
-    constexpr auto rawContexts = std::tuple{
+    template <size_t... Idxs>
+    constexpr void validateImpl(const std::index_sequence<Idxs...>)
+    {
+        (
+            []()
+            {
+                constexpr auto compileTimeCompleted = CompletableRawContext{}.template complete<Idxs>();
+                static_assert(
+                    std::invoke(ToFlatTuple{}, compileTimeCompleted)
+                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, compileTimeCompleted).complete())
+                );
+
+                const auto runTimeCompleted = CompletableRawContext{}.template complete<Idxs>();
+                dynamic_assert(
+                    std::invoke(ToFlatTuple{}, runTimeCompleted)
+                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, runTimeCompleted).complete())
+                );
+            }(),
+            ...
+        );
+    }
+
+    constexpr void validate()
+    {
+        validateImpl(std::make_index_sequence<CompletableRawContext::size>());
+    }
+};
+
+template <typename Given>
+struct CompletableRawGivenContext
+{
+    static constexpr auto rawContexts = std::tuple{
         Composable::ComposableCombination<
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
         Composable::ComposableCombination<
@@ -45,46 +77,24 @@ namespace Idempotent
             COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
     };
 
-    template <typename ToFlatTuple, typename Given, size_t... Idxs>
-    constexpr void assertCombinations(const std::index_sequence<Idxs...>)
+    static constexpr size_t size = std::tuple_size_v<decltype(rawContexts)>;
+
+    template <size_t Idx>
+    constexpr auto complete() const
     {
-        (
-            []()
+        return std::apply(
+            []<typename Target, typename... Targets>(Target&& target, Targets&&... targets)
             {
-                constexpr auto completeContext = [&]()
-                {
-                    return std::apply(
-                        []<typename Target, typename... Targets>(Target&& target, Targets&&... targets)
-                        {
-                            return (std::invoke(Given{}, std::forward<Target>(target)) + ...
-                                    + std::forward<Targets>(targets))
-                                .complete();
-                        },
-                        std::get<Idxs>(rawContexts)
-                    );
-                };
-
-                constexpr auto compileTimeCompleted = completeContext();
-                static_assert(
-                    std::invoke(ToFlatTuple{}, compileTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, compileTimeCompleted).complete())
-                );
-
-                const auto runTimeCompleted = completeContext();
-                dynamic_assert(
-                    std::invoke(ToFlatTuple{}, runTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Given{}, runTimeCompleted).complete())
-                );
-            }(),
-            ...
+                return (std::invoke(Given{}, std::forward<Target>(target)) + ... + std::forward<Targets>(targets))
+                    .complete();
+            },
+            std::get<Idx>(rawContexts)
         );
     }
-}
+};
 
 template <typename ToFlatTuple, typename Given>
 void idempotent()
 {
-    Idempotent::assertCombinations<ToFlatTuple, Given>(
-        std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts)>>()
-    );
+    HybridValidatableIdempotentGivenComponent<ToFlatTuple, Given, CompletableRawGivenContext<Given>>{}.validate();
 }
