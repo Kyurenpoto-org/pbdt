@@ -24,8 +24,8 @@ struct IdempotentValidator
     }
 
 private:
-    static constexpr ToComparable toComparable;
-    static constexpr Component component;
+    static constexpr ToComparable toComparable{};
+    static constexpr Component component{};
 };
 
 template <typename CompletableRawContext>
@@ -54,5 +54,5 @@ private:
         }
     }
 
-    static constexpr CompletableRawContext completable;
+    static constexpr CompletableRawContext completable{};
 };

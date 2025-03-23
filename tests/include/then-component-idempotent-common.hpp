@@ -14,7 +14,7 @@ struct CompletableRawThenContext
         Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr Then then;
+    static constexpr Then then{};
 
     static constexpr size_t size()
     {

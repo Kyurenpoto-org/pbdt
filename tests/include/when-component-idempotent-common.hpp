@@ -13,7 +13,7 @@ struct CompletableRawWhenContext
     static constexpr auto RAW_CONTEXT = Productable::ProductableCombination<
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr When when;
+    static constexpr When when{};
 
     static constexpr size_t size()
     {
