@@ -4,82 +4,33 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <functional>
-#include <tuple>
-
 #include "foldable-callable.hpp"
-#include "util.hpp"
+#include "idempotent.hpp"
 
-namespace Idempotent
+template <typename Then, typename Expect>
+struct CompletableRawThenContext
 {
-    template <typename Expect>
-    constexpr auto rawContexts = std::tuple{
-        Foldable::FoldableCombination<Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-    };
+    static constexpr auto RAW_CONTEXT = Foldable::FoldableCombination<
+        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Then then;
 
-    template <typename Expect, typename ToFlatTuple, typename Then, size_t... Idxs>
-    constexpr void assertCombinations(const std::index_sequence<Idxs...>)
+    static constexpr size_t size()
     {
-        (
-            []()
-            {
-                constexpr auto completeContext = [&]()
-                {
-                    return std::apply(
-                        []<typename Prop, typename... Props>(Prop&& prop, Props&&... props)
-                        {
-                            return (std::invoke(Then{}, std::forward<Prop>(prop)) + ... + std::forward<Props>(props))
-                                .complete();
-                        },
-                        std::get<Idxs>(rawContexts<Expect>)
-                    );
-                };
-
-                constexpr auto compileTimeCompleted = completeContext();
-                static_assert(
-                    std::invoke(ToFlatTuple{}, compileTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Then{}, compileTimeCompleted).complete())
-                );
-
-                const auto runTimeCompleted = completeContext();
-                dynamic_assert(
-                    std::invoke(ToFlatTuple{}, runTimeCompleted)
-                    == std::invoke(ToFlatTuple{}, std::invoke(Then{}, runTimeCompleted).complete())
-                );
-            }(),
-            ...
-        );
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
     }
-}
+
+    template <size_t Idx, size_t... Idxs>
+    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    {
+        return (then(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
+    }
+};
 
 template <typename Expect, typename ToFlatTuple, typename Then>
 void idempotent()
 {
-    Idempotent::assertCombinations<Expect, ToFlatTuple, Then>(
-        std::make_index_sequence<std::tuple_size_v<decltype(Idempotent::rawContexts<Expect>)>>()
-    );
+    const AcceptableRawContext<CompletableRawThenContext<Then, Expect>> acceptable;
+    acceptable.accept(IdempotentValidator<Then, ToFlatTuple>{});
 }
