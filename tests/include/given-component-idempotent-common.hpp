@@ -4,54 +4,33 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <functional>
-#include <tuple>
-
 #include "composable-callable.hpp"
 #include "idempotent.hpp"
 
 template <typename Given>
 struct CompletableRawGivenContext
 {
-    static constexpr auto rawContexts = Composable::ComposableCombination<
+    static constexpr auto RAW_CONTEXT = Composable::ComposableCombination<
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Given given;
+
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+    }
 
     template <size_t Idx, size_t... Idxs>
-    static constexpr auto complete(const std::index_sequence<Idx, Idxs...>)
+    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
     {
-        return (std::invoke(Given{}, std::get<Idx>(rawContexts)) + ... + std::get<Idxs>(rawContexts)).complete();
-    }
-
-    template <size_t N, typename Visitor>
-    static void acceptImpl(Visitor&& visitor)
-    {
-        std::invoke(
-            std::forward<Visitor>(visitor),
-            []()
-            {
-                return CompletableRawGivenContext::complete(std::make_index_sequence<N + 1>());
-            }
-        );
-
-        if constexpr (N > 0)
-        {
-            acceptImpl<N - 1>(std::forward<Visitor>(visitor));
-        }
-    }
-
-    template <typename Visitor>
-    static void accept(Visitor&& visitor)
-    {
-        CompletableRawGivenContext::acceptImpl<std::tuple_size_v<decltype(rawContexts)> - 1>(
-            std::forward<Visitor>(visitor)
-        );
+        return (given(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
     }
 };
 
 template <typename ToFlatTuple, typename Given>
 void idempotent()
 {
-    CompletableRawGivenContext<Given>::accept(IdempotentValidator<IdempotentProperty<ToFlatTuple, Given>>{});
+    const AcceptableRawContext<CompletableRawGivenContext<Given>> acceptable;
+    acceptable.accept(IdempotentValidator<Given, ToFlatTuple>{});
 }
