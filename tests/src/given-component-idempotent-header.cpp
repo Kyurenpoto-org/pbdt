@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "given-component-idempotent-common.hpp"
+#include "idempotent.hpp"
 
 #include "pbdt/bdd.hpp"
 
@@ -64,7 +64,8 @@ struct Given
 
 int main()
 {
-    idempotent<ToFlatTuple, Given>();
+    const AcceptableRawContext<CompletableRawGivenContext<Given>> acceptable;
+    acceptable.accept(IdempotentValidator<Given, ToFlatTuple>{});
 
     return EXIT_SUCCESS;
 }

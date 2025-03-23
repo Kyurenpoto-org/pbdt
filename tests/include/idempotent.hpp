@@ -42,7 +42,7 @@ private:
     void acceptImpl(Visitor&& visitor) const
     {
         visitor(
-            [&]()
+            []()
             {
                 return completable.complete(std::make_index_sequence<Measure + 1>());
             }
@@ -55,4 +55,70 @@ private:
     }
 
     static constexpr CompletableRawContext completable{};
+};
+
+#include "composable-callable.hpp"
+#include "foldable-callable.hpp"
+#include "productable-container.hpp"
+
+template <typename Given>
+struct CompletableRawGivenContext
+{
+    static constexpr auto RAW_CONTEXT = Composable::ComposableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Given given{};
+
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+    }
+
+    template <size_t Idx, size_t... Idxs>
+    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    {
+        return (given(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
+    }
+};
+
+template <typename When>
+struct CompletableRawWhenContext
+{
+    static constexpr auto RAW_CONTEXT = Productable::ProductableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr When when{};
+
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+    }
+
+    template <size_t Idx, size_t... Idxs>
+    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    {
+        return (when(std::get<Idx>(RAW_CONTEXT)()) + ... + std::get<Idxs>(RAW_CONTEXT)()).complete();
+    }
+};
+
+template <typename Then, typename Expect>
+struct CompletableRawThenContext
+{
+    static constexpr auto RAW_CONTEXT = Foldable::FoldableCombination<
+        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Then then{};
+
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+    }
+
+    template <size_t Idx, size_t... Idxs>
+    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    {
+        return (then(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
+    }
 };
