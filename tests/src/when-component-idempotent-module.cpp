@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "when-component-idempotent-common.hpp"
+#include "idempotent.hpp"
 
 import exstd;
 import pbdt;
@@ -38,7 +38,8 @@ struct When
 
 int main()
 {
-    idempotent<ToContainer, When>();
+    const AcceptableRawContext<CompletableRawWhenContext<When>> acceptable;
+    acceptable.accept(IdempotentValidator<When, ToContainer>{});
 
     return EXIT_SUCCESS;
 }

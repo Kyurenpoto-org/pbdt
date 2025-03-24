@@ -4,9 +4,8 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "then-component-associative-common.hpp"
+#include "associative.hpp"
 
-import exstd;
 import pbdt;
 
 namespace
@@ -33,6 +32,15 @@ namespace
             },
             tup
         );
+    }
+}
+
+namespace pbdt::bdd::detail
+{
+    template <typename... Props, typename Prop>
+    constexpr auto operator+(ThenContext<Props...>&& context, Prop&& prop)
+    {
+        return context.andThen("", std::forward<Prop>(prop));
     }
 }
 
@@ -65,7 +73,8 @@ struct Then
 
 int main()
 {
-    associative<Expect, ToFlatTuple, Then>();
+    const AcceptableRawContext<TwoWayCompletableRawThenContext<Then, Expect>> acceptable;
+    acceptable.accept(AssociativeValidator<ToFlatTuple>{});
 
     return EXIT_SUCCESS;
 }

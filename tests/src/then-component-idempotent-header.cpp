@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "then-component-idempotent-common.hpp"
+#include "idempotent.hpp"
 
 #include "pbdt/bdd.hpp"
 
@@ -73,7 +73,8 @@ struct Then
 
 int main()
 {
-    idempotent<Expect, ToFlatTuple, Then>();
+    const AcceptableRawContext<CompletableRawThenContext<Then, Expect>> acceptable;
+    acceptable.accept(IdempotentValidator<Then, ToFlatTuple>{});
 
     return EXIT_SUCCESS;
 }

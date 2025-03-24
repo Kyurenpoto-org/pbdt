@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "given-component-associative-common.hpp"
+#include "associative.hpp"
 
 #include "pbdt/bdd.hpp"
 
@@ -35,6 +35,15 @@ namespace
     }
 }
 
+namespace pbdt::bdd::detail
+{
+    template <typename... Targets, typename Target>
+    constexpr auto operator+(GivenContext<Targets...>&& context, Target&& target)
+    {
+        return context.andGiven("", std::forward<Target>(target));
+    }
+}
+
 struct ToFlatTuple
 {
     template <typename T>
@@ -55,7 +64,8 @@ struct Given
 
 int main()
 {
-    associative<ToFlatTuple, Given>();
+    const AcceptableRawContext<TwoWayCompletableRawGivenContext<Given>> acceptable;
+    acceptable.accept(AssociativeValidator<ToFlatTuple>{});
 
     return EXIT_SUCCESS;
 }
