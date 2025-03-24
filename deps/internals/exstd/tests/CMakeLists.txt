@@ -15,5 +15,5 @@ target_include_directories(
 )
 
 # tests
-add_header_module_tests("exstd" "exstd-fixture" "callable-concept" "")
-add_header_module_tests("exstd" "exstd-fixture" "simple-callable" "")
+add_header_module_tests("exstd" "exstd-fixture" "callable-concept" "exstd.callable-concept")
+add_header_module_tests("exstd" "exstd-fixture" "simple-callable" "exstd.simple-callable")

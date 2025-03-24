@@ -3,10 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 function(add_header_module_tests dep fixture test_target test_name)
-    if(NOT test_name)
-        set(test_name ${dep}.${test_target})
-    endif()
-
     add_executable(${test_target}-header "src/${test_target}-header.cpp")
 
     target_compile_features(

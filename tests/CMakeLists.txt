@@ -13,10 +13,6 @@ target_include_directories(
     bdd-fixture
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-target_link_libraries(
-    bdd-fixture
-    INTERFACE pbdt
-)
 
 add_library(given-component-fixture STATIC)
 
@@ -64,7 +60,7 @@ target_sources(
 )
 
 # tests
-add_header_module_tests("pbdt" "bdd-fixture" "test-context" "")
+add_header_module_tests("pbdt" "bdd-fixture" "test-context" "pbdt.test-context")
 
 # Given Component: Set Category
 add_header_module_tests("pbdt" "given-component-fixture" "given-component-idempotent" "pbdt.given-component.idempotent")
