@@ -69,71 +69,23 @@ private:
 template <typename Given>
 struct TwoWayCompletableRawGivenContext
 {
-    static constexpr auto RAW_CONTEXT = std::tuple{
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-        Composable::ComposableCombination<
-            COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-            COMPILE_TIME_RANDOM()>::value,
-    };
+    static constexpr auto COMBINATIONS = Composable::ComposableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr Given given{};
 
     static constexpr size_t size()
     {
-        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
     }
 
     template <size_t Idx>
     constexpr auto l2rComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (given((given(a) + b).complete()) + c).complete();
     }
@@ -141,11 +93,9 @@ struct TwoWayCompletableRawGivenContext
     template <size_t Idx>
     constexpr auto r2lComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (given(a) + (given(b) + c).complete()).complete();
     }
@@ -154,39 +104,23 @@ struct TwoWayCompletableRawGivenContext
 template <typename When>
 struct TwoWayCompletableRawWhenContext
 {
-    static constexpr auto RAW_CONTEXT = std::tuple{
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Productable::ProductableCombination<COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-    };
+    static constexpr auto COMBINATIONS = Productable::ProductableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM()>::value;
     static constexpr When when{};
 
     static constexpr size_t size()
     {
-        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
     }
 
     template <size_t Idx>
     constexpr auto l2rComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (when((when(a()) + b()).complete()) + c()).complete();
     }
@@ -194,11 +128,9 @@ struct TwoWayCompletableRawWhenContext
     template <size_t Idx>
     constexpr auto r2lComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (when(a()) + (when(b()) + c()).complete()).complete();
     }
@@ -207,55 +139,23 @@ struct TwoWayCompletableRawWhenContext
 template <typename Then, typename Expect>
 struct TwoWayCompletableRawThenContext
 {
-    static constexpr auto RAW_CONTEXT = std::tuple{
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-        Foldable::FoldableCombination<
-            Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value,
-    };
+    static constexpr auto COMBINATIONS = Foldable::FoldableCombination<
+        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr Then then{};
 
     static constexpr size_t size()
     {
-        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
     }
 
     template <size_t Idx>
     constexpr auto l2rComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (then((then(a) + b).complete()) + c).complete();
     }
@@ -263,11 +163,9 @@ struct TwoWayCompletableRawThenContext
     template <size_t Idx>
     constexpr auto r2lComplete() const
     {
-        constexpr auto combination = std::get<Idx>(RAW_CONTEXT);
-
-        constexpr auto a = std::get<0>(combination);
-        constexpr auto b = std::get<1>(combination);
-        constexpr auto c = std::get<2>(combination);
+        constexpr auto a = std::get<Idx>(COMBINATIONS);
+        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
+        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
 
         return (then(a) + (then(b) + c).complete()).complete();
     }
