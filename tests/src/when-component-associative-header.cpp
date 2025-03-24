@@ -4,9 +4,18 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "when-component-associative-common.hpp"
+#include "associative.hpp"
 
 #include "pbdt/bdd.hpp"
+
+namespace pbdt::bdd::detail
+{
+    template <typename... Domains, typename Domain>
+    constexpr auto operator+(WhenContext<Domains...>&& context, Domain&& domain)
+    {
+        return context.andWhen("", std::forward<Domain>(domain));
+    }
+}
 
 struct ToContainer
 {
@@ -28,7 +37,8 @@ struct When
 
 int main()
 {
-    associative<ToContainer, When>();
+    const AcceptableRawContext<TwoWayCompletableRawWhenContext<When>> acceptable;
+    acceptable.accept(AssociativeValidator<ToContainer>{});
 
     return EXIT_SUCCESS;
 }
