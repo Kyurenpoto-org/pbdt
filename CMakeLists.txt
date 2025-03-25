@@ -104,3 +104,19 @@ target_sources(
 if(PBDT_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
+
+if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+	include(GNUInstallDirs)
+	include(CMakePackageConfigHelpers)
+
+	write_basic_package_version_file(
+		${PROJECT_NAME}-config-version.cmake
+		VERSION ${PROJECT_VERSION}
+		COMPATIBILITY SameMajorVersion
+		ARCH_INDEPENDENT
+	)
+	install(
+		FILES ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config-version.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+endif()
