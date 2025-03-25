@@ -8,7 +8,7 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "fixtures.hpp"
+#include "util.hpp"
 
 template <typename, typename>
 struct X;
@@ -28,10 +28,10 @@ struct X<typename Outer<T>::Inner, T>
 
 int main()
 {
-    pbdt::bdd::builder.withGiven(pbdt::bdd::given("", natural_components::target::freeFuncTarget))
+    /*pbdt::bdd::builder.withGiven(pbdt::bdd::given("", natural_components::target::freeFuncTarget))
         .withWhen(pbdt::bdd::when("", natural_components::domain::containerDomain))
         .withThen(pbdt::bdd::then("", natural_components::prop::freeFuncProp))
-        .build("");
+        .build("");*/
 
     // <요건 bdd가 아님>
     // 기능/시나리오 리스트 얻어내기

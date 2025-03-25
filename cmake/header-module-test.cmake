@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-function(add_header_module_tests dep fixture test_target)
+function(add_header_module_tests dep fixture test_target test_name)
     add_executable(${test_target}-header "src/${test_target}-header.cpp")
 
     target_compile_features(
@@ -16,7 +16,7 @@ function(add_header_module_tests dep fixture test_target)
     )
 
     add_test(
-        NAME ${dep}.${test_target}.header
+        NAME ${test_name}.header
         COMMAND ${test_target}-header
     )
 
@@ -33,7 +33,7 @@ function(add_header_module_tests dep fixture test_target)
     )
 
     add_test(
-        NAME ${dep}.${test_target}.module
+        NAME ${test_name}.module
         COMMAND ${test_target}-module
     )
 endfunction()
