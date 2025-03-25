@@ -36,23 +36,25 @@ namespace pbdt::bdd
         struct ComponentContext<Elements...>
         {
             constexpr ComponentContext(
-                const std::array<std::string_view, sizeof...(Elements)> steps, const std::tuple<Elements...> elements
+                // const std::array<std::string_view, sizeof...(Elements)> steps,
+                const std::tuple<Elements...> elements
             ) :
-                steps(steps),
+                // steps(steps),
                 elements(elements)
             {
             }
 
             template <typename Element>
-            constexpr ComponentContext<Elements..., std::decay_t<Element>>
-            expand(const std::string_view step, Element&& element) const
+            constexpr ComponentContext<Elements..., std::decay_t<Element>> expand( // const std::string_view step,
+                Element&& element
+            ) const
             {
-                std::array<std::string_view, sizeof...(Elements) + 1> newSteps;
-                std::copy(steps.begin(), steps.end(), newSteps.begin());
-                newSteps[sizeof...(Elements)] = step;
+                // std::array<std::string_view, sizeof...(Elements) + 1> newSteps;
+                // std::copy(steps.begin(), steps.end(), newSteps.begin());
+                // newSteps[sizeof...(Elements)] = step;
 
                 return {
-                    newSteps,
+                    // newSteps,
                     std::tuple_cat(elements, std::tuple{ element }),
                 };
             }
@@ -64,19 +66,19 @@ namespace pbdt::bdd
                 return T{ elements };
             }
 
-            constexpr std::string description(const std::string_view name) const
-            {
-                std::string result = "[" + std::string(name) + "] " + steps[0] + "\n";
-                for (size_t i = 1; i < steps.size(); ++i)
-                {
-                    result += "[AND] " + steps[i] + "\n";
-                }
-
-                return result;
-            }
+            // constexpr std::string description(const std::string_view name) const
+            //{
+            //     std::string result = "[" + std::string(name) + "] " + steps[0] + "\n";
+            //     for (size_t i = 1; i < steps.size(); ++i)
+            //     {
+            //         result += "[AND] " + steps[i] + "\n";
+            //     }
+            //
+            //    return result;
+            //}
 
         private:
-            std::array<std::string_view, sizeof...(Elements)> steps;
+            // std::array<std::string_view, sizeof...(Elements)> steps;
             std::tuple<Elements...> elements;
         };
 
@@ -85,17 +87,21 @@ namespace pbdt::bdd
         {
             template <typename T>
                 requires std::is_constructible_v<Element, T>
-            constexpr ComponentContext(const std::string_view step, T&& element) :
-                step(step),
+            constexpr ComponentContext( // const std::string_view step,
+                T&& element
+            ) :
+                // step(step),
                 element(std::forward<T>(element))
             {
             }
 
             template <typename NextElement>
-            constexpr auto expand(const std::string_view nextStep, NextElement&& nextElement) const
+            constexpr auto expand( // const std::string_view nextStep,
+                NextElement&& nextElement
+            ) const
             {
                 return ComponentContext<Element, std::decay_t<NextElement>>{
-                    std::array{ step, nextStep },
+                    // std::array{ step, nextStep },
                     std::tuple{ element, nextElement },
                 };
             }
@@ -105,13 +111,13 @@ namespace pbdt::bdd
                 return element;
             }
 
-            constexpr std::string description(const std::string_view name) const
-            {
-                return "[" + std::string(name) + "] " + std::string(step) + "\n";
-            }
+            // constexpr std::string description(const std::string_view name) const
+            //{
+            //     return "[" + std::string(name) + "] " + std::string(step) + "\n";
+            // }
 
         private:
-            std::string_view step;
+            // std::string_view step;
             Element element;
         };
 
@@ -155,10 +161,13 @@ namespace pbdt::bdd
             template <typename Target>
                 requires CallableTarget<Target>
                       && IsomorphicCallableComponent<ReturnType, exstd::CallableArgumentsType<std::decay_t<Target>>>
-            constexpr GivenContext<Targets..., std::decay_t<Target>>
-            andGiven(const std::string_view step, Target&& target) const
+            constexpr GivenContext<Targets..., std::decay_t<Target>> andGiven( // const std::string_view step,
+                Target&& target
+            ) const
             {
-                return { core.expand(step, std::forward<Target>(target)) };
+                return { core.expand( // step,
+                    std::forward<Target>(target)
+                ) };
             }
 
             using Completion = TargetCompletion<std::tuple<Targets...>, ReturnType, ArgumentsType>;
@@ -168,10 +177,10 @@ namespace pbdt::bdd
                 return core.template complete<Completion>();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("GIVEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("GIVEN");
+            // }
 
         private:
             ComponentContext<Targets...> core;
@@ -185,18 +194,25 @@ namespace pbdt::bdd
 
             template <typename T>
                 requires std::is_constructible_v<Target, T>
-            constexpr GivenContext(const std::string_view step, T&& target) :
-                core(step, std::forward<T>(target))
+            constexpr GivenContext( // const std::string_view step,
+                T&& target
+            ) :
+                core( // step,
+                    std::forward<T>(target)
+                )
             {
             }
 
             template <typename NextTarget>
                 requires CallableTarget<NextTarget>
                       && IsomorphicCallableComponent<ReturnType, exstd::CallableArgumentsType<std::decay_t<NextTarget>>>
-            constexpr GivenContext<Target, std::decay_t<NextTarget>>
-            andGiven(const std::string_view step, NextTarget&& target) const
+            constexpr GivenContext<Target, std::decay_t<NextTarget>> andGiven( // const std::string_view step,
+                NextTarget&& target
+            ) const
             {
-                return { core.expand(step, std::forward<NextTarget>(target)) };
+                return { core.expand( // step,
+                    std::forward<NextTarget>(target)
+                ) };
             }
 
             constexpr Target complete() const
@@ -204,10 +220,10 @@ namespace pbdt::bdd
                 return core.complete();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("GIVEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("GIVEN");
+            // }
 
         private:
             ComponentContext<Target> core;
@@ -229,13 +245,15 @@ namespace pbdt::bdd
             using BaseType = decltype(exstd::flattenCartesianProduct(std::declval<Domains>()...));
 
             constexpr DomainCompletion(const std::tuple<Domains...> domains) :
-                base(std::apply(
-                    [](Domains... domains)
-                    {
-                        return exstd::flattenCartesianProduct(std::move(domains)...);
-                    },
-                    domains
-                ))
+                base(
+                    std::apply(
+                        [](Domains... domains)
+                        {
+                            return exstd::flattenCartesianProduct(std::move(domains)...);
+                        },
+                        domains
+                    )
+                )
             {
             }
 
@@ -267,9 +285,13 @@ namespace pbdt::bdd
             template <typename Domain>
                 requires RangeDomain<Domain>
             constexpr WhenContext<Domains..., decltype(exstd::toContainer(std::declval<Domain>()))>
-            andWhen(const std::string_view step, Domain&& domain) const
+            andWhen( // const std::string_view step,
+                Domain&& domain
+            ) const
             {
-                return { core.expand(step, exstd::toContainer(std::forward<Domain>(domain))) };
+                return { core.expand( // step,
+                    exstd::toContainer(std::forward<Domain>(domain))
+                ) };
             }
 
             using Completion = DomainCompletion<std::tuple<Domains...>>;
@@ -279,10 +301,10 @@ namespace pbdt::bdd
                 return core.template complete<Completion>();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("WHEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("WHEN");
+            // }
 
         private:
             ComponentContext<Domains...> core;
@@ -295,17 +317,25 @@ namespace pbdt::bdd
 
             template <typename T>
                 requires std::is_constructible_v<Domain, T>
-            constexpr WhenContext(const std::string_view step, T&& domain) :
-                core(step, std::forward<T>(domain))
+            constexpr WhenContext( // const std::string_view step,
+                T&& domain
+            ) :
+                core( // step,
+                    std::forward<T>(domain)
+                )
             {
             }
 
             template <typename NextDomain>
                 requires RangeDomain<NextDomain>
             constexpr WhenContext<Domain, decltype(exstd::toContainer(std::declval<NextDomain>()))>
-            andWhen(const std::string_view step, NextDomain&& domain) const
+            andWhen( // const std::string_view step,
+                NextDomain&& domain
+            ) const
             {
-                return { core.expand(step, exstd::toContainer(std::forward<NextDomain>(domain))) };
+                return { core.expand( // step,
+                    exstd::toContainer(std::forward<NextDomain>(domain))
+                ) };
             }
 
             constexpr Domain complete() const
@@ -313,10 +343,10 @@ namespace pbdt::bdd
                 return core.complete();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("WHEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("WHEN");
+            // }
 
         private:
             ComponentContext<Domain> core;
@@ -369,10 +399,13 @@ namespace pbdt::bdd
 
             template <typename Prop>
                 requires CallableProperty<Prop> && HasCommonArguments<Props..., std::decay_t<Prop>>
-            constexpr ThenContext<Props..., std::decay_t<Prop>>
-            andThen(const std::string_view step, Prop&& property) const
+            constexpr ThenContext<Props..., std::decay_t<Prop>> andThen( // const std::string_view step,
+                Prop&& property
+            ) const
             {
-                return { core.expand(step, static_cast<std::decay_t<Prop>>(property)) };
+                return { core.expand( // step,
+                    static_cast<std::decay_t<Prop>>(property)
+                ) };
             }
 
             using Completion = PropertyCompletion<std::tuple<Props...>, SampleType, ResultType>;
@@ -382,10 +415,10 @@ namespace pbdt::bdd
                 return core.template complete<Completion>();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("THEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("THEN");
+            // }
 
         private:
             ComponentContext<Props...> core;
@@ -399,17 +432,24 @@ namespace pbdt::bdd
 
             template <typename T>
                 requires std::is_constructible_v<Prop, T>
-            constexpr ThenContext(const std::string_view step, T&& property) :
-                core(step, std::forward<T>(property))
+            constexpr ThenContext( // const std::string_view step,
+                T&& property
+            ) :
+                core( // step,
+                    std::forward<T>(property)
+                )
             {
             }
 
             template <typename NextProp>
                 requires CallableProperty<NextProp> && HasCommonArguments<Prop, std::decay_t<NextProp>>
-            constexpr ThenContext<Prop, std::decay_t<NextProp>>
-            andThen(const std::string_view step, NextProp&& property) const
+            constexpr ThenContext<Prop, std::decay_t<NextProp>> andThen( // const std::string_view step,
+                NextProp&& property
+            ) const
             {
-                return { core.expand(step, static_cast<std::decay_t<NextProp>>(property)) };
+                return { core.expand( // step,
+                    static_cast<std::decay_t<NextProp>>(property)
+                ) };
             }
 
             constexpr Prop complete() const
@@ -417,10 +457,10 @@ namespace pbdt::bdd
                 return core.complete();
             }
 
-            constexpr std::string description() const
-            {
-                return core.description("THEN");
-            }
+            // constexpr std::string description() const
+            //{
+            //     return core.description("THEN");
+            // }
 
         private:
             ComponentContext<Prop> core;
@@ -429,10 +469,12 @@ namespace pbdt::bdd
 
     template <typename Target>
         requires detail::CallableTarget<Target>
-    constexpr detail::GivenContext<std::decay_t<Target>> given(const std::string_view step, Target&& target)
+    constexpr detail::GivenContext<std::decay_t<Target>> given( // const std::string_view step,
+        Target&& target
+    )
     {
         return {
-            step,
+            // step,
             std::forward<Target>(target),
         };
     }
@@ -440,20 +482,24 @@ namespace pbdt::bdd
     template <typename Domain>
         requires detail::RangeDomain<Domain>
     constexpr detail::WhenContext<decltype(exstd::toContainer(std::declval<Domain>()))>
-    when(const std::string_view step, Domain&& domain)
+    when( // const std::string_view step,
+        Domain&& domain
+    )
     {
         return {
-            step,
+            // step,
             exstd::toContainer(std::forward<Domain>(domain)),
         };
     }
 
     template <typename Prop>
         requires detail::CallableProperty<Prop>
-    constexpr detail::ThenContext<std::decay_t<Prop>> then(const std::string_view step, Prop&& property)
+    constexpr detail::ThenContext<std::decay_t<Prop>> then( // const std::string_view step,
+        Prop&& property
+    )
     {
         return {
-            step,
+            // step,
             std::forward<Prop>(property),
         };
     }
@@ -536,10 +582,10 @@ namespace pbdt::bdd
             }
 
             constexpr auto build(const std::string_view name) const
-                requires(
-                    !(std::is_same_v<Given, nullptr_t> || std::is_same_v<When, nullptr_t>
-                      || std::is_same_v<Then, nullptr_t>)
-                )
+                requires(!(
+                    std::is_same_v<Given, nullptr_t> || std::is_same_v<When, nullptr_t>
+                    || std::is_same_v<Then, nullptr_t>
+                ))
             {
             }
 
