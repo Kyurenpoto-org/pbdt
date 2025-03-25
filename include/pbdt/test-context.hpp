@@ -102,11 +102,11 @@ namespace pbdt::test_context
                 return failed != 0;
             }
 
-            constexpr operator std::string() const
-            {
-                return "Passed: " + stringify(passed) + "\n" + "Failed: " + stringify(failed) + "\n"
-                     + "Skipped: " + stringify(skipped) + "\n";
-            }
+            // constexpr operator std::string() const
+            //{
+            //     return "Passed: " + stringify(passed) + "\n" + "Failed: " + stringify(failed) + "\n"
+            //          + "Skipped: " + stringify(skipped) + "\n";
+            // }
 
         private:
             constexpr EventCountable(const size_t passed, const size_t failed, const size_t skipped) :
@@ -132,7 +132,7 @@ namespace pbdt::test_context
             {
                 return TestContext{
                     EventCountable::prototype(),
-                    {},
+                    //{},
                 };
             }
 
@@ -143,14 +143,14 @@ namespace pbdt::test_context
                 {
                     return TestContext{
                         assertions.pass(),
-                        failures,
+                        // failures,
                     };
                 }
                 else
                 {
                     return TestContext{
                         assertions.fail(),
-                        failures + std::string(StringifiedLocation{ location }),
+                        // failures + std::string(StringifiedLocation{ location }),
                     };
                 }
             }
@@ -159,7 +159,7 @@ namespace pbdt::test_context
             {
                 return TestContext{
                     assertions + context.assertions,
-                    failures + context.failures,
+                    // failures + context.failures,
                 };
             }
 
@@ -168,27 +168,30 @@ namespace pbdt::test_context
                 return !assertions.someFailed();
             }
 
-            constexpr std::string description() const
-            {
-                if (passable())
-                {
-                    return "<Assertions>\n" + std::string(assertions);
-                }
-                else
-                {
-                    return failures + "\n\n<Assertions>\n" + std::string(assertions);
-                }
-            }
+            // constexpr std::string description() const
+            //{
+            //     if (passable())
+            //     {
+            //         return "<Assertions>\n" + std::string(assertions);
+            //     }
+            //     else
+            //     {
+            //         return failures + "\n\n<Assertions>\n" + std::string(assertions);
+            //     }
+            // }
 
         private:
-            constexpr TestContext(const EventCountable assertions, const std::string failures) :
-                assertions(assertions),
-                failures(failures)
+            constexpr TestContext(
+                const EventCountable assertions
+                //, const std::string failures
+            ) :
+                assertions(assertions) //,
+            // failures(failures)
             {
             }
 
             const EventCountable assertions;
-            const std::string failures;
+            // const std::string failures;
         };
 
         constexpr TestContext operator+(const TestContext lhs, const TestContext rhs)
@@ -210,18 +213,20 @@ namespace pbdt::test_context
             {
                 return SampledTestContext{
                     EventCountable::prototype(),
-                    {},
+                    //{},
                 };
             }
 
             template <typename Test>
-            constexpr SampledTestContext accumulate(const std::string sample, Test&& test) const
+            constexpr SampledTestContext accumulate( // const std::string sample,
+                Test&& test
+            ) const
             {
                 if (samples.someFailed())
                 {
                     return SampledTestContext{
                         samples.skip(),
-                        failures,
+                        // failures,
                     };
                 }
 
@@ -230,14 +235,14 @@ namespace pbdt::test_context
                 {
                     return SampledTestContext{
                         samples.pass(),
-                        failures,
+                        // failures,
                     };
                 }
                 else
                 {
                     return SampledTestContext{
                         samples.fail(),
-                        failures + context.description(),
+                        // failures + context.description(),
                     };
                 }
             }
@@ -247,27 +252,30 @@ namespace pbdt::test_context
                 return !samples.someFailed();
             }
 
-            constexpr std::string description() const
-            {
-                if (passable())
-                {
-                    return "<Samples>\n" + std::string(samples);
-                }
-                else
-                {
-                    return failures + "\n\n<Samples>\n" + std::string(samples);
-                }
-            }
+            // constexpr std::string description() const
+            //{
+            //     if (passable())
+            //     {
+            //         return "<Samples>\n" + std::string(samples);
+            //     }
+            //     else
+            //     {
+            //         return failures + "\n\n<Samples>\n" + std::string(samples);
+            //     }
+            // }
 
         private:
-            constexpr SampledTestContext(const EventCountable samples, const std::string failures) :
-                samples(samples),
-                failures(failures)
+            constexpr SampledTestContext(
+                const EventCountable samples
+                //, const std::string failures
+            ) :
+                samples(samples) //,
+            // failures(failures)
             {
             }
 
             EventCountable samples;
-            std::string failures;
+            // std::string failures;
         };
     }
 
@@ -280,7 +288,7 @@ namespace pbdt::test_context
             [&test](const detail::SampledTestContext context, const auto sample)
             {
                 return context.accumulate(
-                    "",
+                    //"",
                     [&]()
                     {
                         return test(sample);
@@ -293,7 +301,7 @@ namespace pbdt::test_context
         for (const auto& sample : samples)
         {
             context = context.accumulate(
-                "",
+                //"",
                 [&]()
                 {
                     return test(sample);
