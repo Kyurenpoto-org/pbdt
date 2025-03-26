@@ -14,12 +14,19 @@ project(
 	CXX
 )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	set(PBDT_IS_TOP_LEVEL_PROJECT ON)
+else()
+	set(PBDT_IS_TOP_LEVEL_PROJECT OFF)
+endif()
+
+option(PBDT_BUILD_TESTS "Build the tests" ${PBDT_IS_TOP_LEVEL_PROJECT})
+option(PBDT_INSTALL "Install targets" ${PBDT_IS_TOP_LEVEL_PROJECT})
+
 if(POLICY CMP0141)
 	cmake_policy(SET CMP0141 NEW)
 	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
-
-option(PBDT_BUILD_TESTS "Build the tests" OFF)
 
 # packages
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
@@ -58,7 +65,87 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	else()
 		set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS ${CLANG_SCAN_DEPS_EXECUTABLE})
 	endif()
+
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++")
 endif()
 
 # modules
 add_subdirectory("deps/internals")
+
+# For header based library
+add_library(pbdt INTERFACE)
+
+target_compile_features(
+	pbdt
+	INTERFACE cxx_std_23
+)
+target_link_libraries(
+	pbdt
+	INTERFACE exstd
+)
+target_include_directories(
+	pbdt
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+)
+
+# For module based library
+add_library(pbdt-module STATIC)
+
+target_compile_features(
+	pbdt-module
+	PUBLIC cxx_std_23
+)
+target_link_libraries(
+	pbdt-module
+	PRIVATE pbdt
+	PRIVATE exstd-module
+)
+target_sources(
+	pbdt-module
+	PUBLIC
+	FILE_SET pbdt_modules
+	TYPE CXX_MODULES
+	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
+)
+
+if(PBDT_BUILD_TESTS)
+	add_subdirectory(tests)
+endif()
+
+if(PBDT_INSTALL)
+	include(GNUInstallDirs)
+	include(CMakePackageConfigHelpers)
+
+	# Header files
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/include/exstd
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+	)
+
+	# targets
+	install(
+		TARGETS pbdt pbdt-module exstd exstd-module
+		EXPORT ${PROJECT_NAME}-targets
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		FILE_SET pbdt_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}
+		FILE_SET exstd_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}/exstd
+	)
+
+	install(
+		EXPORT ${PROJECT_NAME}-targets
+		FILE ${PROJECT_NAME}-targets.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-config.cmake)
+endif()

@@ -127,11 +127,24 @@ jobs:
 
       - name: install clang
         run: |
-          brew install llvm@16
-          echo PATH="/opt/homebrew/opt/llvm@16/bin:$PATH" >> $GITHUB_ENV
-          brew link --overwrite llvm@16
+          brew install llvm@19
+          echo PATH="/opt/homebrew/opt/llvm@19/bin:$PATH" >> $GITHUB_ENV
+          brew link --overwrite llvm@19
 
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
         with:
           preset: ${{ matrix.preset }}
+
+  check-success:
+    runs-on: ubuntu-latest
+    needs: [windows-build, linux-build, macos-build]
+    steps:
+      - name: check success
+        run: |
+          if [[ "${{ needs.windows-build.result }}" != "success" ]] || \
+             [[ "${{ needs.linux-build.result }}" != "success" ]] || \
+             [[ "${{ needs.macos-build.result }}" != "success" ]]; then
+            echo "One or more builds failed."
+            exit 1
+          fi
