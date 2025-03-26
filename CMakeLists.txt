@@ -109,6 +109,17 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	include(GNUInstallDirs)
 	include(CMakePackageConfigHelpers)
 
+	# Header files
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/include/exstd
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+	)
+
 	# Version config
 	write_basic_package_version_file(
 		${PROJECT_NAME}-config-version.cmake
