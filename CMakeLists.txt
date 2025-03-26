@@ -145,6 +145,23 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 	)
 
+	# Module based targets
+	install(
+		TARGETS pbdt-module exstd-module
+		EXPORT ${PROJECT_NAME}-module-targets
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		FILE_SET pbdt_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}
+		FILE_SET exstd_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}/exstd
+	)
+
+	install(
+		EXPORT ${PROJECT_NAME}-module-targets
+		FILE ${PROJECT_NAME}-module-targets.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+
 	# Version config
 	write_basic_package_version_file(
 		${PROJECT_NAME}-config-version.cmake
@@ -157,6 +174,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	file(WRITE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake.in [[
 @PACKAGE_INIT@
 include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-module-targets.cmake")
 	]])
 
 	configure_package_config_file(
