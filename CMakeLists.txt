@@ -122,6 +122,17 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 	)
 
+	# Module files
+	install(
+		FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/miu/${PROJECT_NAME}
+	)
+
+	install(
+		FILES ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/src/module/core.cppm
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/miu/${PROJECT_NAME}/exstd
+	)
+
 	# Header based targets
 	install(
 		TARGETS pbdt exstd
