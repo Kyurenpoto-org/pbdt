@@ -109,6 +109,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	include(GNUInstallDirs)
 	include(CMakePackageConfigHelpers)
 
+	# Version config
 	write_basic_package_version_file(
 		${PROJECT_NAME}-config-version.cmake
 		VERSION ${PROJECT_VERSION}
@@ -116,6 +117,7 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		ARCH_INDEPENDENT
 	)
 
+	# CMake config
 	file(WRITE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake.in [[
 @PACKAGE_INIT@
 include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-targets.cmake")
@@ -127,6 +129,7 @@ include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-targets.cmake")
 		INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 	)
 
+	# pkg-config
 	file(WRITE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.pc.in [[
 prefix=@CMAKE_INSTALL_PREFIX@
 exec_prefix=@CMAKE_INSTALL_PREFIX@
