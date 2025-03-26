@@ -78,7 +78,9 @@ target_link_libraries(
 )
 target_include_directories(
 	pbdt
-	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
 )
 
 # For module based library
@@ -118,6 +120,18 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	install(
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/include/exstd
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+	)
+
+	# Header based targets
+	install(
+		TARGETS pbdt exstd
+		EXPORT ${PROJECT_NAME}-targets
+	)
+
+	install(
+		EXPORT ${PROJECT_NAME}-targets
+		FILE ${PROJECT_NAME}-targets.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 	)
 
 	# Version config

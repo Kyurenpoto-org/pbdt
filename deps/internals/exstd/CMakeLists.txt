@@ -11,7 +11,9 @@ target_compile_features(
 )
 target_include_directories(
     exstd
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 
 # For module based library
