@@ -32,7 +32,8 @@ target_sources(
     PUBLIC
     FILE_SET exstd_modules
     TYPE CXX_MODULES
-    FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
+    BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+    FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
 )
 
 if(PBDT_BUILD_TESTS)

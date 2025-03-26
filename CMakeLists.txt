@@ -100,7 +100,8 @@ target_sources(
 	PUBLIC
 	FILE_SET pbdt_modules
 	TYPE CXX_MODULES
-	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
+	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
 )
 
 if(PBDT_BUILD_TESTS)
@@ -120,17 +121,6 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	install(
 		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/include/exstd
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
-	)
-
-	# Module files
-	install(
-		FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/miu/${PROJECT_NAME}
-	)
-
-	install(
-		FILES ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/src/module/core.cppm
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cxx/miu/${PROJECT_NAME}/exstd
 	)
 
 	# Header based targets
