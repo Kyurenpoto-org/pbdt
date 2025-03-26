@@ -123,22 +123,10 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
 	)
 
-	# Header based targets
+	# targets
 	install(
-		TARGETS pbdt exstd
+		TARGETS pbdt pbdt-module exstd exstd-module
 		EXPORT ${PROJECT_NAME}-targets
-	)
-
-	install(
-		EXPORT ${PROJECT_NAME}-targets
-		FILE ${PROJECT_NAME}-targets.cmake
-		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-	)
-
-	# Module based targets
-	install(
-		TARGETS pbdt-module exstd-module
-		EXPORT ${PROJECT_NAME}-module-targets
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib
@@ -147,8 +135,8 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	)
 
 	install(
-		EXPORT ${PROJECT_NAME}-module-targets
-		FILE ${PROJECT_NAME}-module-targets.cmake
+		EXPORT ${PROJECT_NAME}-targets
+		FILE ${PROJECT_NAME}-targets.cmake
 		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
 	)
 
@@ -164,7 +152,6 @@ if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
 	file(WRITE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}-config.cmake.in [[
 @PACKAGE_INIT@
 include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-targets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/${PROJECT_NAME}-module-targets.cmake")
 	]])
 
 	configure_package_config_file(
