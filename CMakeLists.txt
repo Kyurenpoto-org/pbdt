@@ -14,12 +14,19 @@ project(
 	CXX
 )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	set(PBDT_IS_TOP_LEVEL_PROJECT ON)
+else()
+	set(PBDT_IS_TOP_LEVEL_PROJECT OFF)
+endif()
+
+option(PBDT_BUILD_TESTS "Build the tests" ${PBDT_IS_TOP_LEVEL_PROJECT})
+option(PBDT_INSTALL "Install targets" ${PBDT_IS_TOP_LEVEL_PROJECT})
+
 if(POLICY CMP0141)
 	cmake_policy(SET CMP0141 NEW)
 	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
-
-option(PBDT_BUILD_TESTS "Build the tests" OFF)
 
 # packages
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
@@ -108,7 +115,7 @@ if(PBDT_BUILD_TESTS)
 	add_subdirectory(tests)
 endif()
 
-if(${CMAKE_PROJECT_NAME} STREQUAL ${PROJECT_NAME})
+if(PBDT_INSTALL)
 	include(GNUInstallDirs)
 	include(CMakePackageConfigHelpers)
 
