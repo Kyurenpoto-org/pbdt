@@ -14,12 +14,19 @@ project(
 	CXX
 )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+	set(PBDT_IS_TOP_LEVEL_PROJECT ON)
+else()
+	set(PBDT_IS_TOP_LEVEL_PROJECT OFF)
+endif()
+
+option(PBDT_BUILD_TESTS "Build the tests" ${PBDT_IS_TOP_LEVEL_PROJECT})
+option(PBDT_INSTALL "Install targets" ${PBDT_IS_TOP_LEVEL_PROJECT})
+
 if(POLICY CMP0141)
 	cmake_policy(SET CMP0141 NEW)
 	set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
-
-option(PBDT_BUILD_TESTS "Build the tests" OFF)
 
 # packages
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/package-manager-toolchain.cmake)
@@ -78,7 +85,9 @@ target_link_libraries(
 )
 target_include_directories(
 	pbdt
-	INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+	INTERFACE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<INSTALL_INTERFACE:include>
 )
 
 # For module based library
@@ -98,9 +107,45 @@ target_sources(
 	PUBLIC
 	FILE_SET pbdt_modules
 	TYPE CXX_MODULES
-	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/module/core.cppm
+	BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
 )
 
 if(PBDT_BUILD_TESTS)
 	add_subdirectory(tests)
+endif()
+
+if(PBDT_INSTALL)
+	include(GNUInstallDirs)
+	include(CMakePackageConfigHelpers)
+
+	# Header files
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+	)
+
+	install(
+		DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deps/internals/exstd/include/exstd
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}
+	)
+
+	# targets
+	install(
+		TARGETS pbdt pbdt-module exstd exstd-module
+		EXPORT ${PROJECT_NAME}-targets
+		RUNTIME DESTINATION bin
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+		FILE_SET pbdt_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}
+		FILE_SET exstd_modules DESTINATION lib/cxx/miu/${PROJECT_NAME}/exstd
+	)
+
+	install(
+		EXPORT ${PROJECT_NAME}-targets
+		FILE ${PROJECT_NAME}-targets.cmake
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+
+	include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/install-config.cmake)
 endif()
