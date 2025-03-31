@@ -19,7 +19,7 @@ on:
       - release/*
 
 jobs:
-  windows-ci:
+  windows-build:
     runs-on: windows-latest
     strategy:
       matrix:
@@ -52,7 +52,7 @@ jobs:
         with:
           preset: ${{ matrix.preset }}
 
-  linux-ci:
+  linux-build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -93,7 +93,7 @@ jobs:
         with:
           preset: ${{ matrix.preset }}
 
-  macos-ci:
+  macos-build:
     runs-on: macos-latest
     strategy:
       matrix:
