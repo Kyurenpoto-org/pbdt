@@ -536,26 +536,137 @@ namespace pbdt::bdd
         RunnableScenario(Target&&, Prop&&, Domain&&) -> RunnableScenario<Target, Prop, Domain>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&&, Prop&&, Domain&) -> RunnableScenario<Target, Prop, Domain&>;
+        RunnableScenario(Target&&, Prop&&, const Domain&) -> RunnableScenario<Target, Prop, const Domain&>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&&, Prop&, Domain&&) -> RunnableScenario<Target, Prop&, Domain>;
+        RunnableScenario(Target&&, const Prop&, Domain&&) -> RunnableScenario<Target, const Prop&, Domain>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&&, Prop&, Domain&) -> RunnableScenario<Target, Prop&, Domain&>;
+        RunnableScenario(Target&&, const Prop&, const Domain&) -> RunnableScenario<Target, const Prop&, const Domain&>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&, Prop&&, Domain&&) -> RunnableScenario<Target&, Prop, Domain>;
+        RunnableScenario(const Target&, Prop&&, Domain&&) -> RunnableScenario<const Target&, Prop, Domain>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&, Prop&&, Domain&) -> RunnableScenario<Target&, Prop, Domain&>;
+        RunnableScenario(const Target&, Prop&&, const Domain&) -> RunnableScenario<const Target&, Prop, const Domain&>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&, Prop&, Domain&&) -> RunnableScenario<Target&, Prop&, Domain>;
+        RunnableScenario(const Target&, const Prop&, Domain&&) -> RunnableScenario<const Target&, const Prop&, Domain>;
 
         template <typename Target, typename Prop, typename Domain>
-        RunnableScenario(Target&, Prop&, Domain&) -> RunnableScenario<Target&, Prop&, Domain&>;
+        RunnableScenario(const Target&, const Prop&, const Domain&)
+            -> RunnableScenario<const Target&, const Prop&, const Domain&>;
 
+        template <typename T>
+        constexpr T toStorableRef(const T& t)
+        {
+            return t;
+        }
+
+        template <typename T>
+            requires std::is_rvalue_reference_v<T>
+        constexpr T& toStorableRef(const T& t)
+        {
+            return t;
+        }
+
+        template <typename Target, typename Prop, typename Domain>
+        struct ScenarioContext
+        {
+            constexpr ScenarioContext(
+                StorableRefType<Target> target, StorableRefType<Prop> prop, StorableRefType<Domain> domain
+            ) :
+                target(std::forward<Target>(target)),
+                prop(std::forward<Prop>(prop)),
+                domain(std::forward<Domain>(domain))
+            {
+            }
+
+            template <typename NewTarget>
+            constexpr ScenarioContext<NewTarget, Prop, Domain> given(NewTarget&& newTarget) const
+            {
+                return {
+                    std::forward<NewTarget>(newTarget),
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewTarget>
+            constexpr ScenarioContext<const NewTarget&, Prop, Domain> given(const NewTarget& newTarget) const
+            {
+                return {
+                    newTarget,
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewProp>
+            constexpr ScenarioContext<Target, NewProp, Domain> then(NewProp&& newProp) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    std::forward<NewProp>(newProp),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewProp>
+            constexpr ScenarioContext<Target, const NewProp&, Domain> then(const NewProp& newProp) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    newProp,
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewDomain>
+            constexpr ScenarioContext<Target, Prop, NewDomain> when(NewDomain&& newDomain) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    std::forward<NewDomain>(newDomain),
+                };
+            }
+
+            template <typename NewDomain>
+            constexpr ScenarioContext<Target, Prop, const NewDomain&> when(const NewDomain& newDomain) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    newDomain,
+                };
+            }
+
+            constexpr auto complete() const
+                requires(
+                    !std::is_same_v<Target, std::monostate> && !std::is_same_v<Prop, std::monostate>
+                    && !std::is_same_v<Domain, std::monostate>
+                )
+            {
+                return RunnableScenario{
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+        private:
+            Target target;
+            Prop prop;
+            Domain domain;
+        };
+
+        constexpr ScenarioContext<const std::monostate, const std::monostate, const std::monostate>
+            emptyScenarioContext{
+                std::monostate{},
+                std::monostate{},
+                std::monostate{},
+            };
     }
 
     template <typename Target, typename Prop, typename Domain>
@@ -569,6 +680,10 @@ namespace pbdt::bdd
         };
     }
 
+    constexpr auto scenario()
+    {
+        return detail::emptyScenarioContext;
+    }
 }
 
 namespace exstd::detail
