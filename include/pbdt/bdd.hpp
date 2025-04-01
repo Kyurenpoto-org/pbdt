@@ -583,6 +583,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewTarget>
+                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
             constexpr ScenarioContext<NewTarget, Prop, Domain> given(NewTarget&& newTarget) const
             {
                 return {
@@ -593,6 +594,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewTarget>
+                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
             constexpr ScenarioContext<const NewTarget&, Prop, Domain> given(const NewTarget& newTarget) const
             {
                 return {
@@ -603,6 +605,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewProp>
+                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
             constexpr ScenarioContext<Target, NewProp, Domain> then(NewProp&& newProp) const
             {
                 return {
@@ -613,6 +616,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewProp>
+                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
             constexpr ScenarioContext<Target, const NewProp&, Domain> then(const NewProp& newProp) const
             {
                 return {
@@ -623,6 +627,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewDomain>
+                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
             constexpr ScenarioContext<Target, Prop, NewDomain> when(NewDomain&& newDomain) const
             {
                 return {
@@ -633,6 +638,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewDomain>
+                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
             constexpr ScenarioContext<Target, Prop, const NewDomain&> when(const NewDomain& newDomain) const
             {
                 return {
@@ -670,8 +676,8 @@ namespace pbdt::bdd
     }
 
     template <typename Target, typename Prop, typename Domain>
-    constexpr auto scenario(Target&& target, Prop&& prop, Domain&& domain)
         requires detail::CallableTarget<Target> && detail::CallableProperty<Prop> && detail::RangeDomain<Domain>
+    constexpr auto scenario(Target&& target, Prop&& prop, Domain&& domain)
     {
         return detail::RunnableScenario{
             std::forward<Target>(target),
