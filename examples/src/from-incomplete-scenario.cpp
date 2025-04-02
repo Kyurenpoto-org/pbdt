@@ -35,7 +35,7 @@ int main()
                                      }
                                  );
 
-    static_assert(context.when(domain).complete().passable());
+    static_assert(context.when(domain).complete().run().passable());
 
     return EXIT_SUCCESS;
 }

@@ -521,9 +521,15 @@ namespace pbdt::bdd
             {
             }
 
-            constexpr bool passable() const
+            constexpr auto run() const
             {
-                return pbdt::test_context::propertyContext(target, prop, domain).passable();
+                return pbdt::test_context::parameterizedContext(
+                    std::forward<Domain>(domain),
+                    [this](const auto& sample)
+                    {
+                        return prop(sample, exstd::applyOrInvoke(target, sample));
+                    }
+                );
             }
 
         private:

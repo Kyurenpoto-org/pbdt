@@ -6,7 +6,7 @@
 
 #include "test-context-common.hpp"
 
-#include "pbdt/test-context.hpp"
+#include "pbdt/bdd.hpp"
 
 struct Expect
 {
@@ -22,7 +22,8 @@ struct PropertyContext
     template <typename Target, typename Prop, typename Domain>
     constexpr auto operator()(Target&& target, Prop&& prop, Domain&& domain)
     {
-        return pbdt::test_context::propertyContext(target, prop, domain);
+        return pbdt::bdd::scenario(std::forward<Target>(target), std::forward<Prop>(prop), std::forward<Domain>(domain))
+            .run();
     }
 };
 
