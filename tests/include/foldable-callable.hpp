@@ -50,21 +50,21 @@ namespace Foldable
     template <size_t N>
     using IndexToType = typename IndexToTypeImpl<N>::type;
 
-    template <size_t, size_t>
+    template <size_t, size_t, typename, typename>
     struct FoldableCallable;
 
-    template <size_t N>
-    struct FoldableCallable<0, N>
+    template <size_t N, typename T, typename U>
+    struct FoldableCallable<0, N, T, U>
     {
         template <typename Expect>
-        static constexpr auto value = &freeFunction<N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>, Expect>;
+        static constexpr auto value = &freeFunction<N, T, U, Expect>;
     };
 
-    template <size_t N>
-    struct FoldableCallable<1, N>
+    template <size_t N, typename T, typename U>
+    struct FoldableCallable<1, N, T, U>
     {
         template <typename Expect>
-        static constexpr auto value = Functor<N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>, Expect>{};
+        static constexpr auto value = Functor<N, T, U, Expect>{};
     };
 
     template <typename Expect, size_t N, size_t First, size_t... Rest>
@@ -72,7 +72,8 @@ namespace Foldable
     {
         static constexpr auto value = std::tuple_cat(
             std::tuple{
-                FoldableCallable<First % 2, N>::template value<Expect>,
+                FoldableCallable<First % 2, N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>>::template value<
+                    Expect>,
             },
             FoldableCombination<Expect, N, Rest...>::value
         );
@@ -82,7 +83,7 @@ namespace Foldable
     struct FoldableCombination<Expect, N, M>
     {
         static constexpr auto value = std::tuple{
-            FoldableCallable<M % 2, N>::template value<Expect>,
+            FoldableCallable<M % 2, N % 2, IndexToType<N / 2 % 2>, IndexToType<N / 4 % 2>>::template value<Expect>,
         };
     };
 }
