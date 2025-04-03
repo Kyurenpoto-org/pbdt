@@ -74,39 +74,23 @@ namespace Productable
     struct ProductableContainer;
 
     template <typename T, size_t N>
-    struct ProductableContainer<0, T, N>
+    struct ProductableContainer<0, T, N> : SequenceArray<T, N>
     {
-        static constexpr auto rvalue()
-        {
-            return SequenceArray<T, N>::rvalue();
-        }
     };
 
     template <typename T, size_t N>
-    struct ProductableContainer<1, T, N>
+    struct ProductableContainer<1, T, N> : SequenceArraySpan<T, N>
     {
-        static constexpr auto rvalue()
-        {
-            return SequenceArraySpan<T, N>::rvalue();
-        }
     };
 
     template <typename T, size_t N>
-    struct ProductableContainer<2, T, N>
+    struct ProductableContainer<2, T, N> : SequenceArrayOwningView<T, N>
     {
-        static constexpr auto rvalue()
-        {
-            return SequenceArrayOwningView<T, N>::rvalue();
-        }
     };
 
     template <typename T, size_t N>
-    struct ProductableContainer<3, T, N>
+    struct ProductableContainer<3, T, N> : SequenceArrayRefView<T, N>
     {
-        static constexpr auto rvalue()
-        {
-            return SequenceArrayRefView<T, N>::rvalue();
-        }
     };
 
     template <size_t N>
