@@ -524,7 +524,7 @@ namespace pbdt::bdd
             constexpr auto run() const
             {
                 return pbdt::test_context::parameterizedContext(
-                    std::forward<Domain>(domain),
+                    domain,
                     [this](const auto& sample)
                     {
                         return prop(sample, exstd::applyOrInvoke(target, sample));
@@ -688,7 +688,7 @@ namespace pbdt::bdd
         return detail::RunnableScenario{
             std::forward<Target>(target),
             std::forward<Prop>(prop),
-            std::forward<Domain>(domain),
+            exstd::toContainer(std::forward<Domain>(domain)),
         };
     }
 

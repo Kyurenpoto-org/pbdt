@@ -20,7 +20,7 @@ struct Expect
 struct PropertyContext
 {
     template <typename Target, typename Prop, typename Domain>
-    constexpr auto operator()(Target&& target, Prop&& prop, Domain&& domain)
+    constexpr auto operator()(Target&& target, Prop&& prop, Domain&& domain) const
     {
         return pbdt::bdd::scenario(std::forward<Target>(target), std::forward<Prop>(prop), std::forward<Domain>(domain))
             .run();
