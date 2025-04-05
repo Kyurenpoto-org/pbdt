@@ -73,4 +73,4 @@ add_header_module_tests("pbdt" "then-component-fixture" "then-component-idempote
 add_header_module_tests("pbdt" "then-component-fixture" "then-component-associative" "pbdt.unit.then-component.associative")
 
 # Runnable Scenario: Example based
-add_header_module_tests("pbdt" "bdd-fixture" "runnable-scenario" "pbdt.unit.runnable-scenario")
+add_header_module_tests("pbdt" "bdd-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")

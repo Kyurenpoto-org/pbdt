@@ -171,4 +171,33 @@ namespace Runnable
             return Domain<C % 40, D % 36>::rvalue();
         }
     };
+
+    template <typename Expect, size_t N>
+    using RunnableCombinationSuccessSample =
+        SuccessRunnableCombination<Expect, N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+
+    template <typename Expect, size_t N>
+    using RunnableCombinationFailureSample =
+        FailureRunnableCombination<Expect, N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+
+    template <typename Expect, size_t First, size_t... Rest>
+    struct RunnableCombinationSamples
+    {
+        static constexpr auto value = std::tuple_cat(
+            std::tuple{
+                RunnableCombinationSuccessSample<Expect, First>{},
+                RunnableCombinationFailureSample<Expect, First>{},
+            },
+            RunnableCombinationSamples<Expect, Rest...>::value
+        );
+    };
+
+    template <typename Expect, size_t N>
+    struct RunnableCombinationSamples<Expect, N>
+    {
+        static constexpr auto value = std::tuple{
+            RunnableCombinationSuccessSample<Expect, N>{},
+            RunnableCombinationFailureSample<Expect, N>{},
+        };
+    };
 }
