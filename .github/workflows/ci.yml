@@ -129,8 +129,6 @@ jobs:
         run: |
           brew install llvm@19
           echo PATH="/opt/homebrew/opt/llvm@19/bin:$PATH" >> $GITHUB_ENV
-          echo LIBRARY_PATH="/opt/homebrew/opt/llvm@19/lib:$LIBRARY_PATH" >> $GITHUB_ENV
-          echo CPLUS_INCLUDE_PATH="/opt/homebrew/opt/llvm@19/include/c++/v1:$CPLUS_INCLUDE_PATH" >> $GITHUB_ENV
           brew link --overwrite llvm@19
 
       - name: run cmake
