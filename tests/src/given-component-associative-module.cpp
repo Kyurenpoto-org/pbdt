@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "associative.hpp"
+#include "properties/associative.hpp"
 
 import exstd;
 import pbdt;

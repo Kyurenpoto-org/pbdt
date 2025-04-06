@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "model.hpp"
+#include "properties/model.hpp"
 
 import exstd;
 import pbdt;

@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "idempotent.hpp"
+#include "properties/idempotent.hpp"
 
 #include "pbdt/bdd.hpp"
 
