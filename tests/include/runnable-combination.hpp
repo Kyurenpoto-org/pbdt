@@ -134,7 +134,7 @@ namespace Runnable
     {
     };
 
-    template <typename Expect, size_t A, size_t B, size_t C, size_t D>
+    template <size_t A, size_t B, size_t C, size_t D>
     struct SuccessRunnableCombination
     {
         constexpr auto target() const
@@ -142,6 +142,7 @@ namespace Runnable
             return Target<A % 2, D % 36>::value;
         }
 
+        template <typename Expect>
         constexpr auto prop() const
         {
             return Prop<B % 2, D % 36>::template value<Expect>;
@@ -153,7 +154,7 @@ namespace Runnable
         }
     };
 
-    template <typename Expect, size_t A, size_t B, size_t C, size_t D>
+    template <size_t A, size_t B, size_t C, size_t D>
     struct FailureRunnableCombination
     {
         constexpr auto target() const
@@ -161,6 +162,7 @@ namespace Runnable
             return Target<A % 2, D % 36>::value;
         }
 
+        template <typename Expect>
         constexpr auto prop() const
         {
             return Prop<B % 2 + 2, D % 36>::template value<Expect>;
@@ -172,32 +174,32 @@ namespace Runnable
         }
     };
 
-    template <typename Expect, size_t N>
+    template <size_t N>
     using RunnableCombinationSuccessSample =
-        SuccessRunnableCombination<Expect, N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+        SuccessRunnableCombination<N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
 
-    template <typename Expect, size_t N>
+    template <size_t N>
     using RunnableCombinationFailureSample =
-        FailureRunnableCombination<Expect, N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+        FailureRunnableCombination<N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
 
-    template <typename Expect, size_t First, size_t... Rest>
+    template <size_t First, size_t... Rest>
     struct RunnableCombinationSamples
     {
         static constexpr auto value = std::tuple_cat(
             std::tuple{
-                RunnableCombinationSuccessSample<Expect, First>{},
-                RunnableCombinationFailureSample<Expect, First>{},
+                RunnableCombinationSuccessSample<First>{},
+                RunnableCombinationFailureSample<First>{},
             },
-            RunnableCombinationSamples<Expect, Rest...>::value
+            RunnableCombinationSamples<Rest...>::value
         );
     };
 
-    template <typename Expect, size_t N>
-    struct RunnableCombinationSamples<Expect, N>
+    template <size_t N>
+    struct RunnableCombinationSamples<N>
     {
         static constexpr auto value = std::tuple{
-            RunnableCombinationSuccessSample<Expect, N>{},
-            RunnableCombinationFailureSample<Expect, N>{},
+            RunnableCombinationSuccessSample<N>{},
+            RunnableCombinationFailureSample<N>{},
         };
     };
 }

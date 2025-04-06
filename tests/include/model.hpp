@@ -59,7 +59,7 @@ template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
 struct TwoWayRunnableScenarioCombination
 {
     static constexpr auto COMBINATIONS = Runnable::RunnableCombinationSamples<
-        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr RunnableScenario runnableScenario{};
     static constexpr ApplyOrInvoke applyOrInvoke{};
@@ -74,7 +74,9 @@ struct TwoWayRunnableScenarioCombination
     {
         constexpr auto combination = std::get<Idx>(COMBINATIONS);
 
-        return runnableScenario(combination.target(), combination.prop(), combination.domain()).run().passable();
+        return runnableScenario(combination.target(), combination.template prop<Expect>(), combination.domain())
+            .run()
+            .passable();
     }
 
     template <size_t Idx>
@@ -84,7 +86,7 @@ struct TwoWayRunnableScenarioCombination
 
         for (const auto& sample : combination.domain())
         {
-            if (!combination.prop()(sample, applyOrInvoke(combination.target(), sample)).passable())
+            if (!combination.template prop<Expect>()(sample, applyOrInvoke(combination.target(), sample)).passable())
             {
                 return false;
             }

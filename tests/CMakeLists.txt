@@ -3,17 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 # fixtures
-add_library(bdd-fixture INTERFACE)
-
-target_compile_features(
-    bdd-fixture
-    INTERFACE cxx_std_23
-)
-target_include_directories(
-    bdd-fixture
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 add_library(given-component-fixture STATIC)
 
 target_compile_features(
@@ -59,6 +48,21 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/foldable-callable.cpp
 )
 
+add_library(runnable-scenario-fixture STATIC)
+
+target_compile_features(
+    runnable-scenario-fixture
+    PUBLIC cxx_std_23
+)
+target_include_directories(
+    runnable-scenario-fixture
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+target_sources(
+    runnable-scenario-fixture
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/runnable-combination.cpp
+)
+
 # tests
 # Given Component: Set Category
 add_header_module_tests("pbdt" "given-component-fixture" "given-component-idempotent" "pbdt.unit.given-component.idempotent")
@@ -73,4 +77,4 @@ add_header_module_tests("pbdt" "then-component-fixture" "then-component-idempote
 add_header_module_tests("pbdt" "then-component-fixture" "then-component-associative" "pbdt.unit.then-component.associative")
 
 # Runnable Scenario: Modeling
-add_header_module_tests("pbdt" "bdd-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")
+add_header_module_tests("pbdt" "runnable-scenario-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")
