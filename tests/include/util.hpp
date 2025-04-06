@@ -7,8 +7,12 @@
 #pragma once
 
 #include <array>
-#include <print>
+#include <iostream>
 #include <source_location>
+
+#if __cpp_lib_print >= 202207L
+#include <print>
+#endif
 
 namespace
 {
@@ -16,7 +20,11 @@ namespace
     {
         if (!expr)
         {
+#if __cpp_lib_print >= 202207L
             std::println("{0}({1},{2})", location.file_name(), location.line(), location.column());
+#else
+            std::cerr << location.file_name() << "(" << location.line() << "," << location.column() << ")\n";
+#endif
             std::exit(EXIT_FAILURE);
         }
     }
