@@ -62,9 +62,9 @@ private:
     static constexpr TwoWayCompletableRawContext completable{};
 };
 
-#include "composable-callable.hpp"
-#include "foldable-callable.hpp"
-#include "productable-container.hpp"
+#include "generators/composable-callable.hpp"
+#include "generators/foldable-callable.hpp"
+#include "generators/productable-container.hpp"
 
 template <typename Given>
 struct TwoWayCompletableRawGivenContext

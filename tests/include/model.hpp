@@ -53,7 +53,7 @@ private:
     static constexpr TwoWayRunnableCombination runnable{};
 };
 
-#include "runnable-combination.hpp"
+#include "generators/runnable-combination.hpp"
 
 template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
 struct TwoWayRunnableScenarioCombination

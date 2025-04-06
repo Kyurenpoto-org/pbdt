@@ -15,7 +15,7 @@ target_include_directories(
 )
 target_sources(
     given-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/composable-callable.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/composable-callable.cpp
 )
 
 add_library(when-component-fixture STATIC)
@@ -30,7 +30,7 @@ target_include_directories(
 )
 target_sources(
     when-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/productable-container.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/productable-container.cpp
 )
 
 add_library(then-component-fixture STATIC)
@@ -45,7 +45,7 @@ target_include_directories(
 )
 target_sources(
     then-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/foldable-callable.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/foldable-callable.cpp
 )
 
 add_library(runnable-scenario-fixture STATIC)
@@ -60,7 +60,7 @@ target_include_directories(
 )
 target_sources(
     runnable-scenario-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/runnable-combination.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
 # tests
