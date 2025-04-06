@@ -18,7 +18,7 @@ int main()
     };
     constexpr auto domain = std::array<int, 5>{ 1, 2, 3, 4, 5 };
 
-    static_assert(pbdt::bdd::scenario(target, prop, domain).passable());
+    static_assert(pbdt::bdd::scenario(target, prop, domain).run().passable());
 
     return EXIT_SUCCESS;
 }

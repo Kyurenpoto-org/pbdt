@@ -52,7 +52,7 @@ namespace Composable
     template <typename Ret, typename... Args>
     struct Functor
     {
-        constexpr Ret operator()(Args...)
+        constexpr Ret operator()(Args...) const
         {
             return Ret{};
         }

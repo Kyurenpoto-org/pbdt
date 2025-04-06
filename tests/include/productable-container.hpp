@@ -70,44 +70,32 @@ namespace Productable
         }
     };
 
-    template <size_t, size_t>
+    template <size_t, typename, size_t>
     struct ProductableContainer;
 
-    template <size_t N>
-    struct ProductableContainer<0, N>
+    template <typename T, size_t N>
+    struct ProductableContainer<0, T, N> : SequenceArray<T, N>
     {
-        static constexpr auto rvalue()
-        {
-            return SequenceArray<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
+    };
+
+    template <typename T, size_t N>
+    struct ProductableContainer<1, T, N> : SequenceArraySpan<T, N>
+    {
+    };
+
+    template <typename T, size_t N>
+    struct ProductableContainer<2, T, N> : SequenceArrayOwningView<T, N>
+    {
+    };
+
+    template <typename T, size_t N>
+    struct ProductableContainer<3, T, N> : SequenceArrayRefView<T, N>
+    {
     };
 
     template <size_t N>
-    struct ProductableContainer<1, N>
-    {
-        static constexpr auto rvalue()
-        {
-            return SequenceArraySpan<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
-    };
-
-    template <size_t N>
-    struct ProductableContainer<2, N>
-    {
-        static constexpr auto rvalue()
-        {
-            return SequenceArrayOwningView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
-    };
-
-    template <size_t N>
-    struct ProductableContainer<3, N>
-    {
-        static constexpr auto rvalue()
-        {
-            return SequenceArrayRefView<decltype(std::make_index_sequence<N / 2 % 3 + 1>()), N % 2>::rvalue();
-        }
-    };
+    using ProductableCombinationImpl =
+        ProductableContainer<N % 4, decltype(std::make_index_sequence<N / 8 % 3 + 1>()), N / 4 % 2>;
 
     template <size_t First, size_t... Rest>
     struct ProductableCombination
@@ -116,7 +104,7 @@ namespace Productable
             std::tuple{
                 []()
                 {
-                    return ProductableContainer<First % 4, First / 4 % 6>::rvalue();
+                    return ProductableCombinationImpl<First>::rvalue();
                 },
             },
             ProductableCombination<Rest...>::value
@@ -129,7 +117,7 @@ namespace Productable
         static constexpr auto value = std::tuple{
             []()
             {
-                return ProductableContainer<N % 4, N / 4 % 6>::rvalue();
+                return ProductableCombinationImpl<N>::rvalue();
             },
         };
     };

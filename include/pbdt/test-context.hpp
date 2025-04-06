@@ -312,16 +312,4 @@ namespace pbdt::test_context
         return context;
 #endif
     }
-
-    template <typename Target, typename Prop, typename Domain>
-    constexpr detail::SampledTestContext propertyContext(Target&& target, Prop&& prop, Domain&& domain)
-    {
-        return pbdt::test_context::parameterizedContext(
-            std::forward<Domain>(domain),
-            [&target, &prop](const auto& sample)
-            {
-                return prop(sample, exstd::applyOrInvoke(target, sample));
-            }
-        );
-    }
 }
