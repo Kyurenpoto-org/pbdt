@@ -4,17 +4,25 @@
  * SPDX - License - Identifier: MIT
  */
 
+#include <array>
+
 #include "properties/model.hpp"
 
 import exstd;
 import pbdt;
 
 #include "for-injection.hpp"
+#include "suite-runner.hpp"
 
-int main()
+void runnableScenario()
 {
     const AcceptableCombination<TwoWayRunnableScenarioCombination<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
     acceptable.accept(ModelValidator{});
+}
+
+int main(int argc, const char* const* argv)
+{
+    suite(std::array{ "runnable-scenario" }, std::array{ runnableScenario }).run(argc, argv);
 
     return EXIT_SUCCESS;
 }

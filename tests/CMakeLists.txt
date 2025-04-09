@@ -48,15 +48,6 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/foldable-callable.cpp
 )
 
-add_library(associative-fixture INTERFACE)
-
-target_link_libraries(
-    associative-fixture
-    INTERFACE given-component-fixture
-    INTERFACE when-component-fixture
-    INTERFACE then-component-fixture
-)
-
 add_library(runnable-scenario-fixture STATIC)
 
 target_compile_features(
@@ -92,6 +83,12 @@ add_header_module_prop_suite(
 )
 
 # Runnable Scenario: Modeling
-add_header_module_tests("pbdt" "runnable-scenario-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")
+add_header_module_prop_suite(
+    PROP modeling
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS runnable-scenario
+    FIXTURES runnable-scenario-fixture
+)
 
 # integrated tests
