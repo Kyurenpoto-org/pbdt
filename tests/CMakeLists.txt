@@ -48,6 +48,15 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/foldable-callable.cpp
 )
 
+add_library(associative-fixture INTERFACE)
+
+target_link_libraries(
+    associative-fixture
+    INTERFACE given-component-fixture
+    INTERFACE when-component-fixture
+    INTERFACE then-component-fixture
+)
+
 add_library(runnable-scenario-fixture STATIC)
 
 target_compile_features(
@@ -63,18 +72,26 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
-# tests
-# Given Component: Set Category
-add_header_module_tests("pbdt" "given-component-fixture" "given-component-idempotent" "pbdt.unit.given-component.idempotent")
-add_header_module_tests("pbdt" "given-component-fixture" "given-component-associative" "pbdt.unit.given-component.associative")
-
-# When Component: Set Category that has product between any two objects
-add_header_module_tests("pbdt" "when-component-fixture" "when-component-idempotent" "pbdt.unit.when-component.idempotent")
-add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.unit.when-component.associative")
-
-# Then Component: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
-add_header_module_tests("pbdt" "then-component-fixture" "then-component-idempotent" "pbdt.unit.then-component.idempotent")
-add_header_module_tests("pbdt" "then-component-fixture" "then-component-associative" "pbdt.unit.then-component.associative")
+# unit tests
+# Given: Set Category
+# When: Set Category that has product between any two objects
+# Then: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
+add_header_module_prop_suite(
+    PROP idempotent
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS given when then
+    FIXTURES given-component-fixture when-component-fixture then-component-fixture
+)
+add_header_module_prop_suite(
+    PROP associative
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS given when then
+    FIXTURES given-component-fixture when-component-fixture then-component-fixture
+)
 
 # Runnable Scenario: Modeling
 add_header_module_tests("pbdt" "runnable-scenario-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")
+
+# integrated tests
