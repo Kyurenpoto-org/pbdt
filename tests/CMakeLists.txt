@@ -82,7 +82,6 @@ add_header_module_prop_suite(
     FIXTURES given-component-fixture when-component-fixture then-component-fixture
 )
 
-# Runnable Scenario: Modeling
 add_header_module_prop_suite(
     PROP modeling
     DEP pbdt
@@ -92,3 +91,10 @@ add_header_module_prop_suite(
 )
 
 # integrated tests
+add_header_module_prop_suite(
+    PROP homomorphic
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS runnable-scenario-with-then-component
+    FIXTURES runnable-scenario-fixture
+)
