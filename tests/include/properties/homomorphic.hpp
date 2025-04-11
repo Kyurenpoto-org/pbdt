@@ -7,34 +7,32 @@
 #include "util.hpp"
 
 template <typename TwoWayRunnableCombination>
-struct HomomorphicValidation
+struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnableCombination>>
 {
-    void run() const
+    static constexpr size_t size()
     {
-        runImpl<TwoWayRunnableCombination::size() - 1>();
+        return TwoWayRunnableCombination::size();
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return []()
+        {
+            return runnable.template beforeMorph<Idx>();
+        };
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return []()
+        {
+            return runnable.template afterMorph<Idx>();
+        };
     }
 
 private:
-    template <size_t Idx>
-    void runImpl() const
-    {
-        twoWayAssert(
-            []()
-            {
-                return runnable.template beforeMorph<Idx>();
-            },
-            []()
-            {
-                return runnable.template afterMorph<Idx>();
-            }
-        );
-
-        if constexpr (Idx > 0)
-        {
-            runImpl<Idx - 1>();
-        }
-    }
-
     static constexpr TwoWayRunnableCombination runnable{};
 };
 

@@ -7,34 +7,32 @@
 #include "util.hpp"
 
 template <typename ToComparable, typename TwoWayCompletableRawContext>
-struct AssociativeValidation
+struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable, TwoWayCompletableRawContext>>
 {
-    void run() const
+    static constexpr size_t size()
     {
-        runImpl<TwoWayCompletableRawContext::size() - 1>();
+        return TwoWayCompletableRawContext::size();
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return []()
+        {
+            return toComparable(completable.template l2rComplete<Idx>());
+        };
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return []()
+        {
+            return toComparable(completable.template r2lComplete<Idx>());
+        };
     }
 
 private:
-    template <size_t Idx>
-    void runImpl() const
-    {
-        twoWayAssert(
-            []()
-            {
-                return toComparable(completable.template l2rComplete<Idx>());
-            },
-            []()
-            {
-                return toComparable(completable.template r2lComplete<Idx>());
-            }
-        );
-
-        if constexpr (Idx > 0)
-        {
-            runImpl<Idx - 1>();
-        }
-    }
-
     static constexpr TwoWayCompletableRawContext completable{};
     static constexpr ToComparable toComparable{};
 };

@@ -31,6 +31,30 @@ namespace
         const auto runTimeB = b();
         dynamic_assert(runTimeA == runTimeB);
     }
+
+    template <typename Validatable>
+    struct ValidationBase
+    {
+        void run() const
+        {
+            runImpl<Validatable::size() - 1>();
+        }
+
+    private:
+        template <size_t Idx>
+        void runImpl() const
+        {
+            twoWayAssert(
+                static_cast<const Validatable&>(*this).template a<Idx>(),
+                static_cast<const Validatable&>(*this).template b<Idx>()
+            );
+
+            if constexpr (Idx > 0)
+            {
+                runImpl<Idx - 1>();
+            }
+        }
+    };
 }
 
 // https://gist.github.com/KoneLinx/d3601597248bed423daf1a7cf7bd9533

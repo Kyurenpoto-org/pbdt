@@ -7,36 +7,33 @@
 #include "util.hpp"
 
 template <typename ToComparable, typename CompletableRawContext>
-struct IdempotentValidation
+struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, CompletableRawContext>>
 {
-    void run() const
+    static constexpr size_t size()
     {
-        runImpl<CompletableRawContext::size() - 1>();
+        return CompletableRawContext::size();
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return []()
+        {
+            return toComparable(completable.complete(std::make_index_sequence<Idx + 1>()));
+        };
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return []()
+        {
+            return toComparable(completable.idempotentComplete(completable.complete(std::make_index_sequence<Idx + 1>())
+            ));
+        };
     }
 
 private:
-    template <size_t Measure>
-    void runImpl() const
-    {
-        twoWayAssert(
-            []()
-            {
-                return toComparable(completable.complete(std::make_index_sequence<Measure + 1>()));
-            },
-            []()
-            {
-                return toComparable(
-                    completable.idempotentComplete(completable.complete(std::make_index_sequence<Measure + 1>()))
-                );
-            }
-        );
-
-        if constexpr (Measure > 0)
-        {
-            runImpl<Measure - 1>();
-        }
-    }
-
     static constexpr CompletableRawContext completable{};
     static constexpr ToComparable toComparable{};
 };
