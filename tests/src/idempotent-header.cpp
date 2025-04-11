@@ -15,20 +15,20 @@
 
 void given()
 {
-    const AcceptableRawContext<ToFlatTuple, CompletableRawGivenContext<Given>> acceptable;
-    acceptable.accept(IdempotentValidator{});
+    const IdempotentValidation<ToFlatTuple, CompletableRawGivenContext<Given>> acceptable;
+    acceptable.run();
 }
 
 void when()
 {
-    const AcceptableRawContext<ToContainer, CompletableRawWhenContext<When>> acceptable;
-    acceptable.accept(IdempotentValidator{});
+    const IdempotentValidation<ToContainer, CompletableRawWhenContext<When>> acceptable;
+    acceptable.run();
 }
 
 void then()
 {
-    const AcceptableRawContext<ToFlatTuple, CompletableRawThenContext<Then, Expect>> acceptable;
-    acceptable.accept(IdempotentValidator{});
+    const IdempotentValidation<ToFlatTuple, CompletableRawThenContext<Then, Expect>> acceptable;
+    acceptable.run();
 }
 
 int main(int argc, const char* const* argv)

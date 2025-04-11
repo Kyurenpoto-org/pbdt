@@ -6,34 +6,19 @@
 
 #include "util.hpp"
 
-struct HomomorphicValidator
-{
-    void operator()(auto beforeMorph, auto afterMorph) const
-    {
-        constexpr auto compileTimeBeforeMorph = beforeMorph();
-        constexpr auto compileTimeAfterMorph = afterMorph();
-        static_assert(compileTimeBeforeMorph == compileTimeAfterMorph);
-
-        const auto runTimeBeforeMorph = beforeMorph();
-        const auto runTimeAfterMorph = afterMorph();
-        dynamic_assert(runTimeBeforeMorph == runTimeAfterMorph);
-    }
-};
-
 template <typename TwoWayRunnableCombination>
-struct AcceptableCombination
+struct HomomorphicValidation
 {
-    template <typename Visitor>
-    void accept(Visitor&& visitor) const
+    void run() const
     {
-        acceptImpl<TwoWayRunnableCombination::size() - 1>(std::forward<Visitor>(visitor));
+        runImpl<TwoWayRunnableCombination::size() - 1>();
     }
 
 private:
-    template <size_t Idx, typename Visitor>
-    void acceptImpl(Visitor&& visitor) const
+    template <size_t Idx>
+    void runImpl() const
     {
-        visitor(
+        twoWayAssert(
             []()
             {
                 return runnable.template beforeMorph<Idx>();
@@ -46,7 +31,7 @@ private:
 
         if constexpr (Idx > 0)
         {
-            acceptImpl<Idx - 1>(std::forward<Visitor>(visitor));
+            runImpl<Idx - 1>();
         }
     }
 

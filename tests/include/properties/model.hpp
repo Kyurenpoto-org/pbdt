@@ -6,34 +6,19 @@
 
 #include "util.hpp"
 
-struct ModelValidator
-{
-    void operator()(const auto production, const auto model) const
-    {
-        constexpr auto compileTimeProduction = production();
-        constexpr auto compileTimeModel = model();
-        static_assert(compileTimeProduction == compileTimeModel);
-
-        const auto runTimeProduction = production();
-        const auto runTimeModel = model();
-        dynamic_assert(runTimeProduction == runTimeModel);
-    }
-};
-
 template <typename TwoWayRunnableCombination>
-struct AcceptableCombination
+struct ModelingValidation
 {
-    template <typename Visitor>
-    void accept(Visitor&& visitor) const
+    void run() const
     {
-        acceptImpl<TwoWayRunnableCombination::size() - 1>(std::forward<Visitor>(visitor));
+        runImpl<TwoWayRunnableCombination::size() - 1>();
     }
 
 private:
-    template <size_t Idx, typename Visitor>
-    void acceptImpl(Visitor&& visitor) const
+    template <size_t Idx>
+    void runImpl() const
     {
-        visitor(
+        twoWayAssert(
             []()
             {
                 return runnable.template production<Idx>();
@@ -46,7 +31,7 @@ private:
 
         if constexpr (Idx > 0)
         {
-            acceptImpl<Idx - 1>(std::forward<Visitor>(visitor));
+            runImpl<Idx - 1>();
         }
     }
 

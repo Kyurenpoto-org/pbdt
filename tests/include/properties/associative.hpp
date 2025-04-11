@@ -6,34 +6,19 @@
 
 #include "util.hpp"
 
-struct AssociativeValidator
-{
-    void operator()(const auto l2r, const auto r2l) const
-    {
-        constexpr auto compileTimeL2R = l2r();
-        constexpr auto compileTimeR2L = r2l();
-        static_assert(compileTimeL2R == compileTimeR2L);
-
-        const auto runTimeL2R = l2r();
-        const auto runTimeR2L = r2l();
-        dynamic_assert(runTimeL2R == runTimeR2L);
-    }
-};
-
 template <typename ToComparable, typename TwoWayCompletableRawContext>
-struct AcceptableRawContext
+struct AssociativeValidation
 {
-    template <typename Visitor>
-    void accept(Visitor&& visitor) const
+    void run() const
     {
-        acceptImpl<TwoWayCompletableRawContext::size() - 1>(std::forward<Visitor>(visitor));
+        runImpl<TwoWayCompletableRawContext::size() - 1>();
     }
 
 private:
-    template <size_t Idx, typename Visitor>
-    void acceptImpl(Visitor&& visitor) const
+    template <size_t Idx>
+    void runImpl() const
     {
-        visitor(
+        twoWayAssert(
             []()
             {
                 return toComparable(completable.template l2rComplete<Idx>());
@@ -46,7 +31,7 @@ private:
 
         if constexpr (Idx > 0)
         {
-            acceptImpl<Idx - 1>(std::forward<Visitor>(visitor));
+            runImpl<Idx - 1>();
         }
     }
 

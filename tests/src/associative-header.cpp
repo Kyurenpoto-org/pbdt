@@ -15,20 +15,20 @@
 
 void given()
 {
-    const AcceptableRawContext<ToFlatTuple, TwoWayCompletableRawGivenContext<Given>> acceptable;
-    acceptable.accept(AssociativeValidator{});
+    const AssociativeValidation<ToFlatTuple, TwoWayCompletableRawGivenContext<Given>> acceptable;
+    acceptable.run();
 }
 
 void when()
 {
-    const AcceptableRawContext<ToContainer, TwoWayCompletableRawWhenContext<When>> acceptable;
-    acceptable.accept(AssociativeValidator{});
+    const AssociativeValidation<ToContainer, TwoWayCompletableRawWhenContext<When>> acceptable;
+    acceptable.run();
 }
 
 void then()
 {
-    const AcceptableRawContext<ToFlatTuple, TwoWayCompletableRawThenContext<Expect, Then>> acceptable;
-    acceptable.accept(AssociativeValidator{});
+    const AssociativeValidation<ToFlatTuple, TwoWayCompletableRawThenContext<Expect, Then>> acceptable;
+    acceptable.run();
 }
 
 int main(int argc, const char* const* argv)

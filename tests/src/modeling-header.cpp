@@ -15,8 +15,8 @@
 
 void runnableScenario()
 {
-    const AcceptableCombination<TwoWayRunnableScenarioCombination<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
-    acceptable.accept(ModelValidator{});
+    const ModelingValidation<TwoWayRunnableScenarioCombination<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
+    acceptable.run();
 }
 
 int main(int argc, const char* const* argv)

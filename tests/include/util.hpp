@@ -20,6 +20,17 @@ namespace
             std::exit(EXIT_FAILURE);
         }
     }
+
+    void twoWayAssert(const auto a, const auto b)
+    {
+        constexpr auto compileTimeA = a();
+        constexpr auto compileTimeB = b();
+        static_assert(compileTimeA == compileTimeB);
+
+        const auto runTimeA = a();
+        const auto runTimeB = b();
+        dynamic_assert(runTimeA == runTimeB);
+    }
 }
 
 // https://gist.github.com/KoneLinx/d3601597248bed423daf1a7cf7bd9533

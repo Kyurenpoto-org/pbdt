@@ -6,34 +6,19 @@
 
 #include "util.hpp"
 
-struct IdempotentValidator
-{
-    void operator()(const auto completed, const auto idempotentCompleted) const
-    {
-        constexpr auto compileTimeCompleted = completed();
-        constexpr auto compileTimeIdempotentCompleted = idempotentCompleted();
-        static_assert(compileTimeCompleted == compileTimeIdempotentCompleted);
-
-        const auto runTimeCompleted = completed();
-        const auto runTimeIdempotentCompleted = idempotentCompleted();
-        dynamic_assert(runTimeCompleted == runTimeIdempotentCompleted);
-    }
-};
-
 template <typename ToComparable, typename CompletableRawContext>
-struct AcceptableRawContext
+struct IdempotentValidation
 {
-    template <typename Visitor>
-    void accept(Visitor&& visitor) const
+    void run() const
     {
-        acceptImpl<CompletableRawContext::size() - 1>(std::forward<Visitor>(visitor));
+        runImpl<CompletableRawContext::size() - 1>();
     }
 
 private:
-    template <size_t Measure, typename Visitor>
-    void acceptImpl(Visitor&& visitor) const
+    template <size_t Measure>
+    void runImpl() const
     {
-        visitor(
+        twoWayAssert(
             []()
             {
                 return toComparable(completable.complete(std::make_index_sequence<Measure + 1>()));
@@ -48,7 +33,7 @@ private:
 
         if constexpr (Measure > 0)
         {
-            acceptImpl<Measure - 1>(std::forward<Visitor>(visitor));
+            runImpl<Measure - 1>();
         }
     }
 

@@ -16,8 +16,8 @@ import pbdt;
 
 void runnableScenarioWithThenComponent()
 {
-    const AcceptableCombination<TwoWayRunnableScenarioWithThenCombination<Expect, RunnableScenario, Then>> acceptable;
-    acceptable.accept(HomomorphicValidator{});
+    const HomomorphicValidation<TwoWayRunnableScenarioWithThenCombination<Expect, RunnableScenario, Then>> acceptable;
+    acceptable.run();
 }
 
 int main(int argc, const char* const* argv)
