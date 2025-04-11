@@ -16,20 +16,20 @@ import pbdt;
 
 void given()
 {
-    const AcceptableRawContext<CompletableRawGivenContext<Given>> acceptable;
-    acceptable.accept(IdempotentValidator<Given, ToFlatTuple>{});
+    const AcceptableRawContext<ToFlatTuple, CompletableRawGivenContext<Given>> acceptable;
+    acceptable.accept(IdempotentValidator{});
 }
 
 void when()
 {
-    const AcceptableRawContext<CompletableRawWhenContext<When>> acceptable;
-    acceptable.accept(IdempotentValidator<When, ToContainer>{});
+    const AcceptableRawContext<ToContainer, CompletableRawWhenContext<When>> acceptable;
+    acceptable.accept(IdempotentValidator{});
 }
 
 void then()
 {
-    const AcceptableRawContext<CompletableRawThenContext<Then, Expect>> acceptable;
-    acceptable.accept(IdempotentValidator<Then, ToFlatTuple>{});
+    const AcceptableRawContext<ToFlatTuple, CompletableRawThenContext<Then, Expect>> acceptable;
+    acceptable.accept(IdempotentValidator{});
 }
 
 int main(int argc, const char* const* argv)

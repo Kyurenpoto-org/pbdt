@@ -6,30 +6,21 @@
 
 #include "util.hpp"
 
-template <typename ToComparable>
 struct AssociativeValidator
 {
-    static constexpr bool associative(const auto& l2r, const auto& r2l)
-    {
-        return toComparable(l2r) == toComparable(r2l);
-    }
-
     void operator()(const auto l2r, const auto r2l) const
     {
         constexpr auto compileTimeL2R = l2r();
         constexpr auto compileTimeR2L = r2l();
-        static_assert(associative(compileTimeL2R, compileTimeR2L));
+        static_assert(compileTimeL2R == compileTimeR2L);
 
         const auto runTimeL2R = l2r();
         const auto runTimeR2L = r2l();
-        dynamic_assert(associative(runTimeL2R, runTimeR2L));
+        dynamic_assert(runTimeL2R == runTimeR2L);
     }
-
-private:
-    static constexpr ToComparable toComparable{};
 };
 
-template <typename TwoWayCompletableRawContext>
+template <typename ToComparable, typename TwoWayCompletableRawContext>
 struct AcceptableRawContext
 {
     template <typename Visitor>
@@ -45,11 +36,11 @@ private:
         visitor(
             []()
             {
-                return completable.template l2rComplete<Idx>();
+                return toComparable(completable.template l2rComplete<Idx>());
             },
             []()
             {
-                return completable.template r2lComplete<Idx>();
+                return toComparable(completable.template r2lComplete<Idx>());
             }
         );
 
@@ -60,6 +51,7 @@ private:
     }
 
     static constexpr TwoWayCompletableRawContext completable{};
+    static constexpr ToComparable toComparable{};
 };
 
 #include "generators/composable-callable.hpp"
@@ -136,7 +128,7 @@ struct TwoWayCompletableRawWhenContext
     }
 };
 
-template <typename Then, typename Expect>
+template <typename Expect, typename Then>
 struct TwoWayCompletableRawThenContext
 {
     static constexpr auto COMBINATIONS = Foldable::FoldableCombination<

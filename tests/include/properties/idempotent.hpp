@@ -6,29 +6,21 @@
 
 #include "util.hpp"
 
-template <typename Component, typename ToComparable>
 struct IdempotentValidator
 {
-    static constexpr bool idempotent(const auto& completed)
+    void operator()(const auto completed, const auto idempotentCompleted) const
     {
-        return toComparable(completed) == toComparable(component(completed).complete());
+        constexpr auto compileTimeCompleted = completed();
+        constexpr auto compileTimeIdempotentCompleted = idempotentCompleted();
+        static_assert(compileTimeCompleted == compileTimeIdempotentCompleted);
+
+        const auto runTimeCompleted = completed();
+        const auto runTimeIdempotentCompleted = idempotentCompleted();
+        dynamic_assert(runTimeCompleted == runTimeIdempotentCompleted);
     }
-
-    void operator()(const auto complete) const
-    {
-        constexpr auto compileTimeCompleted = complete();
-        static_assert(idempotent(compileTimeCompleted));
-
-        const auto runTimeCompleted = complete();
-        dynamic_assert(idempotent(runTimeCompleted));
-    }
-
-private:
-    static constexpr ToComparable toComparable{};
-    static constexpr Component component{};
 };
 
-template <typename CompletableRawContext>
+template <typename ToComparable, typename CompletableRawContext>
 struct AcceptableRawContext
 {
     template <typename Visitor>
@@ -44,7 +36,13 @@ private:
         visitor(
             []()
             {
-                return completable.complete(std::make_index_sequence<Measure + 1>());
+                return toComparable(completable.complete(std::make_index_sequence<Measure + 1>()));
+            },
+            []()
+            {
+                return toComparable(
+                    completable.idempotentComplete(completable.complete(std::make_index_sequence<Measure + 1>()))
+                );
             }
         );
 
@@ -55,6 +53,7 @@ private:
     }
 
     static constexpr CompletableRawContext completable{};
+    static constexpr ToComparable toComparable{};
 };
 
 #include "generators/composable-callable.hpp"
@@ -80,6 +79,12 @@ struct CompletableRawGivenContext
     {
         return (given(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
     }
+
+    template <typename Completed>
+    constexpr auto idempotentComplete(Completed&& completed) const
+    {
+        return given(completed).complete();
+    }
 };
 
 template <typename When>
@@ -99,6 +104,12 @@ struct CompletableRawWhenContext
     constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
     {
         return (when(std::get<Idx>(RAW_CONTEXT)()) + ... + std::get<Idxs>(RAW_CONTEXT)()).complete();
+    }
+
+    template <typename Completed>
+    constexpr auto idempotentComplete(Completed&& completed) const
+    {
+        return when(completed).complete();
     }
 };
 
@@ -120,5 +131,11 @@ struct CompletableRawThenContext
     constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
     {
         return (then(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
+    }
+
+    template <typename Completed>
+    constexpr auto idempotentComplete(Completed&& completed) const
+    {
+        return then(completed).complete();
     }
 };
