@@ -94,7 +94,7 @@ add_header_module_prop_suite(
 add_header_module_prop_suite(
     PROP homomorphic
     DEP pbdt
-    NAMESPACE pbdt.integrated
+    NAMESPACE pbdt.integration
     TARGETS runnable-scenario-with-then-component
     FIXTURES runnable-scenario-fixture
 )
