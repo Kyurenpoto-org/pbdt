@@ -6,12 +6,12 @@
 
 #include "util.hpp"
 
-template <typename ToComparable, typename TwoWayCompletableRawContext>
-struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable, TwoWayCompletableRawContext>>
+template <typename ToComparable, typename AssociativeRequirements>
+struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable, AssociativeRequirements>>
 {
     static constexpr size_t size()
     {
-        return TwoWayCompletableRawContext::size();
+        return AssociativeRequirements::size();
     }
 
     template <size_t Idx>
@@ -19,9 +19,9 @@ struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable
     {
         return []()
         {
-            return toComparable(completable.closedOp(
-                completable.closedOp(completable.template a<Idx>(), completable.template b<Idx>()),
-                completable.template c<Idx>()
+            return toComparable(requirements.closedOp(
+                requirements.closedOp(requirements.template a<Idx>(), requirements.template b<Idx>()),
+                requirements.template c<Idx>()
             ));
         };
     }
@@ -31,15 +31,15 @@ struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable
     {
         return []()
         {
-            return toComparable(completable.closedOp(
-                completable.template a<Idx>(),
-                completable.closedOp(completable.template b<Idx>(), completable.template c<Idx>())
+            return toComparable(requirements.closedOp(
+                requirements.template a<Idx>(),
+                requirements.closedOp(requirements.template b<Idx>(), requirements.template c<Idx>())
             ));
         };
     }
 
 private:
-    static constexpr TwoWayCompletableRawContext completable{};
+    static constexpr AssociativeRequirements requirements{};
     static constexpr ToComparable toComparable{};
 };
 
@@ -48,7 +48,7 @@ private:
 #include "generators/productable-container.hpp"
 
 template <typename Given>
-struct TwoWayCompletableRawGivenContext
+struct AssociativeGivenRequirements
 {
     static constexpr size_t size()
     {
@@ -88,7 +88,7 @@ private:
 };
 
 template <typename When>
-struct TwoWayCompletableRawWhenContext
+struct AssociativeWhenRequirements
 {
     static constexpr size_t size()
     {
@@ -128,7 +128,7 @@ private:
 };
 
 template <typename Expect, typename Then>
-struct TwoWayCompletableRawThenContext
+struct AssociativeThenRequirements
 {
     static constexpr size_t size()
     {

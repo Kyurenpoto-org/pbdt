@@ -6,12 +6,12 @@
 
 #include "util.hpp"
 
-template <typename ToComparable, typename CompletableRawContext>
-struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, CompletableRawContext>>
+template <typename ToComparable, typename IdempotentRequirements>
+struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, IdempotentRequirements>>
 {
     static constexpr size_t size()
     {
-        return CompletableRawContext::size();
+        return IdempotentRequirements::size();
     }
 
     template <size_t Idx>
@@ -28,7 +28,7 @@ struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, 
     {
         return []()
         {
-            return toComparable(completable.closedOp(complete(std::make_index_sequence<Idx + 1>())));
+            return toComparable(requirements.closedOp(complete(std::make_index_sequence<Idx + 1>())));
         };
     }
 
@@ -36,10 +36,10 @@ private:
     template <size_t... Idxs>
     static constexpr auto complete(const std::index_sequence<Idxs...>)
     {
-        return completable.closedOp(completable.template element<Idxs>()...);
+        return requirements.closedOp(requirements.template element<Idxs>()...);
     }
 
-    static constexpr CompletableRawContext completable{};
+    static constexpr IdempotentRequirements requirements{};
     static constexpr ToComparable toComparable{};
 };
 
@@ -48,7 +48,7 @@ private:
 #include "generators/productable-container.hpp"
 
 template <typename Given>
-struct CompletableRawGivenContext
+struct IdempotentGivenRequirements
 {
     static constexpr size_t size()
     {
@@ -76,7 +76,7 @@ private:
 };
 
 template <typename When>
-struct CompletableRawWhenContext
+struct IdempotentWhenRequirements
 {
     static constexpr size_t size()
     {
@@ -103,7 +103,7 @@ private:
 };
 
 template <typename Then, typename Expect>
-struct CompletableRawThenContext
+struct IdempotentThenRequirements
 {
     static constexpr size_t size()
     {

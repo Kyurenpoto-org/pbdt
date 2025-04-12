@@ -16,19 +16,19 @@ import pbdt;
 
 void given()
 {
-    const AssociativeValidation<ToFlatTuple, TwoWayCompletableRawGivenContext<Given>> acceptable;
+    const AssociativeValidation<ToFlatTuple, AssociativeGivenRequirements<Given>> acceptable;
     acceptable.run();
 }
 
 void when()
 {
-    const AssociativeValidation<ToContainer, TwoWayCompletableRawWhenContext<When>> acceptable;
+    const AssociativeValidation<ToContainer, AssociativeWhenRequirements<When>> acceptable;
     acceptable.run();
 }
 
 void then()
 {
-    const AssociativeValidation<ToFlatTuple, TwoWayCompletableRawThenContext<Expect, Then>> acceptable;
+    const AssociativeValidation<ToFlatTuple, AssociativeThenRequirements<Expect, Then>> acceptable;
     acceptable.run();
 }
 

@@ -6,12 +6,12 @@
 
 #include "util.hpp"
 
-template <typename TwoWayRunnableCombination>
-struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnableCombination>>
+template <typename HomomorphicRequirements>
+struct HomomorphicValidation : ValidationBase<HomomorphicValidation<HomomorphicRequirements>>
 {
     static constexpr size_t size()
     {
-        return TwoWayRunnableCombination::size();
+        return HomomorphicRequirements::size();
     }
 
     template <size_t Idx>
@@ -19,8 +19,8 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnab
     {
         return []()
         {
-            return runnable.template morph<Idx>(
-                runnable.beforeMorphOp(runnable.template propA<Idx>(), runnable.template propB<Idx>())
+            return requirements.template morph<Idx>(
+                requirements.beforeMorphOp(requirements.template propA<Idx>(), requirements.template propB<Idx>())
             );
         };
     }
@@ -30,21 +30,21 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnab
     {
         return []()
         {
-            return runnable.afterMorphOp(
-                runnable.template morph<Idx>(runnable.template propA<Idx>()),
-                runnable.template morph<Idx>(runnable.template propB<Idx>())
+            return requirements.afterMorphOp(
+                requirements.template morph<Idx>(requirements.template propA<Idx>()),
+                requirements.template morph<Idx>(requirements.template propB<Idx>())
             );
         };
     }
 
 private:
-    static constexpr TwoWayRunnableCombination runnable{};
+    static constexpr HomomorphicRequirements requirements{};
 };
 
 #include "generators/runnable-double-combination.hpp"
 
 template <typename Expect, typename RunnableScenario, typename Then>
-struct TwoWayRunnableScenarioWithThenCombination
+struct HomomorphicRunnableScenarioWithThenRequirements
 {
     static constexpr size_t size()
     {

@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/model.hpp"
+#include "properties/modeling.hpp"
 
 #include "pbdt/bdd.hpp"
 
@@ -15,7 +15,7 @@
 
 void runnableScenario()
 {
-    const ModelingValidation<TwoWayRunnableScenarioCombination<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
+    const ModelingValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
     acceptable.run();
 }
 

@@ -6,12 +6,12 @@
 
 #include "util.hpp"
 
-template <typename TwoWayRunnableCombination>
-struct ModelingValidation : ValidationBase<ModelingValidation<TwoWayRunnableCombination>>
+template <typename ModelingRequirements>
+struct ModelingValidation : ValidationBase<ModelingValidation<ModelingRequirements>>
 {
     static constexpr size_t size()
     {
-        return TwoWayRunnableCombination::size();
+        return ModelingRequirements::size();
     }
 
     template <size_t Idx>
@@ -19,7 +19,7 @@ struct ModelingValidation : ValidationBase<ModelingValidation<TwoWayRunnableComb
     {
         return []()
         {
-            return runnable.template production<Idx>();
+            return requirements.template production<Idx>();
         };
     }
 
@@ -28,18 +28,18 @@ struct ModelingValidation : ValidationBase<ModelingValidation<TwoWayRunnableComb
     {
         return []()
         {
-            return runnable.template model<Idx>();
+            return requirements.template model<Idx>();
         };
     }
 
 private:
-    static constexpr TwoWayRunnableCombination runnable{};
+    static constexpr ModelingRequirements requirements{};
 };
 
 #include "generators/runnable-combination.hpp"
 
 template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
-struct TwoWayRunnableScenarioCombination
+struct ModelingRunnableScenarioRequirements
 {
     static constexpr size_t size()
     {
