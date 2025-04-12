@@ -20,7 +20,7 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<HomomorphicR
         return []()
         {
             return requirements.template morph<Idx>(
-                requirements.beforeMorphOp(requirements.template propA<Idx>(), requirements.template propB<Idx>())
+                requirements.beforeMorphOp(requirements.template a<Idx>(), requirements.template b<Idx>())
             );
         };
     }
@@ -31,8 +31,8 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<HomomorphicR
         return []()
         {
             return requirements.afterMorphOp(
-                requirements.template morph<Idx>(requirements.template propA<Idx>()),
-                requirements.template morph<Idx>(requirements.template propB<Idx>())
+                requirements.template morph<Idx>(requirements.template a<Idx>()),
+                requirements.template morph<Idx>(requirements.template b<Idx>())
             );
         };
     }
@@ -52,13 +52,13 @@ struct HomomorphicRunnableScenarioWithThenRequirements
     }
 
     template <size_t Idx>
-    constexpr auto propA() const
+    constexpr auto a() const
     {
         return std::get<Idx>(COMBINATIONS).template propA<Expect>();
     }
 
     template <size_t Idx>
-    constexpr auto propB() const
+    constexpr auto b() const
     {
         return std::get<Idx>(COMBINATIONS).template propB<Expect>();
     }
