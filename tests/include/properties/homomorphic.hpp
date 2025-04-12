@@ -63,12 +63,12 @@ struct HomomorphicRunnableScenarioWithThenRequirements
         return std::get<Idx>(COMBINATIONS).template propB<Expect>();
     }
 
-    template <size_t Idx>
-    constexpr auto morph(auto&& prop) const
+    template <size_t Idx, typename Prop>
+    constexpr auto morph(Prop&& prop) const
     {
         constexpr auto combination = std::get<Idx>(COMBINATIONS);
 
-        return runnableScenario(combination.target(), prop, combination.domain()).run().passable();
+        return runnableScenario(combination.target(), std::forward<Prop>(prop), combination.domain()).run().passable();
     }
 
     template <typename A, typename B>
