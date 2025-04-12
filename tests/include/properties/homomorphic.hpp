@@ -19,7 +19,9 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnab
     {
         return []()
         {
-            return runnable.template beforeMorph<Idx>();
+            return runnable.template morph<Idx>(
+                runnable.beforeMorphOp(runnable.template propA<Idx>(), runnable.template propB<Idx>())
+            );
         };
     }
 
@@ -28,7 +30,10 @@ struct HomomorphicValidation : ValidationBase<HomomorphicValidation<TwoWayRunnab
     {
         return []()
         {
-            return runnable.template afterMorph<Idx>();
+            return runnable.afterMorphOp(
+                runnable.template morph<Idx>(runnable.template propA<Idx>()),
+                runnable.template morph<Idx>(runnable.template propB<Idx>())
+            );
         };
     }
 
@@ -41,45 +46,46 @@ private:
 template <typename Expect, typename RunnableScenario, typename Then>
 struct TwoWayRunnableScenarioWithThenCombination
 {
-    static constexpr auto COMBINATIONS = Runnable::RunnableDoublePropCombinationSamples<
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr RunnableScenario runnableScenario{};
-    static constexpr Then then{};
-
     static constexpr size_t size()
     {
         return std::tuple_size_v<decltype(COMBINATIONS)>;
     }
 
-    constexpr auto morph(const auto& combination) const
+    template <size_t Idx>
+    constexpr auto propA() const
     {
+        return std::get<Idx>(COMBINATIONS).template propA<Expect>();
     }
 
     template <size_t Idx>
-    constexpr bool beforeMorph() const
+    constexpr auto propB() const
     {
-        constexpr auto combination = std::get<Idx>(COMBINATIONS);
-
-        return runnableScenario(
-                   combination.target(),
-                   (then(combination.template propA<Expect>()) + combination.template propB<Expect>()).complete(),
-                   combination.domain()
-        )
-            .run()
-            .passable();
+        return std::get<Idx>(COMBINATIONS).template propB<Expect>();
     }
 
     template <size_t Idx>
-    constexpr bool afterMorph() const
+    constexpr auto morph(auto&& prop) const
     {
         constexpr auto combination = std::get<Idx>(COMBINATIONS);
 
-        return runnableScenario(combination.target(), combination.template propA<Expect>(), combination.domain())
-                   .run()
-                   .passable()
-            && runnableScenario(combination.target(), combination.template propB<Expect>(), combination.domain())
-                   .run()
-                   .passable();
+        return runnableScenario(combination.target(), prop, combination.domain()).run().passable();
     }
+
+    template <typename A, typename B>
+    constexpr auto beforeMorphOp(A&& a, B&& b) const
+    {
+        return (then(std::forward<A>(a)) + std::forward<B>(b)).complete();
+    }
+
+    constexpr auto afterMorphOp(auto&& a, auto&& b) const
+    {
+        return a && b;
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Runnable::RunnableDoublePropCombinationSamples<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr RunnableScenario runnableScenario{};
+    static constexpr Then then{};
 };

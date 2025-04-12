@@ -41,12 +41,6 @@ private:
 template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
 struct TwoWayRunnableScenarioCombination
 {
-    static constexpr auto COMBINATIONS = Runnable::RunnableCombinationSamples<
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr RunnableScenario runnableScenario{};
-    static constexpr ApplyOrInvoke applyOrInvoke{};
-
     static constexpr size_t size()
     {
         return std::tuple_size_v<decltype(COMBINATIONS)>;
@@ -66,7 +60,6 @@ struct TwoWayRunnableScenarioCombination
     constexpr bool model() const
     {
         constexpr auto combination = std::get<Idx>(COMBINATIONS);
-
         for (const auto& sample : combination.domain())
         {
             if (!combination.template prop<Expect>()(sample, applyOrInvoke(combination.target(), sample)).passable())
@@ -77,4 +70,11 @@ struct TwoWayRunnableScenarioCombination
 
         return true;
     }
+
+private:
+    static constexpr auto COMBINATIONS = Runnable::RunnableCombinationSamples<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr RunnableScenario runnableScenario{};
+    static constexpr ApplyOrInvoke applyOrInvoke{};
 };

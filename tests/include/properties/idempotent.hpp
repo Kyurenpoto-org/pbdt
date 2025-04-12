@@ -19,7 +19,7 @@ struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, 
     {
         return []()
         {
-            return toComparable(completable.complete(std::make_index_sequence<Idx + 1>()));
+            return toComparable(complete(std::make_index_sequence<Idx + 1>()));
         };
     }
 
@@ -28,12 +28,17 @@ struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, 
     {
         return []()
         {
-            return toComparable(completable.idempotentComplete(completable.complete(std::make_index_sequence<Idx + 1>())
-            ));
+            return toComparable(completable.closedOp(complete(std::make_index_sequence<Idx + 1>())));
         };
     }
 
 private:
+    template <size_t... Idxs>
+    static constexpr auto complete(const std::index_sequence<Idxs...>)
+    {
+        return completable.closedOp(completable.template element<Idxs>()...);
+    }
+
     static constexpr CompletableRawContext completable{};
     static constexpr ToComparable toComparable{};
 };
@@ -45,79 +50,82 @@ private:
 template <typename Given>
 struct CompletableRawGivenContext
 {
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
+    }
+
+    template <size_t Idx>
+    constexpr auto element() const
+    {
+        return std::get<Idx>(RAW_CONTEXT);
+    }
+
+    template <typename T, typename... Ts>
+    constexpr auto closedOp(T&& t, Ts&&... ts) const
+    {
+        return (given(std::forward<T>(t)) + ... + std::forward<Ts>(ts)).complete();
+    }
+
+private:
     static constexpr auto RAW_CONTEXT = Composable::ComposableCombination<
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr Given given{};
-
-    static constexpr size_t size()
-    {
-        return std::tuple_size_v<decltype(RAW_CONTEXT)>;
-    }
-
-    template <size_t Idx, size_t... Idxs>
-    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
-    {
-        return (given(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
-    }
-
-    template <typename Completed>
-    constexpr auto idempotentComplete(Completed&& completed) const
-    {
-        return given(completed).complete();
-    }
 };
 
 template <typename When>
 struct CompletableRawWhenContext
 {
-    static constexpr auto RAW_CONTEXT = Productable::ProductableCombination<
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr When when{};
-
     static constexpr size_t size()
     {
         return std::tuple_size_v<decltype(RAW_CONTEXT)>;
     }
 
-    template <size_t Idx, size_t... Idxs>
-    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    template <size_t Idx>
+    constexpr auto element() const
     {
-        return (when(std::get<Idx>(RAW_CONTEXT)()) + ... + std::get<Idxs>(RAW_CONTEXT)()).complete();
+        return std::get<Idx>(RAW_CONTEXT)();
     }
 
-    template <typename Completed>
-    constexpr auto idempotentComplete(Completed&& completed) const
+    template <typename T, typename... Ts>
+    constexpr auto closedOp(T&& t, Ts&&... ts) const
     {
-        return when(completed).complete();
+        return (when(std::forward<T>(t)) + ... + std::forward<Ts>(ts)).complete();
     }
+
+private:
+    static constexpr auto RAW_CONTEXT = Productable::ProductableCombination<
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr When when{};
 };
 
 template <typename Then, typename Expect>
 struct CompletableRawThenContext
 {
-    static constexpr auto RAW_CONTEXT = Foldable::FoldableCombination<
-        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr Then then{};
-
     static constexpr size_t size()
     {
         return std::tuple_size_v<decltype(RAW_CONTEXT)>;
     }
 
-    template <size_t Idx, size_t... Idxs>
-    constexpr auto complete(const std::index_sequence<Idx, Idxs...>) const
+    template <size_t Idx>
+    constexpr auto element() const
     {
-        return (then(std::get<Idx>(RAW_CONTEXT)) + ... + std::get<Idxs>(RAW_CONTEXT)).complete();
+        return std::get<Idx>(RAW_CONTEXT);
     }
 
-    template <typename Completed>
-    constexpr auto idempotentComplete(Completed&& completed) const
+    template <typename T, typename... Ts>
+    constexpr auto closedOp(T&& t, Ts&&... ts) const
     {
-        return then(completed).complete();
+        return (then(std::forward<T>(t)) + ... + std::forward<Ts>(ts)).complete();
     }
+
+private:
+    static constexpr auto RAW_CONTEXT = Foldable::FoldableCombination<
+        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Then then{};
 };

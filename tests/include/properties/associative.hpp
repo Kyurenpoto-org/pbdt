@@ -19,7 +19,10 @@ struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable
     {
         return []()
         {
-            return toComparable(completable.template l2rComplete<Idx>());
+            return toComparable(completable.closedOp(
+                completable.closedOp(completable.template a<Idx>(), completable.template b<Idx>()),
+                completable.template c<Idx>()
+            ));
         };
     }
 
@@ -28,7 +31,10 @@ struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable
     {
         return []()
         {
-            return toComparable(completable.template r2lComplete<Idx>());
+            return toComparable(completable.closedOp(
+                completable.template a<Idx>(),
+                completable.closedOp(completable.template b<Idx>(), completable.template c<Idx>())
+            ));
         };
     }
 
@@ -44,104 +50,119 @@ private:
 template <typename Given>
 struct TwoWayCompletableRawGivenContext
 {
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return std::get<Idx>(COMBINATIONS);
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return std::get<Idx + 1>(COMBINATIONS);
+    }
+
+    template <size_t Idx>
+    constexpr auto c() const
+    {
+        return std::get<Idx + 2>(COMBINATIONS);
+    }
+
+    template <typename A, typename B>
+    constexpr auto closedOp(A&& a, B&& b) const
+    {
+        return (given(std::forward<A>(a)) + std::forward<B>(b)).complete();
+    }
+
+private:
     static constexpr auto COMBINATIONS = Composable::ComposableCombination<
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr Given given{};
-
-    static constexpr size_t size()
-    {
-        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
-    }
-
-    template <size_t Idx>
-    constexpr auto l2rComplete() const
-    {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (given((given(a) + b).complete()) + c).complete();
-    }
-
-    template <size_t Idx>
-    constexpr auto r2lComplete() const
-    {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (given(a) + (given(b) + c).complete()).complete();
-    }
 };
 
 template <typename When>
 struct TwoWayCompletableRawWhenContext
 {
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return std::get<Idx>(COMBINATIONS)();
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return std::get<Idx + 1>(COMBINATIONS)();
+    }
+
+    template <size_t Idx>
+    constexpr auto c() const
+    {
+        return std::get<Idx + 2>(COMBINATIONS)();
+    }
+
+    template <typename A, typename B>
+    constexpr auto closedOp(A&& a, B&& b) const
+    {
+        return (when(std::forward<A>(a)) + std::forward<B>(b)).complete();
+    }
+
+private:
     static constexpr auto COMBINATIONS = Productable::ProductableCombination<
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM()>::value;
     static constexpr When when{};
-
-    static constexpr size_t size()
-    {
-        return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
-    }
-
-    template <size_t Idx>
-    constexpr auto l2rComplete() const
-    {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (when((when(a()) + b()).complete()) + c()).complete();
-    }
-
-    template <size_t Idx>
-    constexpr auto r2lComplete() const
-    {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (when(a()) + (when(b()) + c()).complete()).complete();
-    }
 };
 
 template <typename Expect, typename Then>
 struct TwoWayCompletableRawThenContext
 {
-    static constexpr auto COMBINATIONS = Foldable::FoldableCombination<
-        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
-    static constexpr Then then{};
-
     static constexpr size_t size()
     {
         return std::tuple_size_v<decltype(COMBINATIONS)> - 3 + 1;
     }
 
     template <size_t Idx>
-    constexpr auto l2rComplete() const
+    constexpr auto a() const
     {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (then((then(a) + b).complete()) + c).complete();
+        return std::get<Idx>(COMBINATIONS);
     }
 
     template <size_t Idx>
-    constexpr auto r2lComplete() const
+    constexpr auto b() const
     {
-        constexpr auto a = std::get<Idx>(COMBINATIONS);
-        constexpr auto b = std::get<Idx + 1>(COMBINATIONS);
-        constexpr auto c = std::get<Idx + 2>(COMBINATIONS);
-
-        return (then(a) + (then(b) + c).complete()).complete();
+        return std::get<Idx + 1>(COMBINATIONS);
     }
+
+    template <size_t Idx>
+    constexpr auto c() const
+    {
+        return std::get<Idx + 2>(COMBINATIONS);
+    }
+
+    template <typename A, typename B>
+    constexpr auto closedOp(A&& a, B&& b) const
+    {
+        return (then(std::forward<A>(a)) + std::forward<B>(b)).complete();
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Foldable::FoldableCombination<
+        Expect, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
+    static constexpr Then then{};
 };
