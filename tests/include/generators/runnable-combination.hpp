@@ -67,7 +67,7 @@ namespace Productable
 
 namespace Runnable
 {
-    template <size_t N>
+    template <size_t>
     struct IndexToTypeImpl;
 
     template <>
@@ -170,7 +170,7 @@ namespace Runnable
 
         constexpr auto domain() const
         {
-            return Domain<C % 40, D % 36>::rvalue();
+            return Domain<C % 40, D % 6>::rvalue();
         }
     };
 

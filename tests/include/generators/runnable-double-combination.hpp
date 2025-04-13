@@ -32,7 +32,7 @@ namespace Runnable
 
         constexpr auto domain() const
         {
-            return Domain<C % 40, D % 36>::rvalue();
+            return Domain<C % 40, D % 6>::rvalue();
         }
     };
 

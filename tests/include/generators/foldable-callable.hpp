@@ -32,7 +32,7 @@ namespace Foldable
         }
     };
 
-    template <size_t N>
+    template <size_t>
     struct IndexToTypeImpl;
 
     template <>
