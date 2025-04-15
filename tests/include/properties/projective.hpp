@@ -74,7 +74,7 @@ private:
 
 #include "generators/runnable-double-combination.hpp"
 
-template <typename ToContainer, typename ApplyOrInvoke, typename Expect, typename RunnableScenario, typename When>
+template <typename ToContainer, typename Expect, typename RunnableScenario, typename When>
 struct ProjectiveRunnableScenarioWithWhenRequirements
 {
     static constexpr size_t size()
@@ -151,7 +151,6 @@ private:
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr ToContainer toContainer{};
-    static constexpr ApplyOrInvoke applyOrInvoke{};
     static constexpr RunnableScenario runnableScenario{};
     static constexpr When when{};
 };

@@ -16,12 +16,12 @@
 void runnableScenarioWithWhenComponent()
 {
     const LeftProjectiveValidation<
-        ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, ApplyOrInvoke, Expect, RunnableScenario, When>>
+        ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, Expect, RunnableScenario, When>>
         acceptableL;
     acceptableL.run();
 
     const RightProjectiveValidation<
-        ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, ApplyOrInvoke, Expect, RunnableScenario, When>>
+        ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, Expect, RunnableScenario, When>>
         acceptableR;
     acceptableR.run();
 }
