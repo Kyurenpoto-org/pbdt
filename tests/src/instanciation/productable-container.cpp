@@ -4,13 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include <array>
-#include <ranges>
-#include <span>
-#include <string_view>
-#include <tuple>
-
-#include "productable-container.hpp"
+#include "generators/productable-container.hpp"
 
 template class Productable::ProductableContainer<0, decltype(std::make_index_sequence<1>()), 0>;
 template class Productable::ProductableContainer<0, decltype(std::make_index_sequence<2>()), 0>;

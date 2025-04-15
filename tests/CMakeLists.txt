@@ -15,7 +15,7 @@ target_include_directories(
 )
 target_sources(
     given-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/composable-callable.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/composable-callable.cpp
 )
 
 add_library(when-component-fixture STATIC)
@@ -30,7 +30,7 @@ target_include_directories(
 )
 target_sources(
     when-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/productable-container.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/productable-container.cpp
 )
 
 add_library(then-component-fixture STATIC)
@@ -45,7 +45,7 @@ target_include_directories(
 )
 target_sources(
     then-component-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/foldable-callable.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/foldable-callable.cpp
 )
 
 add_library(runnable-scenario-fixture STATIC)
@@ -60,21 +60,48 @@ target_include_directories(
 )
 target_sources(
     runnable-scenario-fixture
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/runnable-combination.cpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
-# tests
-# Given Component: Set Category
-add_header_module_tests("pbdt" "given-component-fixture" "given-component-idempotent" "pbdt.unit.given-component.idempotent")
-add_header_module_tests("pbdt" "given-component-fixture" "given-component-associative" "pbdt.unit.given-component.associative")
+# unit tests
+# Given: Set Category
+# When: Set Category that has product between any two objects
+# Then: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
+add_header_module_prop_suite(
+    PROP idempotent
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS given when then
+    FIXTURES given-component-fixture when-component-fixture then-component-fixture
+)
+add_header_module_prop_suite(
+    PROP associative
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS given when then
+    FIXTURES given-component-fixture when-component-fixture then-component-fixture
+)
 
-# When Component: Set Category that has product between any two objects
-add_header_module_tests("pbdt" "when-component-fixture" "when-component-idempotent" "pbdt.unit.when-component.idempotent")
-add_header_module_tests("pbdt" "when-component-fixture" "when-component-associative" "pbdt.unit.when-component.associative")
+add_header_module_prop_suite(
+    PROP modeling
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS runnable-scenario
+    FIXTURES runnable-scenario-fixture
+)
 
-# Then Component: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
-add_header_module_tests("pbdt" "then-component-fixture" "then-component-idempotent" "pbdt.unit.then-component.idempotent")
-add_header_module_tests("pbdt" "then-component-fixture" "then-component-associative" "pbdt.unit.then-component.associative")
-
-# Runnable Scenario: Modeling
-add_header_module_tests("pbdt" "runnable-scenario-fixture" "runnable-scenario-model" "pbdt.unit.runnable-scenario.model")
+# integrated tests
+add_header_module_prop_suite(
+    PROP projective
+    DEP pbdt
+    NAMESPACE pbdt.integration
+    TARGETS runnable-scenario-with-given-component runnable-scenario-with-when-component
+    FIXTURES runnable-scenario-fixture
+)
+add_header_module_prop_suite(
+    PROP homomorphic
+    DEP pbdt
+    NAMESPACE pbdt.integration
+    TARGETS runnable-scenario-with-then-component
+    FIXTURES runnable-scenario-fixture
+)
