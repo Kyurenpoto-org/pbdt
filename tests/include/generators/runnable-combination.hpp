@@ -118,19 +118,46 @@ namespace Runnable
     template <size_t N>
     using IndexToFlatType = typename IndexToTypeImpl<N>::flatType;
 
+    constexpr size_t TYPE_INDEX_LIMIT = 6;
+    constexpr size_t TYPE_DOUBLE_INDEX_LIMIT = TYPE_INDEX_LIMIT * TYPE_INDEX_LIMIT;
+    constexpr size_t TYPE_TRIPLE_INDEX_LIMIT = TYPE_DOUBLE_INDEX_LIMIT * TYPE_INDEX_LIMIT;
+    constexpr size_t TARGET_SHAPE_LIMIT = 2;
+    constexpr size_t TARGET_VARIETY_LIMIT = TARGET_SHAPE_LIMIT;
+    constexpr size_t TARGET_DOUBLE_VARIETY_LIMIT = TARGET_VARIETY_LIMIT * TARGET_VARIETY_LIMIT;
+    constexpr size_t PROP_SHAPE_LIMIT = 2;
+    constexpr size_t PROP_RESULT_LIMIT = 2;
+    constexpr size_t PROP_VARIETY_LIMIT = PROP_SHAPE_LIMIT * PROP_RESULT_LIMIT;
+    constexpr size_t PROP_DOUBLE_VARIETY_LIMIT = PROP_VARIETY_LIMIT * PROP_VARIETY_LIMIT;
+    constexpr size_t DOMAIN_SHAPE_LIMIT = 4;
+    constexpr size_t DOMAIN_LENGTH_LIMIT = 10;
+    constexpr size_t DOMAIN_VARIETY_LIMIT = DOMAIN_SHAPE_LIMIT * DOMAIN_LENGTH_LIMIT;
+    constexpr size_t DOMAIN_DOUBLE_VARIETY_LIMIT = DOMAIN_VARIETY_LIMIT * DOMAIN_VARIETY_LIMIT;
+
+    consteval size_t domainVarietyLength(size_t variety)
+    {
+        return variety / DOMAIN_SHAPE_LIMIT % DOMAIN_LENGTH_LIMIT + 1;
+    }
+
     template <size_t N, size_t M>
-    struct Target : Composable::ComposableCallable<N % 2, IndexToType<M / 6 % 6>, IndexToType<M % 6>>
+    struct Target :
+        Composable::ComposableCallable<
+            N % TARGET_SHAPE_LIMIT, IndexToType<M / TYPE_INDEX_LIMIT % TYPE_INDEX_LIMIT>,
+            IndexToType<M % TYPE_INDEX_LIMIT>>
     {
     };
 
     template <size_t N, size_t M>
-    struct Prop : Foldable::FoldableCallable<N % 2, N / 2 % 2, IndexToFlatType<M % 6>, IndexToFlatType<M / 6 % 6>>
+    struct Prop :
+        Foldable::FoldableCallable<
+            N % PROP_SHAPE_LIMIT, N / PROP_SHAPE_LIMIT % PROP_RESULT_LIMIT, IndexToFlatType<M % TYPE_INDEX_LIMIT>,
+            IndexToFlatType<M / TYPE_INDEX_LIMIT % TYPE_INDEX_LIMIT>>
     {
     };
 
     template <size_t N, size_t M>
     struct Domain :
-        Productable::ProductableContainer<N % 4, decltype(std::make_index_sequence<N / 4 % 10 + 1>()), M % 6>
+        Productable::ProductableContainer<
+            N % DOMAIN_SHAPE_LIMIT, decltype(std::make_index_sequence<domainVarietyLength(N)>()), M % TYPE_INDEX_LIMIT>
     {
     };
 
@@ -139,18 +166,18 @@ namespace Runnable
     {
         constexpr auto target() const
         {
-            return Target<A % 2, D % 36>::value;
+            return Target<A % TARGET_VARIETY_LIMIT, D % TYPE_DOUBLE_INDEX_LIMIT>::value;
         }
 
         template <typename Expect>
         constexpr auto prop() const
         {
-            return Prop<B % 2, D % 36>::template value<Expect>;
+            return Prop<B % PROP_RESULT_LIMIT, D % TYPE_DOUBLE_INDEX_LIMIT>::template value<Expect>;
         }
 
         constexpr auto domain() const
         {
-            return Domain<C % 40, D % 36>::rvalue();
+            return Domain<C % DOMAIN_VARIETY_LIMIT, D % TYPE_INDEX_LIMIT>::rvalue();
         }
     };
 
@@ -159,28 +186,34 @@ namespace Runnable
     {
         constexpr auto target() const
         {
-            return Target<A % 2, D % 36>::value;
+            return Target<A % TARGET_VARIETY_LIMIT, D % TYPE_DOUBLE_INDEX_LIMIT>::value;
         }
 
         template <typename Expect>
         constexpr auto prop() const
         {
-            return Prop<B % 2 + 2, D % 36>::template value<Expect>;
+            return Prop<B % PROP_RESULT_LIMIT + PROP_RESULT_LIMIT, D % TYPE_DOUBLE_INDEX_LIMIT>::template value<Expect>;
         }
 
         constexpr auto domain() const
         {
-            return Domain<C % 40, D % 6>::rvalue();
+            return Domain<C % DOMAIN_VARIETY_LIMIT, D % TYPE_INDEX_LIMIT>::rvalue();
         }
     };
 
     template <size_t N>
-    using RunnableCombinationSuccessSample =
-        SuccessRunnableCombination<N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+    using RunnableCombinationSuccessSample = SuccessRunnableCombination<
+        N / TYPE_DOUBLE_INDEX_LIMIT % TARGET_VARIETY_LIMIT,
+        N / TYPE_DOUBLE_INDEX_LIMIT / TARGET_VARIETY_LIMIT % PROP_RESULT_LIMIT,
+        N / TYPE_DOUBLE_INDEX_LIMIT / TARGET_VARIETY_LIMIT / PROP_RESULT_LIMIT % DOMAIN_VARIETY_LIMIT,
+        N % TYPE_DOUBLE_INDEX_LIMIT>;
 
     template <size_t N>
-    using RunnableCombinationFailureSample =
-        FailureRunnableCombination<N / 36 % 2, N / 36 / 2 % 2, N / 36 / 4 % 40, N % 36>;
+    using RunnableCombinationFailureSample = FailureRunnableCombination<
+        N / TYPE_DOUBLE_INDEX_LIMIT % TARGET_VARIETY_LIMIT,
+        N / TYPE_DOUBLE_INDEX_LIMIT / TARGET_VARIETY_LIMIT % PROP_RESULT_LIMIT,
+        N / TYPE_DOUBLE_INDEX_LIMIT / TARGET_VARIETY_LIMIT / PROP_RESULT_LIMIT % DOMAIN_VARIETY_LIMIT,
+        N % TYPE_DOUBLE_INDEX_LIMIT>;
 
     template <size_t First, size_t... Rest>
     struct RunnableCombinationSamples
