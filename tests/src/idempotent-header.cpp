@@ -33,7 +33,19 @@ void then()
 
 int main(int argc, const char* const* argv)
 {
-    suite(std::array{ "given", "when", "then" }, std::array{ given, when, then }).run(argc, argv);
+    suite(
+        std::array{
+            "given",
+            "when",
+            "then",
+        },
+        std::array{
+            given,
+            when,
+            then,
+        }
+    )
+        .run(argc, argv);
 
     return EXIT_SUCCESS;
 }

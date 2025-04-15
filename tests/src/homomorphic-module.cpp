@@ -23,7 +23,14 @@ void runnableScenarioWithThenComponent()
 
 int main(int argc, const char* const* argv)
 {
-    suite(std::array{ "runnable-scenario-with-then-component" }, std::array{ runnableScenarioWithThenComponent })
+    suite(
+        std::array{
+            "runnable-scenario-with-then-component",
+        },
+        std::array{
+            runnableScenarioWithThenComponent,
+        }
+    )
         .run(argc, argv);
 
     return EXIT_SUCCESS;

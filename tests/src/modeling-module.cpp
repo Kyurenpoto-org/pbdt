@@ -22,7 +22,15 @@ void runnableScenario()
 
 int main(int argc, const char* const* argv)
 {
-    suite(std::array{ "runnable-scenario" }, std::array{ runnableScenario }).run(argc, argv);
+    suite(
+        std::array{
+            "runnable-scenario",
+        },
+        std::array{
+            runnableScenario,
+        }
+    )
+        .run(argc, argv);
 
     return EXIT_SUCCESS;
 }
