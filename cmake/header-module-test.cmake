@@ -38,6 +38,8 @@ function(add_header_module_tests dep fixture test_target test_name)
     )
 endfunction()
 
+# Add property based test suite for each header and module
+# add_header_module_prop_suite(PROP <prop> DEP <dep> NAMESPACE <namespace> TARGETS <target> [<target> ...] [FIXTURES <fixture> [<fixture> ...]])
 function(add_header_module_prop_suite)
     cmake_parse_arguments(
         SUITE
