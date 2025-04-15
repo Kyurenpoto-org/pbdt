@@ -95,7 +95,7 @@ add_header_module_prop_suite(
     PROP projective
     DEP pbdt
     NAMESPACE pbdt.integration
-    TARGETS runnable-scenario-with-when-component
+    TARGETS runnable-scenario-with-given-component runnable-scenario-with-when-component
     FIXTURES runnable-scenario-fixture
 )
 add_header_module_prop_suite(

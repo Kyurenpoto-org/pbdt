@@ -13,6 +13,14 @@
 #include "for-injection.hpp"
 #include "suite-runner.hpp"
 
+void runnableScenarioWithGivenComponent()
+{
+    const LeftProjectiveValidation<
+        ProjectiveRunnableScenarioWithGivenRequirements<ToContainer, Expect, RunnableScenario, Given>>
+        acceptableL;
+    acceptableL.run();
+}
+
 void runnableScenarioWithWhenComponent()
 {
     const LeftProjectiveValidation<
@@ -28,7 +36,16 @@ void runnableScenarioWithWhenComponent()
 
 int main(int argc, const char* const* argv)
 {
-    suite(std::array{ "runnable-scenario-with-when-component" }, std::array{ runnableScenarioWithWhenComponent })
+    suite(
+        std::array{
+            "runnable-scenario-with-given-component",
+            "runnable-scenario-with-when-component",
+        },
+        std::array{
+            runnableScenarioWithGivenComponent,
+            runnableScenarioWithWhenComponent,
+        }
+    )
         .run(argc, argv);
 
     return EXIT_SUCCESS;
