@@ -21,6 +21,10 @@ This project uses property-based testing to ensure code quality. When writing te
 - **Comply with Requirements Interface**: Requirements must have a `constexpr` interface to ensure that properties are satisfied at both compile time and runtime.
 - **Group Test Suites**: Group tests for the same property into test suites.
 
+## Automation with AI
+
+You can automate some checklists using prompts to ensure that all requirements are met efficiently. See [docs/prompt.md](docs/prompt.md) for more details.
+
 ## Contributor Code of Conduct
 
 All contributors should respect one another, provide constructive feedback, and strive to create an inclusive environment.
