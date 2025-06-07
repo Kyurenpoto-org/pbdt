@@ -94,7 +94,7 @@ jobs:
           preset: ${{ matrix.preset }}
 
   macos-build:
-    runs-on: macos-latest
+    runs-on: macos-15
     strategy:
       matrix:
         preset: [macos-debug, macos-release]
