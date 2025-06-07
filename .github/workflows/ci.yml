@@ -94,7 +94,7 @@ jobs:
           preset: ${{ matrix.preset }}
 
   macos-build:
-    runs-on: macos-latest
+    runs-on: macos-15
     strategy:
       matrix:
         preset: [macos-debug, macos-release]
@@ -127,11 +127,11 @@ jobs:
 
       - name: install clang
         run: |
-          brew install llvm@19
-          echo PATH="/opt/homebrew/opt/llvm@19/bin:$PATH" >> $GITHUB_ENV
-          echo "LDFLAGS=-L/opt/homebrew/opt/llvm@19/lib" >> $GITHUB_ENV
-          echo "CPPFLAGS=-I/opt/homebrew/opt/llvm@19/include" >> $GITHUB_ENV
-          brew link --overwrite llvm@19
+          brew install llvm@20
+          echo PATH="/opt/homebrew/opt/llvm@20/bin:$PATH" >> $GITHUB_ENV
+          echo "LDFLAGS=-L/opt/homebrew/opt/llvm@20/lib" >> $GITHUB_ENV
+          echo "CPPFLAGS=-I/opt/homebrew/opt/llvm@20/include" >> $GITHUB_ENV
+          brew link --overwrite llvm@20
 
       - name: run cmake
         uses: ./.github/workflows/ci-cmake
