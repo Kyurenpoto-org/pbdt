@@ -506,105 +506,196 @@ namespace pbdt::bdd
 
     namespace detail
     {
-        template <typename Given, typename When, typename Then>
-        struct Scenario
+        template <typename T>
+        using StorableRefType = std::conditional_t<std::is_lvalue_reference_v<T>, T&, T&&>;
+
+        template <typename Target, typename Prop, typename Domain>
+        struct RunnableScenario
         {
-            constexpr auto test() const
-            {
-                // return test_context::propertyContext(given.complete(), then.complete(), when.complete());
-            }
-        };
-
-        template <typename Given>
-        concept ValidGivenComponent = requires(Given given) {
-            typename Given::ArgumentsType;
-            typename Given::ReturnType;
-            { given.complete() };
-        };
-
-        template <typename When>
-        concept ValidWhenComponent = requires(When when) {
-            typename When::RangeType;
-            { when.complete() };
-        };
-
-        template <typename Then>
-        concept ValidThenComponent = requires(Then then) {
-            typename Then::SampleType;
-            typename Then::ResultType;
-            { then.complete() };
-        };
-
-        template <typename Given, typename When, typename Then>
-        struct ScenarioBuilder
-        {
-            template <typename NewGiven, typename NewWhen, typename NewThen>
-                requires std::is_constructible_v<Given, NewGiven> && std::is_constructible_v<When, NewWhen>
-                          && std::is_constructible_v<Then, NewThen>
-            constexpr ScenarioBuilder(NewGiven&& given, NewWhen&& when, NewThen&& then) :
-                given(std::forward<NewGiven>(given)),
-                when(std::forward<NewWhen>(when)),
-                then(std::forward<NewThen>(then))
+            constexpr RunnableScenario(
+                StorableRefType<Target> target, StorableRefType<Prop> prop, StorableRefType<Domain> domain
+            ) :
+                target(std::forward<Target>(target)),
+                prop(std::forward<Prop>(prop)),
+                domain(std::forward<Domain>(domain))
             {
             }
 
-            template <typename NewGiven>
-                requires std::is_same_v<Given, nullptr_t> && ValidGivenComponent<NewGiven>
-            constexpr ScenarioBuilder<NewGiven, When, Then> withGiven(NewGiven&& newGiven) const
+            constexpr auto run() const
             {
-                return {
-                    std::forward<NewGiven>(newGiven),
-                    when,
-                    then,
-                };
-            }
-
-            template <typename NewWhen>
-                requires std::is_same_v<When, nullptr_t> && ValidWhenComponent<NewWhen>
-            constexpr ScenarioBuilder<Given, NewWhen, Then> withWhen(NewWhen&& newWhen) const
-            {
-                return {
-                    given,
-                    std::forward<NewWhen>(newWhen),
-                    then,
-                };
-            }
-
-            template <typename NewThen>
-                requires std::is_same_v<Then, nullptr_t> && ValidThenComponent<NewThen>
-            constexpr ScenarioBuilder<Given, When, NewThen> withThen(NewThen&& newThen) const
-            {
-                return {
-                    given,
-                    when,
-                    std::forward<NewThen>(newThen),
-                };
-            }
-
-            constexpr auto build(const std::string_view name) const
-                requires(!(
-                    std::is_same_v<Given, nullptr_t> || std::is_same_v<When, nullptr_t>
-                    || std::is_same_v<Then, nullptr_t>
-                ))
-            {
+                return pbdt::test_context::parameterizedContext(
+                    domain,
+                    [this](const auto& sample)
+                    {
+                        return prop(sample, exstd::applyOrInvoke(target, sample));
+                    }
+                );
             }
 
         private:
-            Given given;
-            When when;
-            Then then;
+            Target target;
+            Prop prop;
+            Domain domain;
+        };
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(Target&&, Prop&&, Domain&&) -> RunnableScenario<Target, Prop, Domain>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(Target&&, Prop&&, const Domain&) -> RunnableScenario<Target, Prop, const Domain&>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(Target&&, const Prop&, Domain&&) -> RunnableScenario<Target, const Prop&, Domain>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(Target&&, const Prop&, const Domain&) -> RunnableScenario<Target, const Prop&, const Domain&>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(const Target&, Prop&&, Domain&&) -> RunnableScenario<const Target&, Prop, Domain>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(const Target&, Prop&&, const Domain&) -> RunnableScenario<const Target&, Prop, const Domain&>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(const Target&, const Prop&, Domain&&) -> RunnableScenario<const Target&, const Prop&, Domain>;
+
+        template <typename Target, typename Prop, typename Domain>
+        RunnableScenario(const Target&, const Prop&, const Domain&)
+            -> RunnableScenario<const Target&, const Prop&, const Domain&>;
+
+        template <typename T>
+        constexpr T toStorableRef(const T& t)
+        {
+            return t;
+        }
+
+        template <typename T>
+            requires std::is_rvalue_reference_v<T>
+        constexpr T& toStorableRef(const T& t)
+        {
+            return t;
+        }
+
+        template <typename Target, typename Prop, typename Domain>
+        struct ScenarioContext
+        {
+            constexpr ScenarioContext(
+                StorableRefType<Target> target, StorableRefType<Prop> prop, StorableRefType<Domain> domain
+            ) :
+                target(std::forward<Target>(target)),
+                prop(std::forward<Prop>(prop)),
+                domain(std::forward<Domain>(domain))
+            {
+            }
+
+            template <typename NewTarget>
+                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
+            constexpr ScenarioContext<NewTarget, Prop, Domain> given(NewTarget&& newTarget) const
+            {
+                return {
+                    std::forward<NewTarget>(newTarget),
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewTarget>
+                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
+            constexpr ScenarioContext<const NewTarget&, Prop, Domain> given(const NewTarget& newTarget) const
+            {
+                return {
+                    newTarget,
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewProp>
+                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
+            constexpr ScenarioContext<Target, NewProp, Domain> then(NewProp&& newProp) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    std::forward<NewProp>(newProp),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewProp>
+                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
+            constexpr ScenarioContext<Target, const NewProp&, Domain> then(const NewProp& newProp) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    newProp,
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+            template <typename NewDomain>
+                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
+            constexpr ScenarioContext<Target, Prop, NewDomain> when(NewDomain&& newDomain) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    std::forward<NewDomain>(newDomain),
+                };
+            }
+
+            template <typename NewDomain>
+                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
+            constexpr ScenarioContext<Target, Prop, const NewDomain&> when(const NewDomain& newDomain) const
+            {
+                return {
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    newDomain,
+                };
+            }
+
+            constexpr auto complete() const
+                requires(
+                    !std::is_same_v<Target, std::monostate> && !std::is_same_v<Prop, std::monostate>
+                    && !std::is_same_v<Domain, std::monostate>
+                )
+            {
+                return RunnableScenario{
+                    toStorableRef<Target>(target),
+                    toStorableRef<Prop>(prop),
+                    toStorableRef<Domain>(domain),
+                };
+            }
+
+        private:
+            Target target;
+            Prop prop;
+            Domain domain;
+        };
+
+        constexpr ScenarioContext<const std::monostate, const std::monostate, const std::monostate>
+            emptyScenarioContext{
+                std::monostate{},
+                std::monostate{},
+                std::monostate{},
+            };
+    }
+
+    template <typename Target, typename Prop, typename Domain>
+        requires detail::CallableTarget<Target> && detail::CallableProperty<Prop> && detail::RangeDomain<Domain>
+    constexpr auto scenario(Target&& target, Prop&& prop, Domain&& domain)
+    {
+        return detail::RunnableScenario{
+            std::forward<Target>(target),
+            std::forward<Prop>(prop),
+            exstd::toContainer(std::forward<Domain>(domain)),
         };
     }
 
-    constexpr auto scenario(const std::string_view name)
+    constexpr auto scenario()
     {
+        return detail::emptyScenarioContext;
     }
-
-    constexpr detail::ScenarioBuilder<std::nullptr_t, std::nullptr_t, std::nullptr_t> builder{
-        nullptr,
-        nullptr,
-        nullptr,
-    };
 }
 
 namespace exstd::detail

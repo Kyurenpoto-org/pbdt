@@ -113,6 +113,7 @@ target_sources(
 
 if(PBDT_BUILD_TESTS)
 	add_subdirectory(tests)
+	add_subdirectory(examples)
 endif()
 
 if(PBDT_INSTALL)
