@@ -51,12 +51,19 @@ jobs:
           JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -s .)
           echo "issue_numbers=$JSON_ARRAY" >> $GITHUB_OUTPUT
 
-      - name: post comment
-        uses: peter-evans/create-or-update-comment@v4
-        with:
-          issue-number: ${{ env.ISSUE_NUMBER }}
-          body: ${{ env.message }}
-
     outputs:
       issue_numbers: ${{ steps.extract_issues.outputs.issue_numbers }}
       message: ${{ steps.set_message.outputs.message }}
+
+  post-comments:
+    runs-on: ubuntu-latest
+    needs: parse-issue-ids
+    strategy:
+      matrix:
+        issue: ${{ fromJson(needs.parse-issue-ids.outputs.issue_numbers) }}
+    steps:
+      - name: post comments
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ matrix.issue }}
+          body: ${{ needs.parse-issue-ids.outputs.message }}
