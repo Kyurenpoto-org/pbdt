@@ -16,7 +16,7 @@ permissions:
   issues: write
 
 jobs:
-  post-comment:
+  parse-issue-ids:
     runs-on: ubuntu-latest
     if: ${{
       (
@@ -36,20 +36,27 @@ jobs:
           fi
 
       - name: set comment message
+        id: set_message
         run: |
           if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
-            echo "message=✅ ${{ env.env }} test completed successfully!" >> $GITHUB_ENV
+            echo "message=✅ ${{ env.env }} test completed successfully!" >> $GITHUB_OUTPUT
           else
-            echo "message=❌ ${{ env.env }} test failed. Please check the details at: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> $GITHUB_ENV
+            echo "message=❌ ${{ env.env }} test failed. Please check the details at: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: extract issue number from commit message
+      - name: extract issue numbers from commit message
+        id: extract_issues
         run: |
-          ISSUE_NUMBER=$(echo '${{ github.event.workflow_run.head_commit.message }}' | sed -n '3p' | grep -o '#[0-9]*' | tr -d '#')
-          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          ISSUE_NUMBERS=$(echo "${{ github.event.workflow_run.head_commit.message }}" | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
+          JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -s .)
+          echo "issue_numbers=$JSON_ARRAY" >> $GITHUB_OUTPUT
 
       - name: post comment
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.ISSUE_NUMBER }}
           body: ${{ env.message }}
+
+    outputs:
+      issue_numbers: ${{ steps.extract_issues.outputs.issue_numbers }}
+      message: ${{ steps.set_message.outputs.message }}
