@@ -16,16 +16,29 @@ permissions:
   issues: write
 
 jobs:
+  set-condition:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.calc_condition.outputs.should_run }}
+    steps:
+      - name: calculate condition
+        id: calc_condition
+        run: |
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          REF="${{ github.event.workflow_run.head_ref }}"
+          if [[ "$BRANCH" == "dev" || "$BRANCH" == release/* || "$BRANCH" == non-release/* ]] && [[ "$REF" == "" ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
   parse-issue-ids:
     runs-on: ubuntu-latest
-    if: ${{
-      (
-        github.event.workflow_run.head_branch == 'dev' || 
-        startsWith(github.event.workflow_run.head_branch, 'release/') || 
-        startsWith(github.event.workflow_run.head_branch, 'non-release/')
-      ) && 
-      github.event.workflow_run.head_ref == ''
-    }}
+    needs: set-condition
+    if: ${{ needs.set-condition.outputs.should_run == 'true' }}
+    outputs:
+      issue_numbers: ${{ steps.extract_issues.outputs.issue_numbers }}
+      message: ${{ steps.set_message.outputs.message }}
     steps:
       - name: target environment
         run: |
@@ -50,10 +63,6 @@ jobs:
           ISSUE_NUMBERS=$(echo "${{ github.event.workflow_run.head_commit.message }}" | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
           JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -s .)
           echo "issue_numbers=$JSON_ARRAY" >> $GITHUB_OUTPUT
-
-    outputs:
-      issue_numbers: ${{ steps.extract_issues.outputs.issue_numbers }}
-      message: ${{ steps.set_message.outputs.message }}
 
   post-comments:
     runs-on: ubuntu-latest
