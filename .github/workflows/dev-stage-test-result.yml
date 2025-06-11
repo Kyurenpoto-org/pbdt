@@ -60,8 +60,8 @@ jobs:
       - name: extract issue numbers from commit message
         id: extract_issues
         run: |
-          ISSUE_NUMBERS=$(echo "${{ github.event.workflow_run.head_commit.message }}" | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
-          JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -s .)
+          ISSUE_NUMBERS=$(printf '%s' "${{ github.event.workflow_run.head_commit.message }}" | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
+          JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -sc .)
           echo "issue_numbers=$JSON_ARRAY" >> $GITHUB_OUTPUT
 
   post-comments:
