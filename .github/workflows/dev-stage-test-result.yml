@@ -16,16 +16,29 @@ permissions:
   issues: write
 
 jobs:
-  post-comment:
+  set-condition:
     runs-on: ubuntu-latest
-    if: ${{
-      (
-        github.event.workflow_run.head_branch == 'dev' || 
-        startsWith(github.event.workflow_run.head_branch, 'release/') || 
-        startsWith(github.event.workflow_run.head_branch, 'non-release/')
-      ) && 
-      github.event.workflow_run.head_ref == ''
-    }}
+    outputs:
+      should_run: ${{ steps.calc_condition.outputs.should_run }}
+    steps:
+      - name: calculate condition
+        id: calc_condition
+        run: |
+          EVENT="${{ github.event.workflow_run.event}}"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if [[ "$EVENT" == "push" ]] && [[ "$BRANCH" == "dev" || "$BRANCH" == release/* || "$BRANCH" == non-release/* ]]; then
+            echo "should_run=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_run=false" >> $GITHUB_OUTPUT
+          fi
+
+  parse-issue-ids:
+    runs-on: ubuntu-latest
+    needs: set-condition
+    if: ${{ needs.set-condition.outputs.should_run == 'true' }}
+    outputs:
+      issue_numbers: ${{ steps.extract_issues.outputs.issue_numbers }}
+      message: ${{ steps.set_message.outputs.message }}
     steps:
       - name: target environment
         run: |
@@ -36,20 +49,30 @@ jobs:
           fi
 
       - name: set comment message
+        id: set_message
         run: |
           if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
-            echo "message=✅ ${{ env.env }} test completed successfully!" >> $GITHUB_ENV
+            echo "message=✅ ${{ env.env }} test completed successfully!" >> $GITHUB_OUTPUT
           else
-            echo "message=❌ ${{ env.env }} test failed. Please check the details at: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> $GITHUB_ENV
+            echo "message=❌ ${{ env.env }} test failed. Please check the details at: https://github.com/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: extract issue number from commit message
+      - name: extract issue numbers from commit message
+        id: extract_issues
         run: |
-          ISSUE_NUMBER=$(echo '${{ github.event.workflow_run.head_commit.message }}' | sed -n '3p' | grep -o '#[0-9]*' | tr -d '#')
-          echo "ISSUE_NUMBER=$ISSUE_NUMBER" >> $GITHUB_ENV
+          ISSUE_NUMBERS=$(printf '%s' "${{ github.event.workflow_run.head_commit.message }}" | tail -n +2 | grep -o '#[0-9]\+' | tr -d '#' | sort -u)
+          JSON_ARRAY=$(echo "$ISSUE_NUMBERS" | jq -R . | jq -sc .)
+          echo "issue_numbers=$JSON_ARRAY" >> $GITHUB_OUTPUT
 
-      - name: post comment
+  post-comments:
+    runs-on: ubuntu-latest
+    needs: parse-issue-ids
+    strategy:
+      matrix:
+        issue: ${{ fromJson(needs.parse-issue-ids.outputs.issue_numbers) }}
+    steps:
+      - name: post comments
         uses: peter-evans/create-or-update-comment@v4
         with:
-          issue-number: ${{ env.ISSUE_NUMBER }}
-          body: ${{ env.message }}
+          issue-number: ${{ matrix.issue }}
+          body: ${{ needs.parse-issue-ids.outputs.message }}

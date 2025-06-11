@@ -24,9 +24,9 @@ jobs:
   windows-build:
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         preset: [x64-debug, x64-release]
-    continue-on-error: true
 
     steps:
       - name: install cmake & ninja
@@ -57,9 +57,9 @@ jobs:
   linux-build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         preset: [linux-debug, linux-release]
-    continue-on-error: true
 
     steps:
       - name: checkout
@@ -98,9 +98,9 @@ jobs:
   macos-build:
     runs-on: macos-15
     strategy:
+      fail-fast: false
       matrix:
         preset: [macos-debug, macos-release]
-    continue-on-error: true
 
     steps:
       - name: checkout
@@ -137,16 +137,3 @@ jobs:
         uses: ./.github/workflows/ci-cmake
         with:
           preset: ${{ matrix.preset }}
-
-  check-success:
-    runs-on: ubuntu-latest
-    needs: [windows-build, linux-build, macos-build]
-    steps:
-      - name: check success
-        run: |
-          if [[ "${{ needs.windows-build.result }}" != "success" ]] || \
-             [[ "${{ needs.linux-build.result }}" != "success" ]] || \
-             [[ "${{ needs.macos-build.result }}" != "success" ]]; then
-            echo "One or more builds failed."
-            exit 1
-          fi
