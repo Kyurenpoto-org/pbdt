@@ -24,9 +24,9 @@ jobs:
       - name: calculate condition
         id: calc_condition
         run: |
+          EVENT="${{ github.event.workflow_run.event}}"
           BRANCH="${{ github.event.workflow_run.head_branch }}"
-          REF="${{ github.event.workflow_run.head_ref }}"
-          if [[ "$BRANCH" == "dev" || "$BRANCH" == release/* || "$BRANCH" == non-release/* ]] && [[ "$REF" == "" ]]; then
+          if [[ "$EVENT" == "push" ]] && [[ "$BRANCH" == "dev" || "$BRANCH" == release/* || "$BRANCH" == non-release/* ]]; then
             echo "should_run=true" >> $GITHUB_OUTPUT
           else
             echo "should_run=false" >> $GITHUB_OUTPUT
