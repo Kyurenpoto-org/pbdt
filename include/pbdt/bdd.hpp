@@ -22,6 +22,7 @@
 
 #endif
 
+#include "pbdt/constraints.hpp"
 #include "pbdt/test-context.hpp"
 
 namespace pbdt::bdd
@@ -120,9 +121,6 @@ namespace pbdt::bdd
             // std::string_view step;
             Element element;
         };
-
-        template <typename Target>
-        concept CallableTarget = exstd::Callable<std::decay_t<Target>>;
 
         template <typename Ret, typename ArgsTuple>
         concept IsomorphicCallableComponent =
@@ -228,9 +226,6 @@ namespace pbdt::bdd
         private:
             ComponentContext<Target> core;
         };
-
-        template <typename Domain>
-        concept RangeDomain = std::ranges::range<std::decay_t<Domain>>;
 
         template <typename... Domains>
         struct WhenContext;
@@ -352,12 +347,6 @@ namespace pbdt::bdd
             ComponentContext<Domain> core;
         };
 
-        template <typename Prop>
-        concept CallableProperty =
-            exstd::Callable<std::decay_t<Prop>>
-            && std::tuple_size_v<exstd::CallableArgumentsType<std::decay_t<Prop>>> == 2
-            && std::is_same_v<exstd::CallableReturnType<std::decay_t<Prop>>, test_context::detail::TestContext>;
-
         template <typename... Funcs>
         using CommonArgumentsType = std::common_type_t<exstd::CallableArgumentsType<Funcs>...>;
 
@@ -468,7 +457,7 @@ namespace pbdt::bdd
     }
 
     template <typename Target>
-        requires detail::CallableTarget<Target>
+        requires CallableTarget<Target>
     constexpr detail::GivenContext<std::decay_t<Target>> given( // const std::string_view step,
         Target&& target
     )
@@ -480,7 +469,7 @@ namespace pbdt::bdd
     }
 
     template <typename Domain>
-        requires detail::RangeDomain<Domain>
+        requires RangeDomain<Domain>
     constexpr detail::WhenContext<decltype(exstd::toContainer(std::declval<Domain>()))>
     when( // const std::string_view step,
         Domain&& domain
@@ -493,7 +482,7 @@ namespace pbdt::bdd
     }
 
     template <typename Prop>
-        requires detail::CallableProperty<Prop>
+        requires CallableProperty<Prop>
     constexpr detail::ThenContext<std::decay_t<Prop>> then( // const std::string_view step,
         Prop&& property
     )
@@ -589,7 +578,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewTarget>
-                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
+                requires(std::is_same_v<Target, const std::monostate> && CallableTarget<NewTarget>)
             constexpr ScenarioContext<NewTarget, Prop, Domain> given(NewTarget&& newTarget) const
             {
                 return {
@@ -600,7 +589,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewTarget>
-                requires(std::is_same_v<Target, const std::monostate> && detail::CallableTarget<NewTarget>)
+                requires(std::is_same_v<Target, const std::monostate> && CallableTarget<NewTarget>)
             constexpr ScenarioContext<const NewTarget&, Prop, Domain> given(const NewTarget& newTarget) const
             {
                 return {
@@ -611,7 +600,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewProp>
-                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
+                requires(std::is_same_v<Prop, const std::monostate> && CallableProperty<NewProp>)
             constexpr ScenarioContext<Target, NewProp, Domain> then(NewProp&& newProp) const
             {
                 return {
@@ -622,7 +611,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewProp>
-                requires(std::is_same_v<Prop, const std::monostate> && detail::CallableProperty<NewProp>)
+                requires(std::is_same_v<Prop, const std::monostate> && CallableProperty<NewProp>)
             constexpr ScenarioContext<Target, const NewProp&, Domain> then(const NewProp& newProp) const
             {
                 return {
@@ -633,7 +622,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewDomain>
-                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
+                requires(std::is_same_v<Domain, const std::monostate> && RangeDomain<NewDomain>)
             constexpr ScenarioContext<Target, Prop, NewDomain> when(NewDomain&& newDomain) const
             {
                 return {
@@ -644,7 +633,7 @@ namespace pbdt::bdd
             }
 
             template <typename NewDomain>
-                requires(std::is_same_v<Domain, const std::monostate> && detail::RangeDomain<NewDomain>)
+                requires(std::is_same_v<Domain, const std::monostate> && RangeDomain<NewDomain>)
             constexpr ScenarioContext<Target, Prop, const NewDomain&> when(const NewDomain& newDomain) const
             {
                 return {
@@ -682,7 +671,7 @@ namespace pbdt::bdd
     }
 
     template <typename Target, typename Prop, typename Domain>
-        requires detail::CallableTarget<Target> && detail::CallableProperty<Prop> && detail::RangeDomain<Domain>
+        requires CallableTarget<Target> && CallableProperty<Prop> && RangeDomain<Domain>
     constexpr auto scenario(Target&& target, Prop&& prop, Domain&& domain)
     {
         return detail::RunnableScenario{
