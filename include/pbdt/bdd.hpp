@@ -20,10 +20,10 @@
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"
 
-#endif
-
 #include "pbdt/constraints.hpp"
 #include "pbdt/test-context.hpp"
+
+#endif
 
 namespace pbdt::bdd
 {
