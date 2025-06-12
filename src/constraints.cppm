@@ -13,9 +13,11 @@ module;
 
 #include "pbdt/module-unit-guard.hpp"
 
-export module pbdt:constraints;
+export module pbdt.constraints;
 
 import exstd.type_traits;
+
+import pbdt.test_context;
 
 export {
 #include "pbdt/constraints.hpp"

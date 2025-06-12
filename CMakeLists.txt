@@ -112,6 +112,7 @@ target_sources(
 	FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
 	${CMAKE_CURRENT_SOURCE_DIR}/src/constraints.cppm
+	${CMAKE_CURRENT_SOURCE_DIR}/src/test-context.cppm
 )
 
 if(PBDT_BUILD_TESTS)
