@@ -15,14 +15,13 @@ module;
 #include <tuple>
 #include <type_traits>
 
-export module pbdt;
+#include "pbdt/module-unit-guard.hpp"
 
-#define PBDT_MODULE
+export module pbdt;
 
 import exstd;
 
-export
-{
+export {
 #include "pbdt/bdd.hpp"
 #include "pbdt/test-context.hpp"
 }
