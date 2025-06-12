@@ -12,9 +12,10 @@
 #include <type_traits>
 #include <variant>
 
+#include "exstd/callable-traits.hpp"
+
 #endif
 
-#include "exstd/callable-traits.hpp"
 #include "exstd/type-container.hpp"
 #include "exstd/type-traits.hpp"
 

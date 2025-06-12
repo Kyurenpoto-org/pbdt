@@ -21,9 +21,9 @@ module;
 
 export module exstd;
 
+export import exstd.callable_traits;
 
 export {
-#include "exstd/callable-traits.hpp"
 #include "exstd/type-container.hpp"
 #include "exstd/type-traits.hpp"
 
