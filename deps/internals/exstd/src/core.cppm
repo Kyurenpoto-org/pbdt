@@ -17,9 +17,10 @@ module;
 #include <variant>
 #include <vector>
 
+#include "exstd/module-unit-guard.hpp"
+
 export module exstd;
 
-#define EXSTD_MODULE
 
 export {
 #include "exstd/callable-traits.hpp"
