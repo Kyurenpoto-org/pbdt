@@ -38,6 +38,7 @@ target_sources(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/core.cppm
     ${CMAKE_CURRENT_SOURCE_DIR}/src/type-traits.cppm
     ${CMAKE_CURRENT_SOURCE_DIR}/src/functional.cppm
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/ranges.cppm
 )
 
 if(PBDT_BUILD_TESTS)
