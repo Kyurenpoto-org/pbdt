@@ -19,8 +19,9 @@ module;
 
 export module exstd;
 
-export
-{
+#define EXSTD_MODULE
+
+export {
 #include "exstd/callable-traits.hpp"
 #include "exstd/type-container.hpp"
 #include "exstd/type-traits.hpp"

@@ -6,9 +6,13 @@
 
 #pragma once
 
+#ifndef EXSTD_MODULE
+
 #include <tuple>
 #include <type_traits>
 #include <variant>
+
+#endif
 
 #include "exstd/callable-traits.hpp"
 #include "exstd/type-container.hpp"

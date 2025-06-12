@@ -6,8 +6,12 @@
 
 #pragma once
 
+#ifndef EXSTD_MODULE
+
 #include <concepts>
 #include <functional>
+
+#endif
 
 namespace exstd
 {
@@ -165,18 +169,18 @@ namespace exstd
         };
 
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveReferenceCallableImpl<Ret (Class::*)(Args...)&>
+        struct RemoveReferenceCallableImpl<Ret (Class::*)(Args...) &>
         {
             using type = Ret (Class::*)(Args...) &;
         };
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveReferenceCallableImpl<Ret (Class::*&)(Args...)&> :
-            RemoveReferenceCallableImpl<Ret (Class::*)(Args...)&>
+        struct RemoveReferenceCallableImpl<Ret (Class::*&)(Args...) &> :
+            RemoveReferenceCallableImpl<Ret (Class::*)(Args...) &>
         {
         };
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveReferenceCallableImpl<Ret (Class::*&&)(Args...)&> :
-            RemoveReferenceCallableImpl<Ret (Class::*)(Args...)&>
+        struct RemoveReferenceCallableImpl<Ret (Class::*&&)(Args...) &> :
+            RemoveReferenceCallableImpl<Ret (Class::*)(Args...) &>
         {
         };
 
@@ -369,17 +373,17 @@ namespace exstd
         };
 
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*)(Args...)&> :
+        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*)(Args...) &> :
             RemoveCVRefMemberFunctionImpl<Ret (Class::*)(Args...)>
         {
         };
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*&)(Args...)&> :
+        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*&)(Args...) &> :
             RemoveCVRefMemberFunctionImpl<Ret (Class::*&)(Args...)>
         {
         };
         template <typename Class, typename Ret, typename... Args>
-        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*&&)(Args...)&> :
+        struct RemoveCVRefMemberFunctionImpl<Ret (Class::*&&)(Args...) &> :
             RemoveCVRefMemberFunctionImpl<Ret (Class::*&&)(Args...)>
         {
         };
@@ -600,15 +604,15 @@ namespace exstd
         };
 
         template <typename Class, typename Ret, typename... Args>
-        struct MemberFunctionImpl<Ret (Class::*)(Args...)&> : MemberFunctionImpl<Ret (Class::*)(Args...)>
+        struct MemberFunctionImpl<Ret (Class::*)(Args...) &> : MemberFunctionImpl<Ret (Class::*)(Args...)>
         {
         };
         template <typename Class, typename Ret, typename... Args>
-        struct MemberFunctionImpl<Ret (Class::*&)(Args...)&> : MemberFunctionImpl<Ret (Class::*)(Args...)>
+        struct MemberFunctionImpl<Ret (Class::*&)(Args...) &> : MemberFunctionImpl<Ret (Class::*)(Args...)>
         {
         };
         template <typename Class, typename Ret, typename... Args>
-        struct MemberFunctionImpl<Ret (Class::*&&)(Args...)&> : MemberFunctionImpl<Ret (Class::*)(Args...)>
+        struct MemberFunctionImpl<Ret (Class::*&&)(Args...) &> : MemberFunctionImpl<Ret (Class::*)(Args...)>
         {
         };
 
