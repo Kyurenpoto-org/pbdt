@@ -21,11 +21,10 @@ module;
 
 export module exstd;
 
-export import exstd.callable_traits;
+export import exstd.type_traits;
 
 export {
 #include "exstd/type-container.hpp"
-#include "exstd/type-traits.hpp"
 
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"

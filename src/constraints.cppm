@@ -15,7 +15,7 @@ module;
 
 export module pbdt:constraints;
 
-import exstd;
+import exstd.type_traits;
 
 export {
 #include "pbdt/constraints.hpp"

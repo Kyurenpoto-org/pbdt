@@ -13,11 +13,11 @@
 #include <variant>
 
 #include "exstd/callable-traits.hpp"
+#include "exstd/type-traits.hpp"
 
 #endif
 
 #include "exstd/type-container.hpp"
-#include "exstd/type-traits.hpp"
 
 namespace exstd
 {

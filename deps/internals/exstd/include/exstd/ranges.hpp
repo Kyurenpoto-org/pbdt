@@ -16,9 +16,9 @@
 #include <type_traits>
 #include <vector>
 
-#endif
-
 #include "exstd/type-traits.hpp"
+
+#endif
 
 namespace exstd
 {

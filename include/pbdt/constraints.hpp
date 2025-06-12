@@ -10,9 +10,9 @@
 
 #include "exstd/callable-traits.hpp"
 
-#endif
-
 #include "pbdt/test-context.hpp"
+
+#endif
 
 namespace pbdt::bdd
 {

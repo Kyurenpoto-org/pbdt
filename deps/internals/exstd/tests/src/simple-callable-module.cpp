@@ -6,7 +6,7 @@
 
 #include "simple-callable-common.hpp"
 
-import exstd.callable_traits;
+import exstd.type_traits;
 
 int main()
 {

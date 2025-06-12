@@ -11,8 +11,9 @@ module;
 
 #include "exstd/module-unit-guard.hpp"
 
-export module exstd.callable_traits;
+export module exstd.type_traits;
 
 export {
 #include "exstd/callable-traits.hpp"
+#include "exstd/type-traits.hpp"
 }
