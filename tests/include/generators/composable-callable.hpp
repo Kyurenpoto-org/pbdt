@@ -35,7 +35,8 @@ namespace Composable
         std::tuple<TestStruct, TestStruct, int>, std::tuple<TestStruct, TestStruct, std::string>,
         std::tuple<TestStruct, TestStruct, TestStruct>>;
 
-    constexpr size_t typeSequenceCount = std::tuple_size_v<TypeSequenceTable>;
+    constexpr size_t TYPE_SEQUENCE_INDEX_LIMIT = std::tuple_size_v<TypeSequenceTable>;
+    constexpr size_t TYPE_SEQUENCE_DOUBLE_INDEX_LIMIT = TYPE_SEQUENCE_INDEX_LIMIT * TYPE_SEQUENCE_INDEX_LIMIT;
 
     template <size_t N>
     struct TypeSequence
@@ -96,8 +97,8 @@ namespace Composable
         static constexpr auto value = std::tuple_cat(
             std::tuple{
                 ComposableCallable<
-                    N % 2, typename TypeSequence<Second % typeSequenceCount>::type,
-                    typename TypeSequence<First % typeSequenceCount>::type>::value,
+                    N % 2, typename TypeSequence<Second % TYPE_SEQUENCE_INDEX_LIMIT>::type,
+                    typename TypeSequence<First % TYPE_SEQUENCE_INDEX_LIMIT>::type>::value,
             },
             ComposableCombination<N / 2, Second, Rest...>::value
         );
@@ -108,11 +109,11 @@ namespace Composable
     {
         static constexpr auto value = std::tuple{
             ComposableCallable<
-                N % 2, typename TypeSequence<Second % typeSequenceCount>::type,
-                typename TypeSequence<First % typeSequenceCount>::type>::value,
+                N % 2, typename TypeSequence<Second % TYPE_SEQUENCE_INDEX_LIMIT>::type,
+                typename TypeSequence<First % TYPE_SEQUENCE_INDEX_LIMIT>::type>::value,
             ComposableCallable<
-                N / 2 % 2, typename TypeSequence<Third % typeSequenceCount>::type,
-                typename TypeSequence<Second % typeSequenceCount>::type>::value,
+                N / 2 % 2, typename TypeSequence<Third % TYPE_SEQUENCE_INDEX_LIMIT>::type,
+                typename TypeSequence<Second % TYPE_SEQUENCE_INDEX_LIMIT>::type>::value,
         };
     };
 }
