@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/modeling.hpp"
+#include "properties/classes/modeling.hpp"
 
 #include "pbdt/bdd.hpp"
 

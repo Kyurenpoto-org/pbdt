@@ -72,7 +72,7 @@ private:
     static constexpr ProjectiveRequirements requirements{};
 };
 
-#include "generators/runnable-double-combination.hpp"
+#include "generators/values/runnable-double-combination.hpp"
 
 template <typename ToContainer, typename Expect, typename RunnableScenario, typename Given>
 struct ProjectiveRunnableScenarioWithGivenRequirements

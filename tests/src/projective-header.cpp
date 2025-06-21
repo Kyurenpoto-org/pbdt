@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/projective.hpp"
+#include "properties/classes/projective.hpp"
 
 #include "pbdt/bdd.hpp"
 

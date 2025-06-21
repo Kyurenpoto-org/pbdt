@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/associative.hpp"
+#include "properties/classes/associative.hpp"
 
 #include "pbdt/bdd.hpp"
 

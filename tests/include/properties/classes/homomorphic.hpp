@@ -41,7 +41,7 @@ private:
     static constexpr HomomorphicRequirements requirements{};
 };
 
-#include "generators/runnable-double-combination.hpp"
+#include "generators/values/runnable-double-combination.hpp"
 
 template <typename Expect, typename RunnableScenario, typename Then>
 struct HomomorphicRunnableScenarioWithThenRequirements

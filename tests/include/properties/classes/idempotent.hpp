@@ -43,9 +43,9 @@ private:
     static constexpr ToComparable toComparable{};
 };
 
-#include "generators/composable-callable.hpp"
-#include "generators/foldable-callable.hpp"
-#include "generators/productable-container.hpp"
+#include "generators/values/composable-callable.hpp"
+#include "generators/values/foldable-callable.hpp"
+#include "generators/values/productable-container.hpp"
 
 template <typename Given>
 struct IdempotentGivenRequirements

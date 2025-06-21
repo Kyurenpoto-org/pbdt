@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/homomorphic.hpp"
+#include "properties/classes/homomorphic.hpp"
 
 import exstd;
 import pbdt;

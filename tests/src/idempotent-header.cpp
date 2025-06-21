@@ -6,7 +6,7 @@
 
 #include <array>
 
-#include "properties/idempotent.hpp"
+#include "properties/classes/idempotent.hpp"
 
 #include "pbdt/bdd.hpp"
 

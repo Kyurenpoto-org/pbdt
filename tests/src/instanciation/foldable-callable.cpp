@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "generators/foldable-callable.hpp"
+#include "generators/values/foldable-callable.hpp"
 
 template class Foldable::FoldableCallable<0, 0, Foldable::IndexToType<0>, Foldable::IndexToType<0>>;
 template class Foldable::FoldableCallable<0, 0, Foldable::IndexToType<0>, Foldable::IndexToType<1>>;

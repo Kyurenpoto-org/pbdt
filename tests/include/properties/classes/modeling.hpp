@@ -36,7 +36,7 @@ private:
     static constexpr ModelingRequirements requirements{};
 };
 
-#include "generators/runnable-combination.hpp"
+#include "generators/values/runnable-combination.hpp"
 
 template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
 struct ModelingRunnableScenarioRequirements
