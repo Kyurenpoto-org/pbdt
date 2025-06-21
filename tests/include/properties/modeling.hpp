@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 template <typename ModelingRequirements>
-struct ModelingValidation : ValidationBase<ModelingValidation<ModelingRequirements>>
+struct ModelingValidation : ValueValidationBase<ModelingValidation<ModelingRequirements>>
 {
     static constexpr size_t size()
     {

@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 template <typename ToComparable, typename AssociativeRequirements>
-struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable, AssociativeRequirements>>
+struct AssociativeValidation : ValueValidationBase<AssociativeValidation<ToComparable, AssociativeRequirements>>
 {
     static constexpr size_t size()
     {

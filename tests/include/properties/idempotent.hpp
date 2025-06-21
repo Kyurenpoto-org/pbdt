@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 template <typename ToComparable, typename IdempotentRequirements>
-struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, IdempotentRequirements>>
+struct IdempotentValidation : ValueValidationBase<IdempotentValidation<ToComparable, IdempotentRequirements>>
 {
     static constexpr size_t size()
     {
