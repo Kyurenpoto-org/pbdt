@@ -15,19 +15,19 @@
 
 void given()
 {
-    const AssociativeValidation<ToFlatTuple, AssociativeGivenRequirements<Given>> acceptable;
+    const AssociativeValueValidation<ToFlatTuple, AssociativeGivenRequirements<Given>> acceptable;
     acceptable.run();
 }
 
 void when()
 {
-    const AssociativeValidation<ToContainer, AssociativeWhenRequirements<When>> acceptable;
+    const AssociativeValueValidation<ToContainer, AssociativeWhenRequirements<When>> acceptable;
     acceptable.run();
 }
 
 void then()
 {
-    const AssociativeValidation<ToFlatTuple, AssociativeThenRequirements<Expect, Then>> acceptable;
+    const AssociativeValueValidation<ToFlatTuple, AssociativeThenRequirements<Expect, Then>> acceptable;
     acceptable.run();
 }
 

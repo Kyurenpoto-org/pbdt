@@ -16,19 +16,19 @@ import pbdt;
 
 void given()
 {
-    const IdempotentValidation<ToFlatTuple, IdempotentGivenRequirements<Given>> acceptable;
+    const IdempotentValueValidation<ToFlatTuple, IdempotentGivenRequirements<Given>> acceptable;
     acceptable.run();
 }
 
 void when()
 {
-    const IdempotentValidation<ToContainer, IdempotentWhenRequirements<When>> acceptable;
+    const IdempotentValueValidation<ToContainer, IdempotentWhenRequirements<When>> acceptable;
     acceptable.run();
 }
 
 void then()
 {
-    const IdempotentValidation<ToFlatTuple, IdempotentThenRequirements<Then, Expect>> acceptable;
+    const IdempotentValueValidation<ToFlatTuple, IdempotentThenRequirements<Then, Expect>> acceptable;
     acceptable.run();
 }
 

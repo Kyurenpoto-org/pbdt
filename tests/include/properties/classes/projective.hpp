@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 template <typename ProjectiveRequirements>
-struct LeftProjectiveValidation : ValueValidationBase<LeftProjectiveValidation<ProjectiveRequirements>>
+struct LeftProjectiveValueValidation : ValueValidationBase<LeftProjectiveValueValidation<ProjectiveRequirements>>
 {
     static constexpr size_t size()
     {
@@ -40,7 +40,7 @@ private:
 };
 
 template <typename ProjectiveRequirements>
-struct RightProjectiveValidation : ValueValidationBase<RightProjectiveValidation<ProjectiveRequirements>>
+struct RightProjectiveValueValidation : ValueValidationBase<RightProjectiveValueValidation<ProjectiveRequirements>>
 {
     static constexpr size_t size()
     {

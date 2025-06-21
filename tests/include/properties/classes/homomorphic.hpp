@@ -7,7 +7,7 @@
 #include "util.hpp"
 
 template <typename HomomorphicRequirements>
-struct HomomorphicValidation : ValueValidationBase<HomomorphicValidation<HomomorphicRequirements>>
+struct HomomorphicValueValidation : ValueValidationBase<HomomorphicValueValidation<HomomorphicRequirements>>
 {
     static constexpr size_t size()
     {

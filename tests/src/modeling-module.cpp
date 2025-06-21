@@ -16,7 +16,8 @@ import pbdt;
 
 void runnableScenario()
 {
-    const ModelingValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
+    const ModelingValueValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>>
+        acceptable;
     acceptable.run();
 }
 

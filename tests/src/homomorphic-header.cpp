@@ -15,7 +15,7 @@
 
 void runnableScenarioWithThenComponent()
 {
-    const HomomorphicValidation<HomomorphicRunnableScenarioWithThenRequirements<Expect, RunnableScenario, Then>>
+    const HomomorphicValueValidation<HomomorphicRunnableScenarioWithThenRequirements<Expect, RunnableScenario, Then>>
         acceptable;
     acceptable.run();
 }
