@@ -71,6 +71,7 @@ namespace
         }
 
     private:
+        template <size_t Idx>
         void runImpl() const
         {
             typeAssert<typename Validatable::A, typename Validatable::B>();
