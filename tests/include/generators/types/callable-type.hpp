@@ -31,37 +31,37 @@ namespace Callable
     template <typename, typename, size_t>
     struct CallableConceptInstanceImpl;
 
-    template <typename... Rets, typename... Args, size_t N>
+    template <typename... Rets, typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<Rets...>, std::tuple<Args...>, 0>
     {
         using type = LambdaConceptInstance<std::tuple<Rets...>, Args...>;
     };
 
-    template <typename... Rets, typename... Args, size_t N>
+    template <typename... Rets, typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<Rets...>, std::tuple<Args...>, 1>
     {
         using type = FreeFunctionConceptInstance<std::tuple<Rets...>, Args...>;
     };
 
-    template <typename Ret, typename... Args, size_t N>
+    template <typename Ret, typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<Ret>, std::tuple<Args...>, 0>
     {
         using type = LambdaConceptInstance<Ret, Args...>;
     };
 
-    template <typename Ret, typename... Args, size_t N>
+    template <typename Ret, typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<Ret>, std::tuple<Args...>, 1>
     {
         using type = FreeFunctionConceptInstance<Ret, Args...>;
     };
 
-    template <typename... Args, size_t N>
+    template <typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<>, std::tuple<Args...>, 0>
     {
         using type = LambdaConceptInstance<void, Args...>;
     };
 
-    template <typename... Args, size_t N>
+    template <typename... Args>
     struct CallableConceptInstanceImpl<std::tuple<>, std::tuple<Args...>, 1>
     {
         using type = FreeFunctionConceptInstance<void, Args...>;
