@@ -69,21 +69,49 @@ namespace Callable
 
     constexpr size_t CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT = 2;
 
-    template <size_t N>
-    using CallableTargetConceptInstance = typename CallableConceptInstanceImpl<
-        typename Composable::TypeSequence<
-            N / CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
-        typename Composable::TypeSequence<
-            N / CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT / Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
+    template <size_t N, size_t First, size_t Second>
+    using CallableTargetCombinationImpl = typename CallableConceptInstanceImpl<
+        typename Composable::TypeSequence<Second % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
+        typename Composable::TypeSequence<First % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
         N % CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT>::type;
 
-    template <typename Expect, size_t N>
-    using CallablePropConceptInstance = typename CallableConceptInstanceImpl<
-        Expect,
+    template <size_t N, size_t First, size_t Second, size_t... Rest>
+    struct CallableTargetCombination
+    {
+        using type = decltype(std::tuple_cat(
+            std::declval<std::tuple<CallableTargetCombinationImpl<N, First, Second>>>(),
+            std::declval<typename CallableTargetCombination<N / 2, Second, Rest...>::type>()
+        ));
+    };
+
+    template <size_t N, size_t First, size_t Second, size_t Third>
+    struct CallableTargetCombination<N, First, Second, Third>
+    {
+        using type = std::tuple<
+            CallableTargetCombinationImpl<N, First, Second>, CallableTargetCombinationImpl<N / 2, Second, Third>>;
+    };
+
+    template <typename Result, size_t N, size_t M>
+    using CallablePropCombinationImpl = typename CallableConceptInstanceImpl<
+        Result,
         std::tuple<
+            typename Composable::TypeSequence<N % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
             typename Composable::TypeSequence<
-                N / CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
-            typename Composable::TypeSequence<
-                N / CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT / Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type>,
-        N % CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT>::type;
+                N / Composable::TYPE_SEQUENCE_INDEX_LIMIT % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type>,
+        M % CALLABLE_CONCEPT_INSTANCE_INDEX_LIMIT>::type;
+
+    template <typename Result, size_t N, size_t First, size_t... Rest>
+    struct CallablePropCombination
+    {
+        using type = decltype(std::tuple_cat(
+            std::declval<std::tuple<CallablePropCombinationImpl<Result, N, First>>>(),
+            std::declval<CallablePropCombination<Rest, N, Rest...>::type>()
+        ));
+    };
+
+    template <typename Result, size_t N, size_t M>
+    struct CallablePropCombination<Result, N, M>
+    {
+        using type = std::tuple<CallablePropCombinationImpl<Result, N, M>>;
+    };
 }

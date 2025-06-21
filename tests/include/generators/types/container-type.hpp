@@ -111,11 +111,23 @@ namespace Container
     constexpr size_t RANGE_CONCEPT_INSTANCE_INDEX_LIMIT = 10;
     constexpr size_t RANCE_CONCEPT_INSTANCE_LENGTH_LIMIT = 10;
 
-    template <size_t N>
-    using RangeConceptInstance = typename RangeConceptInstanceImpl<
-        typename Composable::TypeSequence<
-            N / RANCE_CONCEPT_INSTANCE_LENGTH_LIMIT / RANGE_CONCEPT_INSTANCE_INDEX_LIMIT
-            % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
+    template <size_t N, size_t M>
+    using RangeDomainCombinationImpl = typename RangeConceptInstanceImpl<
+        typename Composable::TypeSequence<M % Composable::TYPE_SEQUENCE_INDEX_LIMIT>::type,
         N % RANCE_CONCEPT_INSTANCE_LENGTH_LIMIT + 1,
         N / RANCE_CONCEPT_INSTANCE_LENGTH_LIMIT % RANGE_CONCEPT_INSTANCE_INDEX_LIMIT>::type;
+
+    template <size_t N, size_t First, size_t... Rest>
+    struct RangeDomainCombination
+    {
+        using type = decltype(std::tuple_cat(
+            std::declval<std::tuple<RangeDomainCombinationImpl<N, First>>>(),
+            std::declval<typename RangeDomainCombination<N / RANCE_CONCEPT_INSTANCE_LENGTH_LIMIT, Rest...>::type>()
+        ));
+    };
+    template <size_t N, size_t M>
+    struct RangeDomainCombination<N, M>
+    {
+        using type = std::tuple<RangeDomainCombinationImpl<N, M>>;
+    };
 }
