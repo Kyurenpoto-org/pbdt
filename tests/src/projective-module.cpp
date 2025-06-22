@@ -11,8 +11,8 @@
 import exstd;
 import pbdt;
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void runnableScenarioWithGivenComponent()
 {

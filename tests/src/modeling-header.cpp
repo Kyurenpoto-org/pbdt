@@ -10,8 +10,8 @@
 
 #include "pbdt/bdd.hpp"
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void runnableScenario()
 {

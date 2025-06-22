@@ -4,6 +4,9 @@
  * SPDX - License - Identifier: MIT
  */
 
+#include <source_location>
+#include <tuple>
+
 namespace
 {
     template <typename T>
