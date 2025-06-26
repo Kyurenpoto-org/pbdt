@@ -24,18 +24,18 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
     }
 
     template <size_t Idx>
-    using A = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<
+    using A = std::conjunction<
+        typename MutualExclusiveRequirements::template ConstituentA<
             typename MutualExclusiveRequirements::template A<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<
+        std::negation<typename MutualExclusiveRequirements::template ConstituentB<
             typename MutualExclusiveRequirements::template A<Idx>>>>;
 
     template <size_t Idx>
-    using B = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<
-            typename MutualExclusiveRequirements::template B<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<
-            typename MutualExclusiveRequirements::template B<Idx>>>>;
+    using B = std::conjunction<
+        std::negation<typename MutualExclusiveRequirements::template ConstituentA<
+            typename MutualExclusiveRequirements::template B<Idx>>>,
+        typename MutualExclusiveRequirements::template ConstituentB<
+            typename MutualExclusiveRequirements::template B<Idx>>>;
 };
 
 #include "generators/types/callable-type.hpp"
@@ -74,8 +74,8 @@ struct MutualExclusiveRangeDomainWithCallableTargetRequirements
     using B = std::tuple_element_t<Idx, DomainCombinations>;
 
     template <typename T>
-    using Constituent1 = CallableTargetWrap<T>;
+    using ConstituentA = CallableTargetWrap<T>;
 
     template <typename T>
-    using Constituent2 = RangeDomainWrap<T>;
+    using ConstituentB = RangeDomainWrap<T>;
 };

@@ -8,6 +8,12 @@
 
 #include "util.hpp"
 
+/**
+ * @brief A value validation structure that checks associative properties.
+ *
+ * @tparam ToComparable
+ * @tparam AssociativeRequirements
+ */
 template <typename ToComparable, typename AssociativeRequirements>
 struct AssociativeValueValidation :
     ValueValidationBase<AssociativeValueValidation<ToComparable, AssociativeRequirements>>
@@ -50,6 +56,11 @@ private:
 #include "generators/values/foldable-callable.hpp"
 #include "generators/values/productable-container.hpp"
 
+/**
+ * @brief A structure that defines associative requirements for a given class.
+ *
+ * @tparam Given
+ */
 template <typename Given>
 struct AssociativeGivenRequirements
 {
@@ -90,6 +101,11 @@ private:
     static constexpr Given given{};
 };
 
+/**
+ * @brief A structure that defines associative requirements for a when class.
+ *
+ * @tparam When
+ */
 template <typename When>
 struct AssociativeWhenRequirements
 {
@@ -130,6 +146,12 @@ private:
     static constexpr When when{};
 };
 
+/**
+ * @brief A structure that defines associative requirements for a then class.
+ *
+ * @tparam Expect
+ * @tparam Then
+ */
 template <typename Expect, typename Then>
 struct AssociativeThenRequirements
 {
