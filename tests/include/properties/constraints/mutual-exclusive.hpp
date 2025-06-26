@@ -10,6 +10,11 @@
 
 #include "util.hpp"
 
+/**
+ * @brief A type validation structure that checks mutual exclusive properties.
+ *
+ * @tparam MutualExclusiveRequirements
+ */
 template <typename MutualExclusiveRequirements>
 struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
 {
@@ -36,6 +41,13 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
 #include "generators/types/callable-type.hpp"
 #include "generators/types/container-type.hpp"
 
+/**
+ * @brief A structure that defines mutual exclusive requirements for two concepts: callable-target and range-domain.
+ *
+ * @tparam Result
+ * @tparam CallableTargetWrap
+ * @tparam RangeDomainWrap
+ */
 template <
     typename Result, template <typename> typename CallableTargetWrap, template <typename> typename RangeDomainWrap>
 struct MutualExclusiveRangeDomainWithCallableTargetRequirements
