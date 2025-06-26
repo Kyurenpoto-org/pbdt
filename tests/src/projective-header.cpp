@@ -6,16 +6,16 @@
 
 #include <array>
 
-#include "properties/projective.hpp"
+#include "properties/classes/projective.hpp"
 
 #include "pbdt/bdd.hpp"
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void runnableScenarioWithGivenComponent()
 {
-    const LeftProjectiveValidation<
+    const LeftProjectiveValueValidation<
         ProjectiveRunnableScenarioWithGivenRequirements<ToContainer, Expect, RunnableScenario, Given>>
         acceptableL;
     acceptableL.run();
@@ -23,12 +23,12 @@ void runnableScenarioWithGivenComponent()
 
 void runnableScenarioWithWhenComponent()
 {
-    const LeftProjectiveValidation<
+    const LeftProjectiveValueValidation<
         ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, Expect, RunnableScenario, When>>
         acceptableL;
     acceptableL.run();
 
-    const RightProjectiveValidation<
+    const RightProjectiveValueValidation<
         ProjectiveRunnableScenarioWithWhenRequirements<ToContainer, Expect, RunnableScenario, When>>
         acceptableR;
     acceptableR.run();

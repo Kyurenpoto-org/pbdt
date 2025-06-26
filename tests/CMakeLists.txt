@@ -63,6 +63,28 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
+add_library(callable-target-property-fixture INTERFACE)
+
+target_compile_features(
+    callable-target-property-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    callable-target-property-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+add_library(range-domain-fixture INTERFACE)
+
+target_compile_features(
+    range-domain-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    range-domain-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # unit tests
 # Given: Set Category
 # When: Set Category that has product between any two objects
@@ -89,6 +111,13 @@ add_header_module_prop_suite(
     TARGETS runnable-scenario
     FIXTURES runnable-scenario-fixture
 )
+add_header_module_prop_suite(
+    PROP inclusive
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS callable-target callable-property
+    FIXTURES callable-target-property-fixture
+)
 
 # integrated tests
 add_header_module_prop_suite(
@@ -104,4 +133,11 @@ add_header_module_prop_suite(
     NAMESPACE pbdt.integration
     TARGETS runnable-scenario-with-then-component
     FIXTURES runnable-scenario-fixture
+)
+add_header_module_prop_suite(
+    PROP mutual-exclusive
+    DEP pbdt
+    NAMESPACE pbdt.integration
+    TARGETS range-domain-with-callable-target
+    FIXTURES callable-target-property-fixture range-domain-fixture
 )

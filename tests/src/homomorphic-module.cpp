@@ -6,17 +6,17 @@
 
 #include <array>
 
-#include "properties/homomorphic.hpp"
+#include "properties/classes/homomorphic.hpp"
 
 import exstd;
 import pbdt;
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void runnableScenarioWithThenComponent()
 {
-    const HomomorphicValidation<HomomorphicRunnableScenarioWithThenRequirements<Expect, RunnableScenario, Then>>
+    const HomomorphicValueValidation<HomomorphicRunnableScenarioWithThenRequirements<Expect, RunnableScenario, Then>>
         acceptable;
     acceptable.run();
 }

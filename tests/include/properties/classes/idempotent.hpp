@@ -4,10 +4,12 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename ToComparable, typename IdempotentRequirements>
-struct IdempotentValidation : ValidationBase<IdempotentValidation<ToComparable, IdempotentRequirements>>
+struct IdempotentValueValidation : ValueValidationBase<IdempotentValueValidation<ToComparable, IdempotentRequirements>>
 {
     static constexpr size_t size()
     {
@@ -43,9 +45,9 @@ private:
     static constexpr ToComparable toComparable{};
 };
 
-#include "generators/composable-callable.hpp"
-#include "generators/foldable-callable.hpp"
-#include "generators/productable-container.hpp"
+#include "generators/values/composable-callable.hpp"
+#include "generators/values/foldable-callable.hpp"
+#include "generators/values/productable-container.hpp"
 
 template <typename Given>
 struct IdempotentGivenRequirements

@@ -6,23 +6,12 @@
 
 module;
 
-#include <algorithm>
-#include <array>
-#include <ranges>
-#include <source_location>
-#include <string>
-#include <string_view>
-#include <tuple>
-#include <type_traits>
+#include "pbdt/module-unit-guard.hpp"
 
 export module pbdt;
 
-#define PBDT_MODULE
-
 import exstd;
 
-export
-{
-#include "pbdt/bdd.hpp"
-#include "pbdt/test-context.hpp"
-}
+export import pbdt.constraints;
+export import pbdt.test_context;
+export import pbdt.bdd;

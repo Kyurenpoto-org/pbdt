@@ -6,10 +6,18 @@
 
 module;
 
+#include <cstddef>
+#include <functional>
+#include <tuple>
+#include <type_traits>
+#include <variant>
+
 #include "exstd/module-unit-guard.hpp"
 
-export module exstd;
+export module exstd.functional;
 
 export import exstd.type_traits;
-export import exstd.functional;
-export import exstd.ranges;
+
+export {
+#include "exstd/functional.hpp"
+}

@@ -6,17 +6,18 @@
 
 #include <array>
 
-#include "properties/classes/modeling.hpp"
+#include "properties/constraints/mutual-exclusive.hpp"
 
 import exstd;
 import pbdt;
 
 #include "suite-runner.hpp"
-#include "wrapped-deps/for-bdd.hpp"
+#include "wrapped-deps/for-constraints.hpp"
 
-void runnableScenario()
+void rangeDomainWithCallableTarget()
 {
-    const ModelingValueValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>>
+    const MutualExclusiveTypeValidation<MutualExclusiveRangeDomainWithCallableTargetRequirements<
+        pbdt::test_context::detail::TestContext, CallableTarget, RangeDomain>>
         acceptable;
     acceptable.run();
 }
@@ -25,10 +26,10 @@ int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
-            "runnable-scenario",
+            "range-domain-with-callable-target",
         },
         std::array{
-            runnableScenario,
+            rangeDomainWithCallableTarget,
         }
     )
         .run(argc, argv);

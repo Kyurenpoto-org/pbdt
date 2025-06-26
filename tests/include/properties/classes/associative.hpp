@@ -4,10 +4,13 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename ToComparable, typename AssociativeRequirements>
-struct AssociativeValidation : ValidationBase<AssociativeValidation<ToComparable, AssociativeRequirements>>
+struct AssociativeValueValidation :
+    ValueValidationBase<AssociativeValueValidation<ToComparable, AssociativeRequirements>>
 {
     static constexpr size_t size()
     {
@@ -43,9 +46,9 @@ private:
     static constexpr ToComparable toComparable{};
 };
 
-#include "generators/composable-callable.hpp"
-#include "generators/foldable-callable.hpp"
-#include "generators/productable-container.hpp"
+#include "generators/values/composable-callable.hpp"
+#include "generators/values/foldable-callable.hpp"
+#include "generators/values/productable-container.hpp"
 
 template <typename Given>
 struct AssociativeGivenRequirements

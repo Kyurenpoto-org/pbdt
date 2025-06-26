@@ -4,10 +4,12 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename HomomorphicRequirements>
-struct HomomorphicValidation : ValidationBase<HomomorphicValidation<HomomorphicRequirements>>
+struct HomomorphicValueValidation : ValueValidationBase<HomomorphicValueValidation<HomomorphicRequirements>>
 {
     static constexpr size_t size()
     {
@@ -41,7 +43,7 @@ private:
     static constexpr HomomorphicRequirements requirements{};
 };
 
-#include "generators/runnable-double-combination.hpp"
+#include "generators/values/runnable-double-combination.hpp"
 
 template <typename Expect, typename RunnableScenario, typename Then>
 struct HomomorphicRunnableScenarioWithThenRequirements
