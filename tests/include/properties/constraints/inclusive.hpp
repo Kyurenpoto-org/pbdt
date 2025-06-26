@@ -10,6 +10,11 @@
 
 #include "util.hpp"
 
+/**
+ * @brief A type validation structure that checks inclusive properties.
+ *
+ * @tparam InclusiveRequirements
+ */
 template <typename InclusiveRequirements>
 struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<InclusiveRequirements>>
 {
@@ -33,6 +38,12 @@ struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<Incl
 
 #include "generators/types/callable-type.hpp"
 
+/**
+ * @brief A structure that defines inclusive requirements for callable-target concept.
+ *
+ * @tparam CallableWrap
+ * @tparam CallableTargetWrap
+ */
 template <template <typename> typename CallableWrap, template <typename> typename CallableTargetWrap>
 struct InclusiveCallableTargetRequirements
 {
@@ -64,6 +75,13 @@ struct InclusiveCallableTargetRequirements
     using BeIncluded = CallableTargetWrap<T>;
 };
 
+/**
+ * @brief A structure that defines inclusive requirements for two concepts: callable-target and callable-property.
+ *
+ * @tparam Result
+ * @tparam CallableTargetWrap
+ * @tparam CallablePropWrap
+ */
 template <
     typename Result, template <typename> typename CallableTargetWrap, template <typename> typename CallablePropWrap>
 struct InclusiveCallablePropertyRequirements

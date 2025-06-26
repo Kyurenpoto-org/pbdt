@@ -10,6 +10,11 @@
 
 #include "util.hpp"
 
+/**
+ * @brief A type validation structure that checks mutual exclusive properties.
+ *
+ * @tparam MutualExclusiveRequirements
+ */
 template <typename MutualExclusiveRequirements>
 struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
 {
@@ -19,23 +24,30 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
     }
 
     template <size_t Idx>
-    using A = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<
+    using A = std::conjunction<
+        typename MutualExclusiveRequirements::template ConstituentA<
             typename MutualExclusiveRequirements::template A<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<
+        std::negation<typename MutualExclusiveRequirements::template ConstituentB<
             typename MutualExclusiveRequirements::template A<Idx>>>>;
 
     template <size_t Idx>
-    using B = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<
-            typename MutualExclusiveRequirements::template B<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<
-            typename MutualExclusiveRequirements::template B<Idx>>>>;
+    using B = std::conjunction<
+        std::negation<typename MutualExclusiveRequirements::template ConstituentA<
+            typename MutualExclusiveRequirements::template B<Idx>>>,
+        typename MutualExclusiveRequirements::template ConstituentB<
+            typename MutualExclusiveRequirements::template B<Idx>>>;
 };
 
 #include "generators/types/callable-type.hpp"
 #include "generators/types/container-type.hpp"
 
+/**
+ * @brief A structure that defines mutual exclusive requirements for two concepts: callable-target and range-domain.
+ *
+ * @tparam Result
+ * @tparam CallableTargetWrap
+ * @tparam RangeDomainWrap
+ */
 template <
     typename Result, template <typename> typename CallableTargetWrap, template <typename> typename RangeDomainWrap>
 struct MutualExclusiveRangeDomainWithCallableTargetRequirements
@@ -62,8 +74,8 @@ struct MutualExclusiveRangeDomainWithCallableTargetRequirements
     using B = std::tuple_element_t<Idx, DomainCombinations>;
 
     template <typename T>
-    using Constituent1 = CallableTargetWrap<T>;
+    using ConstituentA = CallableTargetWrap<T>;
 
     template <typename T>
-    using Constituent2 = RangeDomainWrap<T>;
+    using ConstituentB = RangeDomainWrap<T>;
 };
