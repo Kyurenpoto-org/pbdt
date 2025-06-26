@@ -20,13 +20,15 @@ struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<Incl
 
     template <size_t Idx>
     using A = std::disjunction<
-        std::negation<typename InclusiveRequirements::template Includer<InclusiveRequirements::template A<Idx>>>,
-        typename InclusiveRequirements::template BeIncluded<InclusiveRequirements::template A<Idx>>>;
+        std::negation<
+            typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template A<Idx>>>,
+        typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template A<Idx>>>;
 
     template <size_t Idx>
     using B = std::disjunction<
-        typename InclusiveRequirements::template Includer<InclusiveRequirements::template B<Idx>>,
-        std::negation<typename InclusiveRequirements::template BeIncluded<InclusiveRequirements::template B<Idx>>>>;
+        typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template B<Idx>>,
+        std::negation<
+            typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template B<Idx>>>>;
 };
 
 #include "generators/types/callable-type.hpp"

@@ -37,8 +37,6 @@ namespace
     {
         void run() const
         {
-            static_assert(Validatable::size() > 0, "Validatable must have at least one element.");
-
             runImpl<Validatable::size() - 1>();
         }
 
@@ -69,8 +67,6 @@ namespace
     {
         void run() const
         {
-            static_assert(Validatable::size() > 0, "Validatable must have at least one element.");
-
             runImpl<Validatable::size() - 1>();
         }
 

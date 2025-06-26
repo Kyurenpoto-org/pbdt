@@ -8,6 +8,8 @@
 
 #ifndef EXSTD_MODULE
 
+#include <cstddef>
+#include <functional>
 #include <tuple>
 #include <type_traits>
 #include <variant>

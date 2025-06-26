@@ -20,13 +20,17 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
 
     template <size_t Idx>
     using A = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<MutualExclusiveRequirements::template A<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<MutualExclusiveRequirements::template A<Idx>>>>;
+        typename MutualExclusiveRequirements::template Constituent1<
+            typename MutualExclusiveRequirements::template A<Idx>>,
+        typename MutualExclusiveRequirements::template Constituent2<
+            typename MutualExclusiveRequirements::template A<Idx>>>>;
 
     template <size_t Idx>
     using B = std::negation<std::conjunction<
-        typename MutualExclusiveRequirements::template Constituent1<MutualExclusiveRequirements::template B<Idx>>,
-        typename MutualExclusiveRequirements::template Constituent2<MutualExclusiveRequirements::template B<Idx>>>>;
+        typename MutualExclusiveRequirements::template Constituent1<
+            typename MutualExclusiveRequirements::template B<Idx>>,
+        typename MutualExclusiveRequirements::template Constituent2<
+            typename MutualExclusiveRequirements::template B<Idx>>>>;
 };
 
 #include "generators/types/callable-type.hpp"

@@ -160,7 +160,7 @@ namespace CallableType
     {
         using type = decltype(std::tuple_cat(
             std::declval<std::tuple<CallablePropCombinationImpl<Result, N, First>>>(),
-            std::declval<CallablePropCombination<Result, N, Rest...>::type>()
+            std::declval<typename CallablePropCombination<Result, N, Rest...>::type>()
         ));
     };
 
@@ -216,7 +216,7 @@ namespace CallableType
             std::declval<std::tuple<NonCallablePropCombinationImpl<
                 Result, First % NON_CALLABLE_PROP_CONCEPT_INSTANCE_INDEX_LIMIT, N,
                 First / NON_CALLABLE_PROP_CONCEPT_INSTANCE_INDEX_LIMIT>>>(),
-            std::declval<NonCallablePropCombination<Result, N, Rest...>::type>()
+            std::declval<typename NonCallablePropCombination<Result, N, Rest...>::type>()
         ));
     };
 
