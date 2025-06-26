@@ -22,8 +22,9 @@ namespace pbdt::bdd
      * @tparam Target
      */
     template <typename Target>
-    concept CallableTarget = exstd::Callable<std::decay_t<Target>>;
-
+    concept CallableTarget =
+        (exstd::Callable<std::decay_t<Target>> && !std::is_void_v<exstd::CallableReturnType<std::decay_t<Target>>>
+         && !std::is_same_v<exstd::CallableArgumentsType<std::decay_t<Target>>, std::tuple<>>);
 
     /**
      * @brief A concept that checks if a type is a callable property.
@@ -32,9 +33,8 @@ namespace pbdt::bdd
      */
     template <typename Prop>
     concept CallableProperty =
-        exstd::Callable<std::decay_t<Prop>> && std::tuple_size_v<exstd::CallableArgumentsType<std::decay_t<Prop>>> == 2
-        && std::is_same_v<exstd::CallableReturnType<std::decay_t<Prop>>, test_context::detail::TestContext>;
-
+        (exstd::Callable<std::decay_t<Prop>> && std::tuple_size_v<exstd::CallableArgumentsType<std::decay_t<Prop>>> == 2
+         && std::is_same_v<exstd::CallableReturnType<std::decay_t<Prop>>, test_context::detail::TestContext>);
 
     /**
      * @brief A concept that checks if a type is a range domain.
