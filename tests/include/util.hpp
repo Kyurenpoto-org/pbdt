@@ -37,6 +37,8 @@ namespace
     {
         void run() const
         {
+            static_assert(Validatable::size() > 0, "Validatable must have at least one element.");
+
             runImpl<Validatable::size() - 1>();
         }
 
@@ -59,7 +61,7 @@ namespace
     template <typename A, typename B>
     void typeAssert()
     {
-        static_assert(std::is_same_v<A, B>);
+        static_assert(A::value && B::value);
     }
 
     template <typename Validatable>
@@ -67,6 +69,8 @@ namespace
     {
         void run() const
         {
+            static_assert(Validatable::size() > 0, "Validatable must have at least one element.");
+
             runImpl<Validatable::size() - 1>();
         }
 
@@ -74,7 +78,7 @@ namespace
         template <size_t Idx>
         void runImpl() const
         {
-            typeAssert<typename Validatable::A, typename Validatable::B>();
+            typeAssert<typename Validatable::template A<Idx>, typename Validatable::template B<Idx>>();
 
             if constexpr (Idx > 0)
             {

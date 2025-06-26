@@ -63,6 +63,17 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
+add_library(callable-target-fixture INTERFACE)
+
+target_compile_features(
+    callable-target-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    callable-target-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # unit tests
 # Given: Set Category
 # When: Set Category that has product between any two objects
@@ -88,6 +99,14 @@ add_header_module_prop_suite(
     NAMESPACE pbdt.unit
     TARGETS runnable-scenario
     FIXTURES runnable-scenario-fixture
+)
+
+add_header_module_prop_suite(
+    PROP inclusive
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS callable-target
+    FIXTURES callable-target-fixture
 )
 
 # integrated tests

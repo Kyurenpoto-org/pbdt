@@ -13,7 +13,7 @@
 
 #include "generators/values/composable-callable.hpp"
 
-namespace Container
+namespace ContainerType
 {
     template <typename T, size_t N>
     using SequenceArray = std::array<T, N>;
