@@ -33,7 +33,7 @@ namespace
     }
 
     template <typename Validatable>
-    struct ValidationBase
+    struct ValueValidationBase
     {
         void run() const
         {
@@ -48,6 +48,33 @@ namespace
                 static_cast<const Validatable&>(*this).template a<Idx>(),
                 static_cast<const Validatable&>(*this).template b<Idx>()
             );
+
+            if constexpr (Idx > 0)
+            {
+                runImpl<Idx - 1>();
+            }
+        }
+    };
+
+    template <typename A, typename B>
+    void typeAssert()
+    {
+        static_assert(A::value && B::value);
+    }
+
+    template <typename Validatable>
+    struct TypeValidationBase
+    {
+        void run() const
+        {
+            runImpl<Validatable::size() - 1>();
+        }
+
+    private:
+        template <size_t Idx>
+        void runImpl() const
+        {
+            typeAssert<typename Validatable::template A<Idx>, typename Validatable::template B<Idx>>();
 
             if constexpr (Idx > 0)
             {

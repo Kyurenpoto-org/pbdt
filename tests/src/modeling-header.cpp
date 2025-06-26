@@ -6,16 +6,17 @@
 
 #include <array>
 
-#include "properties/modeling.hpp"
+#include "properties/classes/modeling.hpp"
 
 #include "pbdt/bdd.hpp"
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void runnableScenario()
 {
-    const ModelingValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>> acceptable;
+    const ModelingValueValidation<ModelingRunnableScenarioRequirements<Expect, ApplyOrInvoke, RunnableScenario>>
+        acceptable;
     acceptable.run();
 }
 

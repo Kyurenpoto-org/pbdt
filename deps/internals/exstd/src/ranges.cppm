@@ -6,10 +6,20 @@
 
 module;
 
+#include <algorithm>
+#include <array>
+#include <ranges>
+#include <span>
+#include <tuple>
+#include <type_traits>
+#include <vector>
+
 #include "exstd/module-unit-guard.hpp"
 
-export module exstd;
+export module exstd.ranges;
 
 export import exstd.type_traits;
-export import exstd.functional;
-export import exstd.ranges;
+
+export {
+#include "exstd/ranges.hpp"
+}

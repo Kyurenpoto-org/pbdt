@@ -6,29 +6,29 @@
 
 #include <array>
 
-#include "properties/idempotent.hpp"
+#include "properties/classes/idempotent.hpp"
 
 import exstd;
 import pbdt;
 
-#include "for-injection.hpp"
 #include "suite-runner.hpp"
+#include "wrapped-deps/for-bdd.hpp"
 
 void given()
 {
-    const IdempotentValidation<ToFlatTuple, IdempotentGivenRequirements<Given>> acceptable;
+    const IdempotentValueValidation<ToFlatTuple, IdempotentGivenRequirements<Given>> acceptable;
     acceptable.run();
 }
 
 void when()
 {
-    const IdempotentValidation<ToContainer, IdempotentWhenRequirements<When>> acceptable;
+    const IdempotentValueValidation<ToContainer, IdempotentWhenRequirements<When>> acceptable;
     acceptable.run();
 }
 
 void then()
 {
-    const IdempotentValidation<ToFlatTuple, IdempotentThenRequirements<Then, Expect>> acceptable;
+    const IdempotentValueValidation<ToFlatTuple, IdempotentThenRequirements<Then, Expect>> acceptable;
     acceptable.run();
 }
 

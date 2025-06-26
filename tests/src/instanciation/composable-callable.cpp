@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "generators/composable-callable.hpp"
+#include "generators/values/composable-callable.hpp"
 
 template <size_t, size_t, typename>
 struct InstanciatedComposableCallableImpl;
@@ -26,6 +26,6 @@ struct InstanciatedComposableCallable<N, std::index_sequence<Ns...>>
 };
 
 using InstanciatedComposableCallable0 = typename InstanciatedComposableCallable<
-    0, decltype(std::make_index_sequence<Composable::typeSequenceCount>())>::type;
+    0, decltype(std::make_index_sequence<Composable::TYPE_SEQUENCE_INDEX_LIMIT>())>::type;
 using InstanciatedComposableCallable1 = typename InstanciatedComposableCallable<
-    1, decltype(std::make_index_sequence<Composable::typeSequenceCount>())>::type;
+    1, decltype(std::make_index_sequence<Composable::TYPE_SEQUENCE_INDEX_LIMIT>())>::type;

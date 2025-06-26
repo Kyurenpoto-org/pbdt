@@ -4,7 +4,7 @@
  * SPDX - License - Identifier: MIT
  */
 
-#include "generators/runnable-combination.hpp"
+#include "generators/values/runnable-combination.hpp"
 
 template <typename>
 struct RunnableCombinationSuccessSampleTuple;

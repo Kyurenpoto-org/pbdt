@@ -6,8 +6,13 @@
 
 #pragma once
 
+#ifndef EXSTD_MODULE
+
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
+
+#endif
 
 namespace exstd
 {

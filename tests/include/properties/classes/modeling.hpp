@@ -4,10 +4,12 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename ModelingRequirements>
-struct ModelingValidation : ValidationBase<ModelingValidation<ModelingRequirements>>
+struct ModelingValueValidation : ValueValidationBase<ModelingValueValidation<ModelingRequirements>>
 {
     static constexpr size_t size()
     {
@@ -36,7 +38,7 @@ private:
     static constexpr ModelingRequirements requirements{};
 };
 
-#include "generators/runnable-combination.hpp"
+#include "generators/values/runnable-combination.hpp"
 
 template <typename Expect, typename ApplyOrInvoke, typename RunnableScenario>
 struct ModelingRunnableScenarioRequirements

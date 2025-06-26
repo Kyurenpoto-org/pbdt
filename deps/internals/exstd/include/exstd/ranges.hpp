@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef EXSTD_MODULE
+
 #include <algorithm>
 #include <array>
 #include <ranges>
@@ -15,6 +17,8 @@
 #include <vector>
 
 #include "exstd/type-traits.hpp"
+
+#endif
 
 namespace exstd
 {

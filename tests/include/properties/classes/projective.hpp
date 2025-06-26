@@ -4,10 +4,12 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename ProjectiveRequirements>
-struct LeftProjectiveValidation : ValidationBase<LeftProjectiveValidation<ProjectiveRequirements>>
+struct LeftProjectiveValueValidation : ValueValidationBase<LeftProjectiveValueValidation<ProjectiveRequirements>>
 {
     static constexpr size_t size()
     {
@@ -40,7 +42,7 @@ private:
 };
 
 template <typename ProjectiveRequirements>
-struct RightProjectiveValidation : ValidationBase<RightProjectiveValidation<ProjectiveRequirements>>
+struct RightProjectiveValueValidation : ValueValidationBase<RightProjectiveValueValidation<ProjectiveRequirements>>
 {
     static constexpr size_t size()
     {
@@ -72,7 +74,7 @@ private:
     static constexpr ProjectiveRequirements requirements{};
 };
 
-#include "generators/runnable-double-combination.hpp"
+#include "generators/values/runnable-double-combination.hpp"
 
 template <typename ToContainer, typename Expect, typename RunnableScenario, typename Given>
 struct ProjectiveRunnableScenarioWithGivenRequirements
