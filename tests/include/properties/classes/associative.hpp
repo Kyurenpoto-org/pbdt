@@ -4,6 +4,8 @@
  * SPDX - License - Identifier: MIT
  */
 
+#pragma once
+
 #include "util.hpp"
 
 template <typename ToComparable, typename AssociativeRequirements>
