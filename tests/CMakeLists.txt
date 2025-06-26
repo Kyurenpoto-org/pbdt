@@ -63,14 +63,14 @@ target_sources(
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
 )
 
-add_library(callable-target-fixture INTERFACE)
+add_library(callable-target-property-fixture INTERFACE)
 
 target_compile_features(
-    callable-target-fixture
+    callable-target-property-fixture
     INTERFACE cxx_std_23
 )
 target_include_directories(
-    callable-target-fixture
+    callable-target-property-fixture
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
@@ -105,8 +105,8 @@ add_header_module_prop_suite(
     PROP inclusive
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS callable-target
-    FIXTURES callable-target-fixture
+    TARGETS callable-target callable-property
+    FIXTURES callable-target-property-fixture
 )
 
 # integrated tests

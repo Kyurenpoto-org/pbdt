@@ -17,6 +17,15 @@ import pbdt;
 void callableTarget()
 {
     const InclusiveTypeValidation<InclusiveCallableTargetRequirements<Callable, CallableTarget>> acceptable;
+    acceptable.run();
+}
+
+void callableProperty()
+{
+    const InclusiveTypeValidation<InclusiveCallablePropertyRequirements<
+        pbdt::test_context::detail::TestContext, CallableTarget, CallableProperty>>
+        acceptable;
+    acceptable.run();
 }
 
 int main(int argc, const char* const* argv)
@@ -24,9 +33,11 @@ int main(int argc, const char* const* argv)
     suite(
         std::array{
             "callable-target",
+            "callable-property",
         },
         std::array{
             callableTarget,
+            callableProperty,
         }
     )
         .run(argc, argv);

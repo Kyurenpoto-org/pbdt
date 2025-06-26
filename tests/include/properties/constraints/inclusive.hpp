@@ -62,3 +62,35 @@ struct InclusiveCallableTargetRequirements
     template <typename T>
     using BeIncluded = CallableTargetWrap<T>;
 };
+
+template <
+    typename Result, template <typename> typename CallableTargetWrap, template <typename> typename CallablePropWrap>
+struct InclusiveCallablePropertyRequirements
+{
+    using PropCombinations = typename CallableType::CallablePropCombination<
+        Result, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::type;
+
+    using NonPropCombinations = typename CallableType::NonCallablePropCombination<
+        Result, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::type;
+
+    static constexpr size_t size()
+    {
+        return std::tuple_size_v<PropCombinations>;
+    }
+
+    template <size_t Idx>
+    using A = std::tuple_element_t<Idx, PropCombinations>;
+
+    template <size_t Idx>
+    using B = std::tuple_element_t<Idx, NonPropCombinations>;
+
+    template <typename T>
+    using Includer = CallableTargetWrap<T>;
+
+    template <typename T>
+    using BeIncluded = CallablePropWrap<T>;
+};
