@@ -6,12 +6,12 @@
 
 #pragma once
 
+#ifndef PBDT_MODULE
+
 #include <algorithm>
 #include <ranges>
 #include <source_location>
 #include <string>
-
-#ifndef PBDT_MODULE
 
 #include "exstd/functional.hpp"
 
