@@ -102,6 +102,12 @@ namespace pbdt::test_context
                 return failed != 0;
             }
 
+            template <typename Consumer>
+            constexpr auto provideAggregations(Consumer&& consumer) const
+            {
+                return consumer(passed, failed, skipped);
+            }
+
             // constexpr operator std::string() const
             //{
             //     return "Passed: " + stringify(passed) + "\n" + "Failed: " + stringify(failed) + "\n"
@@ -142,14 +148,14 @@ namespace pbdt::test_context
                 if (expression)
                 {
                     return TestContext{
-                        assertions.pass(),
+                        assertionEvents.pass(),
                         // failures,
                     };
                 }
                 else
                 {
                     return TestContext{
-                        assertions.fail(),
+                        assertionEvents.fail(),
                         // failures + std::string(StringifiedLocation{ location }),
                     };
                 }
@@ -158,39 +164,45 @@ namespace pbdt::test_context
             constexpr TestContext accumulate(const TestContext context) const
             {
                 return TestContext{
-                    assertions + context.assertions,
+                    assertionEvents + context.assertionEvents,
                     // failures + context.failures,
                 };
             }
 
             constexpr bool passable() const
             {
-                return !assertions.someFailed();
+                return !assertionEvents.someFailed();
+            }
+
+            template <typename Consumer>
+            constexpr auto provideEventAggregation(Consumer&& consumer) const
+            {
+                return consumer(assertionEvents);
             }
 
             // constexpr std::string description() const
             //{
             //     if (passable())
             //     {
-            //         return "<Assertions>\n" + std::string(assertions);
+            //         return "<Assertions>\n" + std::string(assertionEvents);
             //     }
             //     else
             //     {
-            //         return failures + "\n\n<Assertions>\n" + std::string(assertions);
+            //         return failures + "\n\n<Assertions>\n" + std::string(assertionEvents);
             //     }
             // }
 
         private:
             constexpr TestContext(
-                const EventCountable assertions
+                const EventCountable assertionEvents
                 //, const std::string failures
             ) :
-                assertions(assertions) //,
+                assertionEvents(assertionEvents) //,
             // failures(failures)
             {
             }
 
-            const EventCountable assertions;
+            EventCountable assertionEvents;
             // const std::string failures;
         };
 
@@ -213,69 +225,50 @@ namespace pbdt::test_context
             {
                 return SampledTestContext{
                     EventCountable::prototype(),
-                    //{},
+                    TestContext::prototype(),
                 };
             }
 
             template <typename Test>
-            constexpr SampledTestContext accumulate( // const std::string sample,
-                Test&& test
-            ) const
+            constexpr SampledTestContext accumulate(Test&& test) const
             {
-                if (samples.someFailed())
+                if (sampleTestEvents.someFailed())
                 {
                     return SampledTestContext{
-                        samples.skip(),
-                        // failures,
-                    };
-                }
-
-                const TestContext context = test();
-                if (context.passable())
-                {
-                    return SampledTestContext{
-                        samples.pass(),
-                        // failures,
+                        sampleTestEvents.skip(),
+                        assertionContext,
                     };
                 }
                 else
                 {
+                    const TestContext context = test();
                     return SampledTestContext{
-                        samples.fail(),
-                        // failures + context.description(),
+                        context.passable() ? sampleTestEvents.pass() : sampleTestEvents.fail(),
+                        assertionContext.accumulate(context),
                     };
                 }
             }
 
             constexpr bool passable() const
             {
-                return !samples.someFailed();
+                return !sampleTestEvents.someFailed();
             }
 
-            // constexpr std::string description() const
-            //{
-            //     if (passable())
-            //     {
-            //         return "<Samples>\n" + std::string(samples);
-            //     }
-            //     else
-            //     {
-            //         return failures + "\n\n<Samples>\n" + std::string(samples);
-            //     }
-            // }
+            template <typename Consumer>
+            constexpr auto provideEventAggregation(Consumer&& consumer) const
+            {
+                return consumer(sampleTestEvents, assertionContext);
+            }
 
         private:
-            constexpr SampledTestContext(
-                const EventCountable samples
-                //, const std::string failures
-            ) :
-                samples(samples) //,
-            // failures(failures)
+            constexpr SampledTestContext(const EventCountable sampleTestEvents, const TestContext assertionContext) :
+                sampleTestEvents(sampleTestEvents),
+                assertionContext(assertionContext)
             {
             }
 
-            EventCountable samples;
-            // std::string failures;
+            EventCountable sampleTestEvents;
+            TestContext assertionContext;
         };
     }
 
