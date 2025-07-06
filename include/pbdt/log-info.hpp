@@ -6,12 +6,11 @@
 
 #pragma once
 
-#include <algorithm>
-#include <ranges>
-#include <source_location>
-#include <string>
-
 #ifndef PBDT_MODULE
+
+#include <format>
+#include <string>
+#include <string_view>
 
 #include "pbdt/test-context.hpp"
 
@@ -23,6 +22,17 @@ namespace pbdt::log_info
     {
         struct EventCountLogInfo
         {
+            struct AmountWithRate
+            {
+                size_t amount;
+                size_t rate;
+
+                operator std::string() const
+                {
+                    return std::format("{:>5} ({:>3}%)", amount, rate);
+                }
+            };
+
             struct Factory
             {
                 constexpr EventCountLogInfo create() const
@@ -37,9 +47,18 @@ namespace pbdt::log_info
                             };
 
                             return EventCountLogInfo{
-                                toRate(passed),
-                                toRate(failed),
-                                toRate(skipped),
+                                AmountWithRate{
+                                    passed,
+                                    toRate(passed),
+                                },
+                                AmountWithRate{
+                                    failed,
+                                    toRate(failed),
+                                },
+                                AmountWithRate{
+                                    skipped,
+                                    toRate(skipped),
+                                },
                                 total,
                             };
                         }
@@ -50,19 +69,36 @@ namespace pbdt::log_info
             };
 
             constexpr EventCountLogInfo(
-                const size_t passedRate, const size_t failedRate, const size_t skippedRate, const size_t total
+                const AmountWithRate passed, const AmountWithRate failed, const AmountWithRate skipped,
+                const size_t total
             ) :
-                passedRate(passedRate),
-                failedRate(failedRate),
-                skippedRate(skippedRate),
+                passed(passed),
+                failed(failed),
+                skipped(skipped),
                 total(total)
             {
             }
 
+            struct Colors
+            {
+                static constexpr std::string_view NONE = "\033[0m";
+                static constexpr std::string_view PASS = "\033[32m";
+                static constexpr std::string_view FAIL = "\033[31m";
+                static constexpr std::string_view SKIP = "\033[33m";
+            };
+
+            operator std::string() const
+            {
+                return std::format(
+                    "{}{} passed{}, {}{} failed{}, {}{} skipped{} | {}", Colors::PASS, passed, Colors::NONE,
+                    Colors::FAIL, failed, Colors::NONE, Colors::SKIP, skipped, Colors::NONE, total
+                );
+            }
+
         private:
-            size_t passedRate;
-            size_t failedRate;
-            size_t skippedRate;
+            AmountWithRate passed;
+            AmountWithRate failed;
+            AmountWithRate skipped;
             size_t total;
         };
 
@@ -109,6 +145,11 @@ namespace pbdt::log_info
                 assertions(assertions),
                 sampleTests(sampleTests)
             {
+            }
+
+            operator std::string() const
+            {
+                return std::format("Assertion: {}\nDomain: {}\n", assertions, sampleTests);
             }
 
         private:
