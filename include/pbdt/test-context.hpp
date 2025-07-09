@@ -102,10 +102,47 @@ namespace pbdt::test_context
                 return failed != 0;
             }
 
-            template <typename Consumer>
-            constexpr auto provideAggregations(Consumer&& consumer) const
+            constexpr size_t sum() const
             {
-                return consumer(passed, failed, skipped);
+                return passed + failed + skipped;
+            }
+
+            enum class EachName
+            {
+                PASSED,
+                FAILED,
+                SKIPPED,
+            };
+
+            struct Each
+            {
+                const size_t amount;
+                const size_t rate;
+            };
+
+            template <EachName Name>
+            constexpr Each each() const
+            {
+                const size_t amount = [this]()
+                {
+                    if constexpr (Name == EachName::PASSED)
+                    {
+                        return passed;
+                    }
+                    else if constexpr (Name == EachName::FAILED)
+                    {
+                        return failed;
+                    }
+                    else
+                    {
+                        return skipped;
+                    }
+                }();
+
+                return Each{
+                    .amount = amount,
+                    .rate = amount * 100 / sum(),
+                };
             }
 
             // constexpr operator std::string() const

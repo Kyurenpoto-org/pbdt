@@ -11,6 +11,7 @@
 #include <format>
 #include <string>
 #include <string_view>
+#include <variant>
 
 #include "pbdt/test-context.hpp"
 
@@ -20,57 +21,323 @@ namespace pbdt::log_info
 {
     namespace detail
     {
-        struct EventCountLogInfo
+        template <auto>
+        struct NonTypePlaceHolder
         {
-            struct AmountWithRate
+        };
+
+        struct ColoredString
+        {
+            enum class Color
             {
-                size_t amount;
-                size_t rate;
+                NONE,
+                PASS,
+                FAIL,
+                SKIP,
+            };
+
+            template <Color COLOR>
+            ColoredString(const std::string str, NonTypePlaceHolder<COLOR>) :
+                colored{
+                    ColorFormatable<COLOR>{
+                        str,
+                    },
+                }
+            {
+            }
+
+            operator std::string() const
+            {
+                return std::visit(
+                    [](const auto colored)
+                    {
+                        return ColorFormatable<Color::NONE>(colored);
+                    },
+                    colored
+                );
+            }
+
+        private:
+            struct FormatableString
+            {
+                FormatableString(const std::string str) :
+                    str{
+                        str,
+                    }
+                {
+                }
+
+                std::string format(const std::string_view color) const
+                {
+                    return std::format("{}{}", color, str);
+                }
+
+            private:
+                std::string str;
+            };
+
+            template <typename Derived>
+            struct ColorFormatableBase
+            {
+                ColorFormatableBase(const std::string str) :
+                    ColorFormatableBase{
+                        FormatableString{
+                            str,
+                        },
+                    }
+                {
+                }
+
+                ColorFormatableBase(const FormatableString str) :
+                    str{
+                        str,
+                    }
+                {
+                }
 
                 operator std::string() const
                 {
-                    return std::format("{:>5} ({:>3}%)", amount, rate);
+                    return str.format(color());
                 }
+
+            protected:
+                constexpr std::string_view color() const;
+
+            private:
+                FormatableString str;
             };
 
-            struct Factory
-            {
-                constexpr EventCountLogInfo create() const
-                {
-                    return aggregation.provideAggregations(
-                        [](const size_t passed, const size_t failed, const size_t skipped)
-                        {
-                            const size_t total = passed + failed + skipped;
-                            const auto toRate = [&total](const size_t amount)
-                            {
-                                return amount * 100 / total;
-                            };
+            template <Color>
+            struct ColorFormatable;
 
-                            return EventCountLogInfo{
-                                AmountWithRate{
-                                    passed,
-                                    toRate(passed),
-                                },
-                                AmountWithRate{
-                                    failed,
-                                    toRate(failed),
-                                },
-                                AmountWithRate{
-                                    skipped,
-                                    toRate(skipped),
-                                },
-                                total,
-                            };
-                        }
-                    );
+            template <>
+            struct ColorFormatable<Color::NONE> : public ColorFormatableBase<ColorFormatable<Color::NONE>>
+            {
+                ColorFormatable(const std::string str) :
+                    ColorFormatableBase<ColorFormatable<Color::NONE>>{
+                        str,
+                    }
+                {
                 }
 
-                const test_context::detail::EventCountable aggregation;
+            protected:
+                constexpr std::string_view color() const
+                {
+                    return COLOR;
+                }
+
+            private:
+                static constexpr std::string_view COLOR = "\033[0m";
+            };
+
+            template <>
+            struct ColorFormatable<Color::PASS> : public ColorFormatableBase<ColorFormatable<Color::PASS>>
+            {
+                ColorFormatable(const std::string str) :
+                    ColorFormatableBase<ColorFormatable<Color::PASS>>{
+                        str,
+                    }
+                {
+                }
+
+            protected:
+                constexpr std::string_view color() const
+                {
+                    return COLOR;
+                }
+
+            private:
+                static constexpr std::string_view COLOR = "\033[32m";
+            };
+
+            template <>
+            struct ColorFormatable<Color::FAIL> : public ColorFormatableBase<ColorFormatable<Color::FAIL>>
+            {
+                ColorFormatable(const std::string str) :
+                    ColorFormatableBase<ColorFormatable<Color::FAIL>>{
+                        str,
+                    }
+                {
+                }
+
+            protected:
+                constexpr std::string_view color() const
+                {
+                    return COLOR;
+                }
+
+            private:
+                static constexpr std::string_view COLOR = "\033[31m";
+            };
+
+            template <>
+            struct ColorFormatable<Color::SKIP> : public ColorFormatableBase<ColorFormatable<Color::SKIP>>
+            {
+                ColorFormatable(const std::string str) :
+                    ColorFormatableBase<ColorFormatable<Color::SKIP>>{
+                        str,
+                    }
+                {
+                }
+
+            protected:
+                constexpr std::string_view color() const
+                {
+                    return COLOR;
+                }
+
+            private:
+                static constexpr std::string_view COLOR = "\033[33m";
+            };
+
+            std::variant<ColorFormatable<Color::PASS>, ColorFormatable<Color::FAIL>, ColorFormatable<Color::SKIP>>
+                colored;
+        };
+
+        struct EventCountLogInfo
+        {
+            constexpr EventCountLogInfo(const pbdt::test_context::detail::EventCountable aggregation) :
+                EventCountLogInfo{
+                    ColoredAmountWithRate<ColoredString::Color::PASS>{
+                        AmountWithRate{
+                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::PASSED>(),
+                        },
+                    },
+                    ColoredAmountWithRate<ColoredString::Color::FAIL>{
+                        AmountWithRate{
+                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::FAILED>(),
+                        },
+                    },
+                    ColoredAmountWithRate<ColoredString::Color::SKIP>{
+                        AmountWithRate{
+                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::SKIPPED>(),
+                        },
+                    },
+                    aggregation.sum(),
+                }
+            {
+            }
+
+            operator std::string() const
+            {
+                return std::format(
+                    "{}, {}, {} | {}", static_cast<std::string>(passed), static_cast<std::string>(failed),
+                    static_cast<std::string>(skipped), total
+                );
+            }
+
+        private:
+            struct AmountWithRate
+            {
+                constexpr AmountWithRate(const pbdt::test_context::detail::EventCountable::Each each) :
+                    each(each)
+                {
+                }
+
+                operator std::string() const
+                {
+                    return std::format("{:>5} ({:>3}%)", each.amount, each.rate);
+                }
+
+            private:
+                pbdt::test_context::detail::EventCountable::Each each;
+            };
+
+            template <typename Derived>
+            struct ColoredAmountWithRateBase
+            {
+                constexpr ColoredAmountWithRateBase(const AmountWithRate amountWithRate) :
+                    amountWithRate{
+                        amountWithRate,
+                    }
+                {
+                }
+
+                operator std::string() const
+                {
+                    return ColoredString{
+                        format(amountWithRate),
+                        NonTypePlaceHolder<ColoredString::Color::PASS>{},
+                    };
+                }
+
+            protected:
+                std::string format(const AmountWithRate&) const;
+
+            private:
+                AmountWithRate amountWithRate;
+            };
+
+            template <ColoredString::Color>
+            struct ColoredAmountWithRate;
+
+            template <>
+            struct ColoredAmountWithRate<ColoredString::Color::PASS> :
+                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::PASS>>
+            {
+                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
+                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::PASS>>{
+                        amountWithRate,
+                    }
+                {
+                }
+
+            protected:
+                std::string format(const AmountWithRate& amountWithRate) const
+                {
+                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                }
+
+            private:
+                static constexpr std::string_view FORMAT = "{} passed";
+            };
+
+            template <>
+            struct ColoredAmountWithRate<ColoredString::Color::FAIL> :
+                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::FAIL>>
+            {
+                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
+                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::FAIL>>{
+                        amountWithRate,
+                    }
+                {
+                }
+
+            protected:
+                std::string format(const AmountWithRate& amountWithRate) const
+                {
+                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                }
+
+            private:
+                static constexpr std::string_view FORMAT = "{} failed";
+            };
+
+            template <>
+            struct ColoredAmountWithRate<ColoredString::Color::SKIP> :
+                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::SKIP>>
+            {
+                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
+                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::SKIP>>{
+                        amountWithRate,
+                    }
+                {
+                }
+
+            protected:
+                std::string format(const AmountWithRate& amountWithRate) const
+                {
+                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                }
+
+            private:
+                static constexpr std::string_view FORMAT = "{} skipped";
             };
 
             constexpr EventCountLogInfo(
-                const AmountWithRate passed, const AmountWithRate failed, const AmountWithRate skipped,
-                const size_t total
+                const ColoredAmountWithRate<ColoredString::Color::PASS> passed,
+                const ColoredAmountWithRate<ColoredString::Color::FAIL> failed,
+                const ColoredAmountWithRate<ColoredString::Color::SKIP> skipped, const size_t total
             ) :
                 passed(passed),
                 failed(failed),
@@ -79,26 +346,9 @@ namespace pbdt::log_info
             {
             }
 
-            struct Colors
-            {
-                static constexpr std::string_view NONE = "\033[0m";
-                static constexpr std::string_view PASS = "\033[32m";
-                static constexpr std::string_view FAIL = "\033[31m";
-                static constexpr std::string_view SKIP = "\033[33m";
-            };
-
-            operator std::string() const
-            {
-                return std::format(
-                    "{}{} passed{}, {}{} failed{}, {}{} skipped{} | {}", Colors::PASS, passed, Colors::NONE,
-                    Colors::FAIL, failed, Colors::NONE, Colors::SKIP, skipped, Colors::NONE, total
-                );
-            }
-
-        private:
-            AmountWithRate passed;
-            AmountWithRate failed;
-            AmountWithRate skipped;
+            ColoredAmountWithRate<ColoredString::Color::PASS> passed;
+            ColoredAmountWithRate<ColoredString::Color::FAIL> failed;
+            ColoredAmountWithRate<ColoredString::Color::SKIP> skipped;
             size_t total;
         };
 
@@ -122,23 +372,27 @@ namespace pbdt::log_info
                 constexpr SampledTestLogInfo create() const
                 {
                     return context.provideEventAggregation(
-                        [](const test_context::detail::EventCountable sampleTests,
-                           const test_context::detail::TestContext& assertionContext)
+                        [](const pbdt::test_context::detail::EventCountable sampleTests,
+                           const pbdt::test_context::detail::TestContext& assertionContext)
                         {
                             return SampledTestLogInfo{
                                 assertionContext.provideEventAggregation(
-                                    [](const test_context::detail::EventCountable assertions)
+                                    [](const pbdt::test_context::detail::EventCountable assertions)
                                     {
-                                        return EventCountLogInfo::Factory{ assertions }.create();
+                                        return EventCountLogInfo{
+                                            assertions,
+                                        };
                                     }
                                 ),
-                                EventCountLogInfo::Factory{ sampleTests }.create(),
+                                EventCountLogInfo{
+                                    sampleTests,
+                                },
                             };
                         }
                     );
                 }
 
-                const test_context::detail::SampledTestContext context;
+                const pbdt::test_context::detail::SampledTestContext context;
             };
 
             constexpr SampledTestLogInfo(const EventCountLogInfo assertions, const EventCountLogInfo sampleTests) :
@@ -149,7 +403,10 @@ namespace pbdt::log_info
 
             operator std::string() const
             {
-                return std::format("Assertion: {}\nDomain: {}\n", assertions, sampleTests);
+                return std::format(
+                    "Assertion: {}\nDomain: {}\n", static_cast<std::string>(assertions),
+                    static_cast<std::string>(sampleTests)
+                );
             }
 
         private:
