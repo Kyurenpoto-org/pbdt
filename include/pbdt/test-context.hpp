@@ -145,12 +145,6 @@ namespace pbdt::test_context
                 };
             }
 
-            // constexpr operator std::string() const
-            //{
-            //     return "Passed: " + stringify(passed) + "\n" + "Failed: " + stringify(failed) + "\n"
-            //          + "Skipped: " + stringify(skipped) + "\n";
-            // }
-
         private:
             constexpr EventCountable(const size_t passed, const size_t failed, const size_t skipped) :
                 passed(passed),
@@ -211,10 +205,15 @@ namespace pbdt::test_context
                 return !assertionEvents.someFailed();
             }
 
-            template <typename Consumer>
-            constexpr auto provideEventAggregation(Consumer&& consumer) const
+            constexpr size_t sumOfAssertions() const
             {
-                return consumer(assertionEvents);
+                return assertionEvents.sum();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachAssertions() const
+            {
+                return assertionEvents.each<Name>();
             }
 
             // constexpr std::string description() const
@@ -291,10 +290,26 @@ namespace pbdt::test_context
                 return !sampleTestEvents.someFailed();
             }
 
-            template <typename Consumer>
-            constexpr auto provideEventAggregation(Consumer&& consumer) const
+            constexpr size_t sumOfAssertions() const
             {
-                return consumer(sampleTestEvents, assertionContext);
+                return assertionContext.sumOfAssertions();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachAssertions() const
+            {
+                return assertionContext.eachAssertions<Name>();
+            }
+
+            constexpr size_t sumOfSampleTests() const
+            {
+                return sampleTestEvents.sum();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachSampleTests() const
+            {
+                return sampleTestEvents.each<Name>();
             }
 
         private:

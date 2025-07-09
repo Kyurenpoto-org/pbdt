@@ -196,24 +196,28 @@ namespace pbdt::log_info
 
         struct EventCountLogInfo
         {
-            constexpr EventCountLogInfo(const pbdt::test_context::detail::EventCountable aggregation) :
+            constexpr EventCountLogInfo(
+                const pbdt::test_context::detail::EventCountable::Each passed,
+                const pbdt::test_context::detail::EventCountable::Each failed,
+                const pbdt::test_context::detail::EventCountable::Each skipped, const size_t total
+            ) :
                 EventCountLogInfo{
                     ColoredAmountWithRate<ColoredString::Color::PASS>{
                         AmountWithRate{
-                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::PASSED>(),
+                            passed,
                         },
                     },
                     ColoredAmountWithRate<ColoredString::Color::FAIL>{
                         AmountWithRate{
-                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::FAILED>(),
+                            failed,
                         },
                     },
                     ColoredAmountWithRate<ColoredString::Color::SKIP>{
                         AmountWithRate{
-                            aggregation.each<pbdt::test_context::detail::EventCountable::EachName::SKIPPED>(),
+                            skipped,
                         },
                     },
-                    aggregation.sum(),
+                    total,
                 }
             {
             }
@@ -367,33 +371,23 @@ namespace pbdt::log_info
 
         struct SampledTestLogInfo
         {
-            struct Factory
-            {
-                constexpr SampledTestLogInfo create() const
-                {
-                    return context.provideEventAggregation(
-                        [](const pbdt::test_context::detail::EventCountable sampleTests,
-                           const pbdt::test_context::detail::TestContext& assertionContext)
-                        {
-                            return SampledTestLogInfo{
-                                assertionContext.provideEventAggregation(
-                                    [](const pbdt::test_context::detail::EventCountable assertions)
-                                    {
-                                        return EventCountLogInfo{
-                                            assertions,
-                                        };
-                                    }
-                                ),
-                                EventCountLogInfo{
-                                    sampleTests,
-                                },
-                            };
-                        }
-                    );
+            constexpr SampledTestLogInfo(const pbdt::test_context::detail::SampledTestContext context) :
+                SampledTestLogInfo{
+                    EventCountLogInfo{
+                        context.eachAssertions<pbdt::test_context::detail::EventCountable::EachName::PASSED>(),
+                        context.eachAssertions<pbdt::test_context::detail::EventCountable::EachName::FAILED>(),
+                        context.eachAssertions<pbdt::test_context::detail::EventCountable::EachName::SKIPPED>(),
+                        context.sumOfAssertions(),
+                    },
+                    EventCountLogInfo{
+                        context.eachSampleTests<pbdt::test_context::detail::EventCountable::EachName::PASSED>(),
+                        context.eachSampleTests<pbdt::test_context::detail::EventCountable::EachName::FAILED>(),
+                        context.eachSampleTests<pbdt::test_context::detail::EventCountable::EachName::SKIPPED>(),
+                        context.sumOfSampleTests(),
+                    },
                 }
-
-                const pbdt::test_context::detail::SampledTestContext context;
-            };
+            {
+            }
 
             constexpr SampledTestLogInfo(const EventCountLogInfo assertions, const EventCountLogInfo sampleTests) :
                 assertions(assertions),
