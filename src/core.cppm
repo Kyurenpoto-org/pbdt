@@ -12,6 +12,7 @@ export module pbdt;
 
 import exstd;
 
-export import pbdt.constraints;
-export import pbdt.test_context;
 export import pbdt.bdd;
+export import pbdt.constraints;
+export import pbdt.log_info;
+export import pbdt.test_context;
