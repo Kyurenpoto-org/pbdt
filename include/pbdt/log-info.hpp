@@ -202,20 +202,14 @@ namespace pbdt::log_info
                 const pbdt::test_context::detail::EventCountable::Each skipped, const size_t total
             ) :
                 EventCountLogInfo{
-                    ColoredAmountWithRate<ColoredString::Color::PASS>{
-                        AmountWithRate{
-                            passed,
-                        },
+                    ColoredEach<ColoredString::Color::PASS>{
+                        passed,
                     },
-                    ColoredAmountWithRate<ColoredString::Color::FAIL>{
-                        AmountWithRate{
-                            failed,
-                        },
+                    ColoredEach<ColoredString::Color::FAIL>{
+                        failed,
                     },
-                    ColoredAmountWithRate<ColoredString::Color::SKIP>{
-                        AmountWithRate{
-                            skipped,
-                        },
+                    ColoredEach<ColoredString::Color::SKIP>{
+                        skipped,
                     },
                     total,
                 }
@@ -231,28 +225,12 @@ namespace pbdt::log_info
             }
 
         private:
-            struct AmountWithRate
-            {
-                constexpr AmountWithRate(const pbdt::test_context::detail::EventCountable::Each each) :
-                    each(each)
-                {
-                }
-
-                operator std::string() const
-                {
-                    return std::format("{:>5} ({:>3}%)", each.amount, each.rate);
-                }
-
-            private:
-                pbdt::test_context::detail::EventCountable::Each each;
-            };
-
             template <typename Derived>
-            struct ColoredAmountWithRateBase
+            struct ColoredEachBase
             {
-                constexpr ColoredAmountWithRateBase(const AmountWithRate amountWithRate) :
-                    amountWithRate{
-                        amountWithRate,
+                constexpr ColoredEachBase(const pbdt::test_context::detail::EventCountable::Each each) :
+                    each{
+                        each,
                     }
                 {
                 }
@@ -260,36 +238,36 @@ namespace pbdt::log_info
                 operator std::string() const
                 {
                     return ColoredString{
-                        format(amountWithRate),
+                        format(each),
                         NonTypePlaceHolder<ColoredString::Color::PASS>{},
                     };
                 }
 
             protected:
-                std::string format(const AmountWithRate&) const;
+                std::string format(const pbdt::test_context::detail::EventCountable::Each&) const;
 
             private:
-                AmountWithRate amountWithRate;
+                pbdt::test_context::detail::EventCountable::Each each;
             };
 
             template <ColoredString::Color>
-            struct ColoredAmountWithRate;
+            struct ColoredEach;
 
             template <>
-            struct ColoredAmountWithRate<ColoredString::Color::PASS> :
-                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::PASS>>
+            struct ColoredEach<ColoredString::Color::PASS> :
+                public ColoredEachBase<ColoredEach<ColoredString::Color::PASS>>
             {
-                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
-                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::PASS>>{
-                        amountWithRate,
+                constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
+                    ColoredEachBase<ColoredEach<ColoredString::Color::PASS>>{
+                        each,
                     }
                 {
                 }
 
             protected:
-                std::string format(const AmountWithRate& amountWithRate) const
+                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
                 {
-                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                    return std::format(FORMAT, static_cast<std::string>(each));
                 }
 
             private:
@@ -297,20 +275,20 @@ namespace pbdt::log_info
             };
 
             template <>
-            struct ColoredAmountWithRate<ColoredString::Color::FAIL> :
-                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::FAIL>>
+            struct ColoredEach<ColoredString::Color::FAIL> :
+                public ColoredEachBase<ColoredEach<ColoredString::Color::FAIL>>
             {
-                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
-                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::FAIL>>{
-                        amountWithRate,
+                constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
+                    ColoredEachBase<ColoredEach<ColoredString::Color::FAIL>>{
+                        each,
                     }
                 {
                 }
 
             protected:
-                std::string format(const AmountWithRate& amountWithRate) const
+                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
                 {
-                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                    return std::format(FORMAT, static_cast<std::string>(each));
                 }
 
             private:
@@ -318,20 +296,20 @@ namespace pbdt::log_info
             };
 
             template <>
-            struct ColoredAmountWithRate<ColoredString::Color::SKIP> :
-                public ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::SKIP>>
+            struct ColoredEach<ColoredString::Color::SKIP> :
+                public ColoredEachBase<ColoredEach<ColoredString::Color::SKIP>>
             {
-                constexpr ColoredAmountWithRate(const AmountWithRate amountWithRate) :
-                    ColoredAmountWithRateBase<ColoredAmountWithRate<ColoredString::Color::SKIP>>{
-                        amountWithRate,
+                constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
+                    ColoredEachBase<ColoredEach<ColoredString::Color::SKIP>>{
+                        each,
                     }
                 {
                 }
 
             protected:
-                std::string format(const AmountWithRate& amountWithRate) const
+                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
                 {
-                    return std::format(FORMAT, static_cast<std::string>(amountWithRate));
+                    return std::format(FORMAT, static_cast<std::string>(each));
                 }
 
             private:
@@ -339,9 +317,9 @@ namespace pbdt::log_info
             };
 
             constexpr EventCountLogInfo(
-                const ColoredAmountWithRate<ColoredString::Color::PASS> passed,
-                const ColoredAmountWithRate<ColoredString::Color::FAIL> failed,
-                const ColoredAmountWithRate<ColoredString::Color::SKIP> skipped, const size_t total
+                const ColoredEach<ColoredString::Color::PASS> passed,
+                const ColoredEach<ColoredString::Color::FAIL> failed,
+                const ColoredEach<ColoredString::Color::SKIP> skipped, const size_t total
             ) :
                 passed(passed),
                 failed(failed),
@@ -350,9 +328,9 @@ namespace pbdt::log_info
             {
             }
 
-            ColoredAmountWithRate<ColoredString::Color::PASS> passed;
-            ColoredAmountWithRate<ColoredString::Color::FAIL> failed;
-            ColoredAmountWithRate<ColoredString::Color::SKIP> skipped;
+            ColoredEach<ColoredString::Color::PASS> passed;
+            ColoredEach<ColoredString::Color::FAIL> failed;
+            ColoredEach<ColoredString::Color::SKIP> skipped;
             size_t total;
         };
 

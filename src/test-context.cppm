@@ -7,6 +7,7 @@
 module;
 
 #include <algorithm>
+#include <format>
 #include <ranges>
 #include <source_location>
 #include <string>

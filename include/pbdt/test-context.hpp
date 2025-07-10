@@ -9,6 +9,7 @@
 #ifndef PBDT_MODULE
 
 #include <algorithm>
+#include <format>
 #include <ranges>
 #include <source_location>
 #include <string>
@@ -116,6 +117,22 @@ namespace pbdt::test_context
 
             struct Each
             {
+                constexpr Each(const size_t amount, const size_t rate) :
+                    amount{
+                        amount,
+                    },
+                    rate{
+                        rate,
+                    }
+                {
+                }
+
+                operator std::string() const
+                {
+                    return std::format("{:>5} ({:>3}%)", amount, rate);
+                }
+
+            private:
                 const size_t amount;
                 const size_t rate;
             };
@@ -140,8 +157,8 @@ namespace pbdt::test_context
                 }();
 
                 return Each{
-                    .amount = amount,
-                    .rate = amount * 100 / sum(),
+                    amount,
+                    amount * 100 / sum(),
                 };
             }
 
