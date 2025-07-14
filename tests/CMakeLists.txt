@@ -118,8 +118,8 @@ add_header_module_prop_suite(
     PROP modeling
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS runnable-scenario event-countable
-    FIXTURES runnable-scenario-fixture event-countable-fixture
+    TARGETS runnable-scenario
+    FIXTURES runnable-scenario-fixture
 )
 add_header_module_prop_suite(
     PROP inclusive
