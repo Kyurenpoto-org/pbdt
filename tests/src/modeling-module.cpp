@@ -13,6 +13,7 @@ import pbdt;
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-bdd.hpp"
+#include "wrapped-deps/for-test-context.hpp"
 
 void runnableScenario()
 {
@@ -21,14 +22,22 @@ void runnableScenario()
     acceptable.run();
 }
 
+void eventCountable()
+{
+    const ModelingValueValidation<ModelingEventCountableSumRequirements<EventCountableWrap>> acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
             "runnable-scenario",
+            "event-countable",
         },
         std::array{
             runnableScenario,
+            eventCountable,
         }
     )
         .run(argc, argv);

@@ -85,6 +85,17 @@ target_include_directories(
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
+add_library(event-countable-fixture INTERFACE)
+
+target_compile_features(
+    event-countable-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    event-countable-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # unit tests
 # Given: Set Category
 # When: Set Category that has product between any two objects
@@ -108,8 +119,8 @@ add_header_module_prop_suite(
     PROP modeling
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS runnable-scenario
-    FIXTURES runnable-scenario-fixture
+    TARGETS runnable-scenario event-countable
+    FIXTURES runnable-scenario-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
     PROP inclusive
