@@ -96,7 +96,6 @@ target_include_directories(
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# unit tests
 # Given: Set Category
 # When: Set Category that has product between any two objects
 # Then: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
@@ -129,8 +128,6 @@ add_header_module_prop_suite(
     TARGETS callable-target callable-property
     FIXTURES callable-target-property-fixture
 )
-
-# integrated tests
 add_header_module_prop_suite(
     PROP projective
     DEP pbdt
@@ -142,8 +139,9 @@ add_header_module_prop_suite(
     PROP homomorphic
     DEP pbdt
     NAMESPACE pbdt.integration
-    TARGETS runnable-scenario-with-then-component
-    FIXTURES runnable-scenario-fixture
+    TARGETS runnable-scenario-with-then-component event-countable-sum-with-accumulate
+    event-countable-some-failed-with-accumulate
+    FIXTURES runnable-scenario-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
     PROP mutual-exclusive
