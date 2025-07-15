@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <print>
 #include <source_location>
 
@@ -21,19 +22,71 @@ namespace
         }
     }
 
-    void twoWayAssert(const auto a, const auto b)
+    /**
+     * @brief A function that performs a compile-time value assertion.
+     *
+     * @param a
+     * @param b
+     */
+    void compileTimeValueAssert(const auto a, const auto b)
     {
         constexpr auto compileTimeA = a();
         constexpr auto compileTimeB = b();
         static_assert(compileTimeA == compileTimeB);
+    }
 
+    /**
+     * @brief A function that performs a run-time value assertion.
+     *
+     * @param a
+     * @param b
+     */
+    void runTimeValueAssert(const auto a, const auto b)
+    {
         const auto runTimeA = a();
         const auto runTimeB = b();
         dynamic_assert(runTimeA == runTimeB);
     }
 
-    template <typename Validatable>
-    struct ValueValidationBase
+    /**
+     * @brief A function that performs a two-way assertion, checking both compile-time and run-time values.
+     *
+     * @param a
+     * @param b
+     */
+    void twoWayAssert(const auto a, const auto b)
+    {
+        compileTimeValueAssert(a, b);
+        runTimeValueAssert(a, b);
+    }
+
+    /**
+     * @brief A functional wrap that asserts two invariants for both truth set and falsity set.
+     *
+     * @tparam Idx
+     */
+    template <size_t Idx>
+    struct IndexedTypeAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable&) const
+        {
+            typeAssert<typename Validatable::template Truth<Idx>, typename Validatable::template Falsity<Idx>>();
+        }
+
+    private:
+        template <typename Truth, typename Falsity>
+        void typeAssert() const
+        {
+            static_assert(Truth::value && Falsity::value);
+        }
+    };
+}
+
+namespace
+{
+    template <typename Validatable, template <size_t> typename WrappedAssertion>
+    struct IterativeValidationBase
     {
         void run() const
         {
@@ -44,10 +97,7 @@ namespace
         template <size_t Idx>
         void runImpl() const
         {
-            twoWayAssert(
-                static_cast<const Validatable&>(*this).template a<Idx>(),
-                static_cast<const Validatable&>(*this).template b<Idx>()
-            );
+            std::invoke(WrappedAssertion<Idx>{}, static_cast<const Validatable&>(*this));
 
             if constexpr (Idx > 0)
             {
@@ -56,31 +106,75 @@ namespace
         }
     };
 
-    template <typename A, typename B>
-    void typeAssert()
-    {
-        static_assert(A::value && B::value);
-    }
-
     template <typename Validatable>
-    struct TypeValidationBase
+    struct RunTimeValueValidationBase
     {
         void run() const
         {
             runImpl<Validatable::size() - 1>();
         }
 
+    protected:
+        template <size_t Idx>
+        void indexedAssert(const Validatable& validatable) const
+        {
+            runTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
+
     private:
         template <size_t Idx>
         void runImpl() const
         {
-            typeAssert<typename Validatable::template A<Idx>, typename Validatable::template B<Idx>>();
+            indexedAssert<Idx>(static_cast<const Validatable&>(*this));
 
             if constexpr (Idx > 0)
             {
                 runImpl<Idx - 1>();
             }
         }
+    };
+
+    /**
+     * @brief A base structure for value validation that checks if a value meets the requirements.
+     *
+     * @tparam Validatable
+     */
+    template <typename Validatable>
+    struct ValueValidationBase
+    {
+        void run() const
+        {
+            runImpl<Validatable::size() - 1>();
+        }
+
+    protected:
+        template <size_t Idx>
+        void indexedAssert(const Validatable& validatable) const
+        {
+            twoWayAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
+
+    private:
+        template <size_t Idx>
+        void runImpl() const
+        {
+            indexedAssert<Idx>(static_cast<const Validatable&>(*this));
+
+            if constexpr (Idx > 0)
+            {
+                runImpl<Idx - 1>();
+            }
+        }
+    };
+
+    /**
+     * @brief A base structure for type validation that checks if a type meets the requirements.
+     *
+     * @tparam Validatable
+     */
+    template <typename Validatable>
+    struct TypeValidationBase : public IterativeValidationBase<Validatable, IndexedTypeAssertion>
+    {
     };
 }
 
@@ -148,6 +242,11 @@ namespace
         );
     };
 
+    /**
+     * @brief A macro that generates a compile-time random value based on the current time, file, line, and column.
+     *
+     * @return A compile-time random value.
+     */
 #define COMPILE_TIME_RANDOM()                                                                                          \
     CompileTimeRandomImpl<                                                                                             \
         stringToArray(__TIME__), stringToArray(__FILE__), std::source_location::current().line(),                      \
