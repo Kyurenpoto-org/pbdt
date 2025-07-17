@@ -133,7 +133,8 @@ add_header_module_prop_suite(
     DEP pbdt
     NAMESPACE pbdt.integration
     TARGETS runnable-scenario-with-given-component runnable-scenario-with-when-component
-    FIXTURES runnable-scenario-fixture
+    event-countable-each
+    FIXTURES runnable-scenario-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
     PROP homomorphic

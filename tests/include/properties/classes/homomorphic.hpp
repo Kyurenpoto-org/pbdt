@@ -43,7 +43,7 @@ private:
     static constexpr HomomorphicRequirements requirements{};
 };
 
-#include "generators/values/event-countable-double-combination.hpp"
+#include "generators/values/event-countable-combination.hpp"
 #include "generators/values/runnable-double-combination.hpp"
 
 template <typename Expect, typename RunnableScenario, typename Then>

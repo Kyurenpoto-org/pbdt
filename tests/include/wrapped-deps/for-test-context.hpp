@@ -58,7 +58,7 @@ namespace
 
         template <size_t N>
             requires(N < 3)
-        static constexpr OpContainer Op()
+        static constexpr OpContainer op()
         {
             if constexpr (N == 0)
             {
@@ -77,6 +77,25 @@ namespace
                 return OpContainer{
                     .op = SkipOp{},
                 };
+            }
+        }
+
+        template <size_t N>
+            requires(N < 3)
+        static constexpr pbdt::test_context::detail::EventCountable::Each
+        each(pbdt::test_context::detail::EventCountable eventCountable)
+        {
+            if constexpr (N == 0)
+            {
+                return eventCountable.each<pbdt::test_context::detail::EventCountable::EachName::PASSED>();
+            }
+            else if constexpr (N == 1)
+            {
+                return eventCountable.each<pbdt::test_context::detail::EventCountable::EachName::FAILED>();
+            }
+            else
+            {
+                return eventCountable.each<pbdt::test_context::detail::EventCountable::EachName::SKIPPED>();
             }
         }
 

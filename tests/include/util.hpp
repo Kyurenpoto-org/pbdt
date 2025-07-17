@@ -23,47 +23,71 @@ namespace
     }
 
     /**
-     * @brief A function that performs a compile-time value assertion.
+     * @brief Performs a compile-time value assertion.
      *
-     * @param a
-     * @param b
+     * @tparam Idx the index to be asserted.
      */
-    void compileTimeValueAssert(const auto a, const auto b)
+    template <size_t Idx>
+    struct IndexedCompileTimeValueAssertion
     {
-        constexpr auto compileTimeA = a();
-        constexpr auto compileTimeB = b();
-        static_assert(compileTimeA == compileTimeB);
-    }
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            compileTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
+
+    private:
+        void compileTimeValueAssert(const auto a, const auto b) const
+        {
+            const auto runTimeA = a();
+            const auto runTimeB = b();
+            dynamic_assert(runTimeA == runTimeB);
+        }
+    };
 
     /**
-     * @brief A function that performs a run-time value assertion.
+     * @brief Performs a run-time value assertion.
      *
-     * @param a
-     * @param b
+     * @tparam Idx the index to be asserted.
      */
-    void runTimeValueAssert(const auto a, const auto b)
+    template <size_t Idx>
+    struct IndexedRunTimeValueAssertion
     {
-        const auto runTimeA = a();
-        const auto runTimeB = b();
-        dynamic_assert(runTimeA == runTimeB);
-    }
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            runTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
+
+    private:
+        void runTimeValueAssert(const auto a, const auto b) const
+        {
+            const auto runTimeA = a();
+            const auto runTimeB = b();
+            dynamic_assert(runTimeA == runTimeB);
+        }
+    };
 
     /**
-     * @brief A function that performs a two-way assertion, checking both compile-time and run-time values.
+     * @brief Performs a two-way assertion, checking both compile-time and run-time values.
      *
-     * @param a
-     * @param b
+     * @tparam Idx the index to be asserted.
      */
-    void twoWayAssert(const auto a, const auto b)
+    template <size_t Idx>
+    struct IndexedTwoWayAssertion
     {
-        compileTimeValueAssert(a, b);
-        runTimeValueAssert(a, b);
-    }
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            std::invoke(IndexedCompileTimeValueAssertion<Idx>{}, validatable);
+            std::invoke(IndexedRunTimeValueAssertion<Idx>{}, validatable);
+        }
+    };
 
     /**
-     * @brief A functional wrap that asserts two invariants for both truth set and falsity set.
+     * @brief Asserts two invariants for both truth set and falsity set.
      *
-     * @tparam Idx
+     * @tparam Idx the index to be asserted.
      */
     template <size_t Idx>
     struct IndexedTypeAssertion
@@ -85,7 +109,12 @@ namespace
 
 namespace
 {
-    template <typename Validatable, template <size_t> typename WrappedAssertion>
+    /**
+     * @brief A base structure for iterative validation.
+     *
+     * @tparam Validatable The type to be asserted.
+     */
+    template <typename Validatable, template <size_t> typename IndexedAssertion>
     struct IterativeValidationBase
     {
         void run() const
@@ -97,35 +126,7 @@ namespace
         template <size_t Idx>
         void runImpl() const
         {
-            std::invoke(WrappedAssertion<Idx>{}, static_cast<const Validatable&>(*this));
-
-            if constexpr (Idx > 0)
-            {
-                runImpl<Idx - 1>();
-            }
-        }
-    };
-
-    template <typename Validatable>
-    struct RunTimeValueValidationBase
-    {
-        void run() const
-        {
-            runImpl<Validatable::size() - 1>();
-        }
-
-    protected:
-        template <size_t Idx>
-        void indexedAssert(const Validatable& validatable) const
-        {
-            runTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
-        }
-
-    private:
-        template <size_t Idx>
-        void runImpl() const
-        {
-            indexedAssert<Idx>(static_cast<const Validatable&>(*this));
+            std::invoke(IndexedAssertion<Idx>{}, static_cast<const Validatable&>(*this));
 
             if constexpr (Idx > 0)
             {
@@ -135,42 +136,44 @@ namespace
     };
 
     /**
-     * @brief A base structure for value validation that checks if a value meets the requirements.
+     * @brief Validates run-time value requirements.
      *
-     * @tparam Validatable
+     * @details Iterative validation with run-time value assertion.
+     *
+     * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedTwoWayAssertion
      */
     template <typename Validatable>
-    struct ValueValidationBase
+    struct RunTimeValueValidationBase : public IterativeValidationBase<Validatable, IndexedRunTimeValueAssertion>
     {
-        void run() const
-        {
-            runImpl<Validatable::size() - 1>();
-        }
-
-    protected:
-        template <size_t Idx>
-        void indexedAssert(const Validatable& validatable) const
-        {
-            twoWayAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
-        }
-
-    private:
-        template <size_t Idx>
-        void runImpl() const
-        {
-            indexedAssert<Idx>(static_cast<const Validatable&>(*this));
-
-            if constexpr (Idx > 0)
-            {
-                runImpl<Idx - 1>();
-            }
-        }
     };
 
     /**
-     * @brief A base structure for type validation that checks if a type meets the requirements.
+     * @brief Validates both compile-time and run-time value requirements.
      *
-     * @tparam Validatable
+     * @details Iterative validation with two-way assertion.
+     *
+     * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedTwoWayAssertion
+     */
+    template <typename Validatable>
+    struct ValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayAssertion>
+    {
+    };
+
+    /**
+     * @brief Validates type requirements.
+     *
+     * @details Iterative validation with type assertion.
+     *
+     * @tparam Validatable The type must provide size(), Truth<Idx>, Falsity<Idx> members.
+     *
+     * @see IterativevalidationBase
+     * @see IndexedTypeAssertion
      */
     template <typename Validatable>
     struct TypeValidationBase : public IterativeValidationBase<Validatable, IndexedTypeAssertion>
