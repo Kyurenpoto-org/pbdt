@@ -70,7 +70,7 @@ jobs:
       - name: install additional utilities
         run: |
           apt-get update
-          apt-get install -y zip unzip curl wget python3-pip
+          apt-get install -y zip unzip curl wget python
 
       - name: install cmake & ninja
         uses: lukka/get-cmake@latest
