@@ -69,7 +69,7 @@ private:
     static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
-    static constexpr EventCountLogInfo eventCountLogInfo;
+    static constexpr EventCountLogInfo eventCountLogInfo{};
 };
 
 template <typename EventCountable, typename EventCountLogInfo>
@@ -100,5 +100,5 @@ private:
     static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
-    static constexpr EventCountLogInfo eventCountLogInfo;
+    static constexpr EventCountLogInfo eventCountLogInfo{};
 };

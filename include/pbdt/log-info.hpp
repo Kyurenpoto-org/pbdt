@@ -37,11 +37,12 @@ namespace pbdt::log_info
             };
 
             template <Color COLOR>
-            ColoredString(const std::string str, NonTypePlaceHolder<COLOR>) :
-                colored{
-                    FormatableString<COLOR>{
-                        str,
-                    },
+            ColoredString(const std::string str, NonTypePlaceHolder<COLOR> placeHolder) :
+                str{
+                    str,
+                },
+                placeHolder{
+                    placeHolder,
                 }
             {
             }
@@ -49,88 +50,166 @@ namespace pbdt::log_info
             operator std::string() const
             {
                 return std::visit(
-                    [](const auto colored)
+                    [this](const auto holder)
                     {
-                        return FormatableString<Color::NONE>(static_cast<std::string>(colored));
+                        return format(holder);
                     },
-                    colored
+                    placeHolder
                 );
             }
 
         private:
-            template <Color>
-            struct ColorFormatable;
-
-            template <>
-            struct ColorFormatable<Color::NONE>
-            {
-                std::string format(const std::string str) const
-                {
-                    return std::format("{}{}", COLOR, str);
-                }
-
-            private:
-                static constexpr std::string_view COLOR = "\033[0m";
-            };
-
-            template <>
-            struct ColorFormatable<Color::PASS>
-            {
-                std::string format(const std::string str) const
-                {
-                    return std::format("{}{}", COLOR, str);
-                }
-
-            private:
-                static constexpr std::string_view COLOR = "\033[32m";
-            };
-
-            template <>
-            struct ColorFormatable<Color::FAIL>
-            {
-                std::string format(const std::string str) const
-                {
-                    return std::format("{}{}", COLOR, str);
-                }
-
-            private:
-                static constexpr std::string_view COLOR = "\033[31m";
-            };
-
-            template <>
-            struct ColorFormatable<Color::SKIP>
-            {
-                std::string format(const std::string str) const
-                {
-                    return std::format("{}{}", COLOR, str);
-                }
-
-            private:
-                static constexpr std::string_view COLOR = "\033[33m";
-            };
-
             template <Color COLOR>
-            struct FormatableString
+            std::string format(NonTypePlaceHolder<COLOR>) const;
+
+            std::string str;
+            std::variant<
+                NonTypePlaceHolder<Color::PASS>, NonTypePlaceHolder<Color::FAIL>, NonTypePlaceHolder<Color::SKIP>>
+                placeHolder;
+        };
+
+        template <ColoredString::Color>
+        struct ColorFormatable;
+
+        template <>
+        struct ColorFormatable<ColoredString::Color::NONE>
+        {
+            std::string format(const std::string str) const
             {
-                FormatableString(const std::string str) :
-                    str{
-                        str,
-                    }
-                {
-                }
+                return std::format("{}{}", COLOR, str);
+            }
 
-                operator std::string() const
-                {
-                    return formatable.format(str);
-                }
+        private:
+            static constexpr std::string_view COLOR = "\033[0m";
+        };
 
-            private:
-                std::string str;
-                ColorFormatable<COLOR> formatable{};
+        template <>
+        struct ColorFormatable<ColoredString::Color::PASS>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format("{}{}", COLOR, str);
+            }
+
+        private:
+            static constexpr std::string_view COLOR = "\033[32m";
+        };
+
+        template <>
+        struct ColorFormatable<ColoredString::Color::FAIL>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format("{}{}", COLOR, str);
+            }
+
+        private:
+            static constexpr std::string_view COLOR = "\033[31m";
+        };
+
+        template <>
+        struct ColorFormatable<ColoredString::Color::SKIP>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format("{}{}", COLOR, str);
+            }
+
+        private:
+            static constexpr std::string_view COLOR = "\033[33m";
+        };
+
+        template <ColoredString::Color COLOR>
+        struct FormatableString
+        {
+            FormatableString(const std::string str) :
+                str{
+                    str,
+                }
+            {
+            }
+
+            operator std::string() const
+            {
+                return colorFormatable.format(str) + defaultFormatable.format(str);
+            }
+
+        private:
+            std::string str;
+            ColorFormatable<COLOR> colorFormatable{};
+            ColorFormatable<ColoredString::Color::NONE> defaultFormatable{};
+        };
+
+        template <ColoredString::Color COLOR>
+        std::string ColoredString::format(NonTypePlaceHolder<COLOR>) const
+        {
+            return FormatableString<COLOR>{
+                str,
             };
+        }
 
-            std::variant<FormatableString<Color::PASS>, FormatableString<Color::FAIL>, FormatableString<Color::SKIP>>
-                colored;
+        template <ColoredString::Color>
+        struct EachFormatable;
+
+        template <>
+        struct EachFormatable<ColoredString::Color::PASS>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format(FORMAT, str);
+            }
+
+        private:
+            static constexpr std::string_view FORMAT = "{} passed";
+        };
+
+        template <>
+        struct EachFormatable<ColoredString::Color::FAIL>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format(FORMAT, str);
+            }
+
+        private:
+            static constexpr std::string_view FORMAT = "{} failed";
+        };
+
+        template <>
+        struct EachFormatable<ColoredString::Color::SKIP>
+        {
+            std::string format(const std::string str) const
+            {
+                return std::format(FORMAT, str);
+            }
+
+        private:
+            static constexpr std::string_view FORMAT = "{} skipped";
+        };
+
+        template <ColoredString::Color COLOR>
+        struct ColoredEach
+        {
+            constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
+                each{
+                    each,
+                }
+            {
+            }
+
+            operator std::string() const
+            {
+                return formatable.format(
+                    ColoredString{
+                        each,
+                        NonTypePlaceHolder<COLOR>{},
+                    }
+                );
+            }
+
+        private:
+            pbdt::test_context::detail::EventCountable::Each each;
+            EachFormatable<COLOR> formatable{};
         };
 
         struct EventCountLogInfo
@@ -140,97 +219,6 @@ namespace pbdt::log_info
                 const pbdt::test_context::detail::EventCountable::Each failed,
                 const pbdt::test_context::detail::EventCountable::Each skipped, const size_t total
             ) :
-                EventCountLogInfo{
-                    ColoredEach<ColoredString::Color::PASS>{
-                        passed,
-                    },
-                    ColoredEach<ColoredString::Color::FAIL>{
-                        failed,
-                    },
-                    ColoredEach<ColoredString::Color::SKIP>{
-                        skipped,
-                    },
-                    total,
-                }
-            {
-            }
-
-            operator std::string() const
-            {
-                return std::format(
-                    "{}, {}, {} | {}", static_cast<std::string>(passed), static_cast<std::string>(failed),
-                    static_cast<std::string>(skipped), total
-                );
-            }
-
-        private:
-            template <ColoredString::Color>
-            struct EachFormatable;
-
-            template <>
-            struct EachFormatable<ColoredString::Color::PASS>
-            {
-                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
-                {
-                    return std::format(FORMAT, static_cast<std::string>(each));
-                }
-
-            private:
-                static constexpr std::string_view FORMAT = "{} passed";
-            };
-
-            template <>
-            struct EachFormatable<ColoredString::Color::FAIL>
-            {
-                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
-                {
-                    return std::format(FORMAT, static_cast<std::string>(each));
-                }
-
-            private:
-                static constexpr std::string_view FORMAT = "{} failed";
-            };
-
-            template <>
-            struct EachFormatable<ColoredString::Color::SKIP>
-            {
-                std::string format(const pbdt::test_context::detail::EventCountable::Each& each) const
-                {
-                    return std::format(FORMAT, static_cast<std::string>(each));
-                }
-
-            private:
-                static constexpr std::string_view FORMAT = "{} skipped";
-            };
-
-            template <ColoredString::Color COLOR>
-            struct ColoredEach
-            {
-                constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
-                    each{
-                        each,
-                    }
-                {
-                }
-
-                operator std::string() const
-                {
-                    return ColoredString{
-                        formatable.format(each),
-                        NonTypePlaceHolder<ColoredString::Color::PASS>{},
-                    };
-                }
-
-            private:
-                pbdt::test_context::detail::EventCountable::Each each;
-                EachFormatable<COLOR> formatable{};
-            };
-
-            constexpr EventCountLogInfo(
-                const ColoredEach<ColoredString::Color::PASS> passed,
-                const ColoredEach<ColoredString::Color::FAIL> failed,
-                const ColoredEach<ColoredString::Color::SKIP> skipped, const size_t total
-            ) :
                 passed(passed),
                 failed(failed),
                 skipped(skipped),
@@ -238,9 +226,27 @@ namespace pbdt::log_info
             {
             }
 
-            ColoredEach<ColoredString::Color::PASS> passed;
-            ColoredEach<ColoredString::Color::FAIL> failed;
-            ColoredEach<ColoredString::Color::SKIP> skipped;
+            operator std::string() const
+            {
+                return std::format(
+                    "{}, {}, {} | {}", coloredEach<ColoredString::Color::PASS>(passed),
+                    coloredEach<ColoredString::Color::FAIL>(failed), coloredEach<ColoredString::Color::SKIP>(skipped),
+                    total
+                );
+            }
+
+        private:
+            template <ColoredString::Color COLOR>
+            std::string coloredEach(const pbdt::test_context::detail::EventCountable::Each& each) const
+            {
+                return ColoredEach<COLOR>{
+                    each,
+                };
+            }
+
+            pbdt::test_context::detail::EventCountable::Each passed;
+            pbdt::test_context::detail::EventCountable::Each failed;
+            pbdt::test_context::detail::EventCountable::Each skipped;
             size_t total;
         };
 

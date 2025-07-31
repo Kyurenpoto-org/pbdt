@@ -270,19 +270,19 @@ struct ProjectiveEventCountableEachRequirements
     template <size_t Idx>
     constexpr auto dependenciesA() const
     {
-        return DROPS.a<Idx>();
+        return DROPS.template a<Idx>();
     }
 
     template <size_t Idx>
     constexpr auto dependenciesB() const
     {
-        return DROPS.b<Idx>();
+        return DROPS.template b<Idx>();
     }
 
     template <size_t Idx>
     constexpr auto x() const
     {
-        return VALUES.a<Idx>();
+        return VALUES.template a<Idx>();
     }
 
     template <typename Dependencies, typename Value>
