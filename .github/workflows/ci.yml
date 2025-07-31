@@ -67,6 +67,11 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: install additional utilities
+        run: |
+          apt-get update
+          apt-get install -y zip unzip curl wget
+
       - name: install cmake & ninja
         uses: lukka/get-cmake@latest
         with:
