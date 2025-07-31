@@ -70,7 +70,10 @@ jobs:
       - name: install additional utilities
         run: |
           apt-get update
-          apt-get install -y zip unzip curl wget python3 python3-pip
+          apt-get install -y zip unzip curl wget python3 python3-pip python3-venv
+          python3 -m venv ~/.venv
+          source ~/.venv/bin/activate
+          pip install --upgrade pip
 
       - name: install cmake & ninja
         uses: lukka/get-cmake@latest
