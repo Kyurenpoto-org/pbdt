@@ -57,7 +57,7 @@ jobs:
   linux-build:
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:25
+      image: ubuntu:25.04
     strategy:
       fail-fast: false
       matrix:
