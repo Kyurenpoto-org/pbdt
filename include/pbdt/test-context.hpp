@@ -158,7 +158,7 @@ namespace pbdt::test_context
 
                 return Each{
                     amount,
-                    amount * 100 / sum(),
+                    sum() == 0 ? 0 : amount * 100 / sum(),
                 };
             }
 

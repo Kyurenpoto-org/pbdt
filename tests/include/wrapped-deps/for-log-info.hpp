@@ -93,18 +93,18 @@ namespace
             {
                 return ComparablePresentation{
                     pbdt::test_context::detail::EventCountable::Each{
-                        std::stoul(match[0]),
                         std::stoul(match[1]),
-                    },
-                    pbdt::test_context::detail::EventCountable::Each{
                         std::stoul(match[2]),
-                        std::stoul(match[3]),
                     },
                     pbdt::test_context::detail::EventCountable::Each{
+                        std::stoul(match[3]),
                         std::stoul(match[4]),
-                        std::stoul(match[5]),
                     },
-                    std::stoul(match[6]),
+                    pbdt::test_context::detail::EventCountable::Each{
+                        std::stoul(match[5]),
+                        std::stoul(match[6]),
+                    },
+                    std::stoul(match[7]),
                 };
             }
             else
