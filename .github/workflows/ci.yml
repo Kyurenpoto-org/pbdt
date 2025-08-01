@@ -87,7 +87,7 @@ jobs:
 
       - name: install conan
         run: |
-          python -m pip install conan
+          python3 -m pip install conan
 
       - name: install gcc
         run: |
