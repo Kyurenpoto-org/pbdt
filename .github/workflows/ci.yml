@@ -92,6 +92,7 @@ jobs:
           . ~/.venv/bin/activate
           python3 -m pip install --upgrade pip
           python3 -m pip install conan
+          echo "$HOME/.venv/bin" >> $GITHUB_PATH
 
       - name: install gcc
         run: |
