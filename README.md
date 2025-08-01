@@ -6,7 +6,7 @@
 
 ![C++](https://img.shields.io/badge/C++-23+-blue)
 ![MSVC](https://img.shields.io/badge/MSVC-19.37+-blue)
-![GCC](https://img.shields.io/badge/GCC-14+-blue)
+![GCC](https://img.shields.io/badge/GCC-15+-blue)
 ![Clang](https://img.shields.io/badge/Clang-19+-blue)
 </div>
 
