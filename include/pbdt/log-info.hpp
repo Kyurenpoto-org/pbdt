@@ -74,7 +74,7 @@ namespace pbdt::log_info
         template <>
         struct ColorFormatable<ColoredString::Color::NONE>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format("{}{}", COLOR, str);
             }
@@ -86,7 +86,7 @@ namespace pbdt::log_info
         template <>
         struct ColorFormatable<ColoredString::Color::PASS>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format("{}{}", COLOR, str);
             }
@@ -98,7 +98,7 @@ namespace pbdt::log_info
         template <>
         struct ColorFormatable<ColoredString::Color::FAIL>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format("{}{}", COLOR, str);
             }
@@ -110,7 +110,7 @@ namespace pbdt::log_info
         template <>
         struct ColorFormatable<ColoredString::Color::SKIP>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format("{}{}", COLOR, str);
             }
@@ -154,7 +154,7 @@ namespace pbdt::log_info
         template <>
         struct EachFormatable<ColoredString::Color::PASS>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format(FORMAT, str);
             }
@@ -166,7 +166,7 @@ namespace pbdt::log_info
         template <>
         struct EachFormatable<ColoredString::Color::FAIL>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format(FORMAT, str);
             }
@@ -178,7 +178,7 @@ namespace pbdt::log_info
         template <>
         struct EachFormatable<ColoredString::Color::SKIP>
         {
-            std::string format(const std::string str) const
+            std::string format(const std::string_view str) const
             {
                 return std::format(FORMAT, str);
             }
@@ -199,12 +199,12 @@ namespace pbdt::log_info
 
             operator std::string() const
             {
-                return formatable.format(
-                    ColoredString{
-                        each,
-                        NonTypePlaceHolder<COLOR>{},
-                    }
-                );
+                const std::string colored = ColoredString{
+                    each,
+                    NonTypePlaceHolder<COLOR>{},
+                };
+
+                return formatable.format(colored);
             }
 
         private:
