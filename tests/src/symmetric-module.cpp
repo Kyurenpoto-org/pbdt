@@ -5,6 +5,7 @@
  */
 
 #include <array>
+#include <charconv>
 #include <variant>
 
 #include "properties/classes/symmetric.hpp"
