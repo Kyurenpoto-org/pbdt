@@ -6,9 +6,11 @@
 
 #pragma once
 
-#include <regex>
+#include <ranges>
 #include <string>
+#include <string_view>
 #include <tuple>
+#include <vector>
 
 namespace
 {
@@ -85,32 +87,91 @@ namespace
 
         ComparablePresentation deserialize(const std::string str) const
         {
-            std::regex regex{ R"(\s*(\d+)\s*\(\s*(\d+)%\s*\)\s*passed,)"
-                              R"(\s*(\d+)\s*\(\s*(\d+)%\s*\)\s*failed,)"
-                              R"(\s*(\d+)\s*\(\s*(\d+)%\s*\)\s*skipped\s*\|\s*(\d+))" };
-            std::smatch match;
-            if (std::regex_match(str, match, regex))
-            {
-                return ComparablePresentation{
-                    pbdt::test_context::detail::EventCountable::Each{
-                        std::stoul(match[1]),
-                        std::stoul(match[2]),
-                    },
-                    pbdt::test_context::detail::EventCountable::Each{
-                        std::stoul(match[3]),
-                        std::stoul(match[4]),
-                    },
-                    pbdt::test_context::detail::EventCountable::Each{
-                        std::stoul(match[5]),
-                        std::stoul(match[6]),
-                    },
-                    std::stoul(match[7]),
-                };
-            }
-            else
+            const auto x = splitStrView(
+                std::string_view{
+                    str,
+                },
+                std::string_view{
+                    " | ",
+                }
+            );
+            if (x.size() != 2)
             {
                 throw std::runtime_error("Invalid format for EventCountLogInfo");
             }
+
+            constexpr std::string_view GREEN = "\033[32m";
+            constexpr std::string_view RED = "\033[31m";
+            constexpr std::string_view YELLOW = "\033[33m";
+            constexpr std::string_view PASSED_END = "%)\033[0m passed";
+            constexpr std::string_view FAILED_END = "%)\033[0m failed";
+            constexpr std::string_view SKIPPED_END = "%)\033[0m skipped";
+            auto y = splitStrView(
+                x[0], std::string_view{
+                          ", ",
+                      }
+            );
+            if (y.size() != 3 || !y[0].starts_with(GREEN) || !y[0].ends_with(PASSED_END) || !y[1].starts_with(RED)
+                || !y[1].ends_with(FAILED_END) || !y[2].starts_with(YELLOW) || !y[2].ends_with(SKIPPED_END))
+            {
+                throw std::runtime_error("Invalid format for EventCountLogInfo");
+            }
+            y[0].remove_prefix(GREEN.size());
+            y[0].remove_suffix(PASSED_END.size());
+            y[1].remove_prefix(RED.size());
+            y[1].remove_suffix(FAILED_END.size());
+            y[2].remove_prefix(YELLOW.size());
+            y[2].remove_suffix(SKIPPED_END.size());
+
+            return ComparablePresentation{
+                parseToEach(y[0]),
+                parseToEach(y[1]),
+                parseToEach(y[2]),
+                parseToInteger(x[1]),
+            };
+        }
+
+    private:
+        std::vector<std::string_view> splitStrView(const std::string_view str, const std::string_view delim) const
+        {
+            return std::views::split(str, delim)
+                 | std::views::transform(
+                       [](auto x)
+                       {
+                           return std::string_view{ x };
+                       }
+                 )
+                 | std::ranges::to<std::vector<std::string_view>>();
+        }
+
+        size_t parseToInteger(const std::string_view str) const
+        {
+            int value;
+            auto [ptr, ec] = std::from_chars(str.data() + str.find_first_not_of(" "), str.data() + str.size(), value);
+            if (ec != std::errc())
+            {
+                throw std::runtime_error("Invalid format for integer");
+            }
+
+            return static_cast<size_t>(value);
+        }
+
+        pbdt::test_context::detail::EventCountable::Each parseToEach(const std::string_view str) const
+        {
+            const auto x = splitStrView(
+                str, std::string_view{
+                         "(",
+                     }
+            );
+            if (x.size() != 2)
+            {
+                throw std::runtime_error("Invalid format for Each");
+            }
+
+            return {
+                parseToInteger(x[0]),
+                parseToInteger(x[1]),
+            };
         }
     };
 }

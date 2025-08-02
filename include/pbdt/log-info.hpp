@@ -131,7 +131,7 @@ namespace pbdt::log_info
 
             operator std::string() const
             {
-                return colorFormatable.format(str) + defaultFormatable.format(str);
+                return colorFormatable.format(str) + defaultFormatable.format("");
             }
 
         private:

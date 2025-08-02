@@ -5,7 +5,6 @@
  */
 
 #include <array>
-#include <regex>
 #include <variant>
 
 #include "properties/classes/symmetric.hpp"
