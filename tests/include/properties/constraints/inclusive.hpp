@@ -24,16 +24,16 @@ struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<Incl
     }
 
     template <size_t Idx>
-    using A = std::disjunction<
+    using Truth = std::disjunction<
         std::negation<
-            typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template A<Idx>>>,
-        typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template A<Idx>>>;
+            typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template Origin<Idx>>>,
+        typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template Origin<Idx>>>;
 
     template <size_t Idx>
-    using B = std::disjunction<
-        typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template B<Idx>>,
-        std::negation<
-            typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template B<Idx>>>>;
+    using Falsity = std::disjunction<
+        typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template Complement<Idx>>,
+        std::negation<typename InclusiveRequirements::template BeIncluded<
+            typename InclusiveRequirements::template Complement<Idx>>>>;
 };
 
 #include "generators/types/callable-type.hpp"
@@ -63,10 +63,10 @@ struct InclusiveCallableTargetRequirements
     }
 
     template <size_t Idx>
-    using A = std::tuple_element_t<Idx, TargetCombinations>;
+    using Origin = std::tuple_element_t<Idx, TargetCombinations>;
 
     template <size_t Idx>
-    using B = std::tuple_element_t<Idx, NonTargetCombinations>;
+    using Complement = std::tuple_element_t<Idx, NonTargetCombinations>;
 
     template <typename T>
     using Includer = CallableWrap<T>;
@@ -102,10 +102,10 @@ struct InclusiveCallablePropertyRequirements
     }
 
     template <size_t Idx>
-    using A = std::tuple_element_t<Idx, PropCombinations>;
+    using Origin = std::tuple_element_t<Idx, PropCombinations>;
 
     template <size_t Idx>
-    using B = std::tuple_element_t<Idx, NonPropCombinations>;
+    using Complement = std::tuple_element_t<Idx, NonPropCombinations>;
 
     template <typename T>
     using Includer = CallableTargetWrap<T>;

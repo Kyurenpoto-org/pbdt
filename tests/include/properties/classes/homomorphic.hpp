@@ -43,6 +43,7 @@ private:
     static constexpr HomomorphicRequirements requirements{};
 };
 
+#include "generators/values/event-countable-combination.hpp"
 #include "generators/values/runnable-double-combination.hpp"
 
 template <typename Expect, typename RunnableScenario, typename Then>
@@ -90,4 +91,90 @@ private:
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>::value;
     static constexpr RunnableScenario runnableScenario{};
     static constexpr Then then{};
+};
+
+template <typename EventCountable>
+struct HomomorphicEventCountableSumWithAccumulateRequirements
+{
+    static constexpr size_t size()
+    {
+        return COMBINATIONS.size();
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return COMBINATIONS.template a<Idx>();
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return COMBINATIONS.template b<Idx>();
+    }
+
+    template <size_t, typename T>
+    constexpr size_t morph(T&& t) const
+    {
+        return std::forward<T>(t).sum();
+    }
+
+    template <typename T>
+    constexpr auto beforeMorphOp(T&& a, T&& b) const
+    {
+        return std::forward<T>(a) + std::forward<T>(b);
+    }
+
+    constexpr size_t afterMorphOp(size_t a, size_t b) const
+    {
+        return a + b;
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
+};
+
+template <typename EventCountable>
+struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
+{
+    static constexpr size_t size()
+    {
+        return COMBINATIONS.size();
+    }
+
+    template <size_t Idx>
+    constexpr auto a() const
+    {
+        return COMBINATIONS.template a<Idx>();
+    }
+
+    template <size_t Idx>
+    constexpr auto b() const
+    {
+        return COMBINATIONS.template b<Idx>();
+    }
+
+    template <size_t, typename T>
+    constexpr bool morph(T&& t) const
+    {
+        return std::forward<T>(t).someFailed();
+    }
+
+    template <typename T>
+    constexpr auto beforeMorphOp(T&& a, T&& b) const
+    {
+        return std::forward<T>(a) + std::forward<T>(b);
+    }
+
+    constexpr bool afterMorphOp(bool a, bool b) const
+    {
+        return a || b;
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };

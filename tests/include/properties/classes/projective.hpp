@@ -74,6 +74,38 @@ private:
     static constexpr ProjectiveRequirements requirements{};
 };
 
+template <typename ProjectiveRequirements>
+struct DoubleProjectiveRuntimeValueValidation :
+    RunTimeValueValidationBase<DoubleProjectiveRuntimeValueValidation<ProjectiveRequirements>>
+{
+    static constexpr size_t size()
+    {
+        return ProjectiveRequirements::size();
+    }
+
+    template <size_t Idx>
+    auto a() const
+    {
+        return []()
+        {
+            return requirements.morph(requirements.template dependenciesA<Idx>(), requirements.template x<Idx>());
+        };
+    }
+
+    template <size_t Idx>
+    auto b() const
+    {
+        return []()
+        {
+            return requirements.morph(requirements.template dependenciesB<Idx>(), requirements.template x<Idx>());
+        };
+    }
+
+private:
+    static constexpr ProjectiveRequirements requirements{};
+};
+
+#include "generators/values/event-countable-combination.hpp"
 #include "generators/values/runnable-double-combination.hpp"
 
 template <typename ToContainer, typename Expect, typename RunnableScenario, typename Given>
@@ -225,4 +257,50 @@ private:
     static constexpr ToContainer toContainer{};
     static constexpr RunnableScenario runnableScenario{};
     static constexpr When when{};
+};
+
+template <typename EventCountable>
+struct ProjectiveEventCountableEachRequirements
+{
+    static constexpr size_t size()
+    {
+        return VALUES.size();
+    }
+
+    template <size_t Idx>
+    constexpr auto dependenciesA() const
+    {
+        return DROPS.template a<Idx>();
+    }
+
+    template <size_t Idx>
+    constexpr auto dependenciesB() const
+    {
+        return DROPS.template b<Idx>();
+    }
+
+    template <size_t Idx>
+    constexpr auto x() const
+    {
+        return VALUES.template a<Idx>();
+    }
+
+    template <typename Dependencies, typename Value>
+    auto morph(Dependencies&& dependencies, Value&& value) const
+    {
+        return std::array{
+            static_cast<std::string>(EventCountable::template each<0>(dependencies[0] + value)),
+            static_cast<std::string>(EventCountable::template each<1>(dependencies[1] + value)),
+            static_cast<std::string>(EventCountable::template each<2>(dependencies[2] + value)),
+        };
+    }
+
+private:
+    static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
+
+    static constexpr auto DROPS = Countable::EventCountableSingleDropCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };

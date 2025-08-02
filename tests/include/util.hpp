@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <print>
 #include <source_location>
 
@@ -21,19 +22,100 @@ namespace
         }
     }
 
-    void twoWayAssert(const auto a, const auto b)
+    /**
+     * @brief Performs a compile-time value assertion.
+     *
+     * @tparam Idx the index to be asserted.
+     */
+    template <size_t Idx>
+    struct IndexedCompileTimeValueAssertion
     {
-        constexpr auto compileTimeA = a();
-        constexpr auto compileTimeB = b();
-        static_assert(compileTimeA == compileTimeB);
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            compileTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
 
-        const auto runTimeA = a();
-        const auto runTimeB = b();
-        dynamic_assert(runTimeA == runTimeB);
-    }
+    private:
+        void compileTimeValueAssert(const auto a, const auto b) const
+        {
+            const auto runTimeA = a();
+            const auto runTimeB = b();
+            dynamic_assert(runTimeA == runTimeB);
+        }
+    };
 
-    template <typename Validatable>
-    struct ValueValidationBase
+    /**
+     * @brief Performs a run-time value assertion.
+     *
+     * @tparam Idx the index to be asserted.
+     */
+    template <size_t Idx>
+    struct IndexedRunTimeValueAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            runTimeValueAssert(validatable.template a<Idx>(), validatable.template b<Idx>());
+        }
+
+    private:
+        void runTimeValueAssert(const auto a, const auto b) const
+        {
+            const auto runTimeA = a();
+            const auto runTimeB = b();
+            dynamic_assert(runTimeA == runTimeB);
+        }
+    };
+
+    /**
+     * @brief Performs a two-way assertion, checking both compile-time and run-time values.
+     *
+     * @tparam Idx the index to be asserted.
+     */
+    template <size_t Idx>
+    struct IndexedTwoWayAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            std::invoke(IndexedCompileTimeValueAssertion<Idx>{}, validatable);
+            std::invoke(IndexedRunTimeValueAssertion<Idx>{}, validatable);
+        }
+    };
+
+    /**
+     * @brief Asserts two invariants for both truth set and falsity set.
+     *
+     * @tparam Idx the index to be asserted.
+     */
+    template <size_t Idx>
+    struct IndexedTypeAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable&) const
+        {
+            typeAssert<typename Validatable::template Truth<Idx>, typename Validatable::template Falsity<Idx>>();
+        }
+
+    private:
+        template <typename Truth, typename Falsity>
+        void typeAssert() const
+        {
+            static_assert(Truth::value && Falsity::value);
+        }
+    };
+}
+
+namespace
+{
+    /**
+     * @brief A base structure for iterative validation.
+     *
+     * @tparam Validatable The type to be asserted.
+     */
+    template <typename Validatable, template <size_t> typename IndexedAssertion>
+    struct IterativeValidationBase
     {
         void run() const
         {
@@ -44,10 +126,7 @@ namespace
         template <size_t Idx>
         void runImpl() const
         {
-            twoWayAssert(
-                static_cast<const Validatable&>(*this).template a<Idx>(),
-                static_cast<const Validatable&>(*this).template b<Idx>()
-            );
+            std::invoke(IndexedAssertion<Idx>{}, static_cast<const Validatable&>(*this));
 
             if constexpr (Idx > 0)
             {
@@ -56,31 +135,49 @@ namespace
         }
     };
 
-    template <typename A, typename B>
-    void typeAssert()
-    {
-        static_assert(A::value && B::value);
-    }
-
+    /**
+     * @brief Validates run-time value requirements.
+     *
+     * @details Iterative validation with run-time value assertion.
+     *
+     * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedTwoWayAssertion
+     */
     template <typename Validatable>
-    struct TypeValidationBase
+    struct RunTimeValueValidationBase : public IterativeValidationBase<Validatable, IndexedRunTimeValueAssertion>
     {
-        void run() const
-        {
-            runImpl<Validatable::size() - 1>();
-        }
+    };
 
-    private:
-        template <size_t Idx>
-        void runImpl() const
-        {
-            typeAssert<typename Validatable::template A<Idx>, typename Validatable::template B<Idx>>();
+    /**
+     * @brief Validates both compile-time and run-time value requirements.
+     *
+     * @details Iterative validation with two-way assertion.
+     *
+     * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedTwoWayAssertion
+     */
+    template <typename Validatable>
+    struct ValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayAssertion>
+    {
+    };
 
-            if constexpr (Idx > 0)
-            {
-                runImpl<Idx - 1>();
-            }
-        }
+    /**
+     * @brief Validates type requirements.
+     *
+     * @details Iterative validation with type assertion.
+     *
+     * @tparam Validatable The type must provide size(), Truth<Idx>, Falsity<Idx> members.
+     *
+     * @see IterativevalidationBase
+     * @see IndexedTypeAssertion
+     */
+    template <typename Validatable>
+    struct TypeValidationBase : public IterativeValidationBase<Validatable, IndexedTypeAssertion>
+    {
     };
 }
 
@@ -148,6 +245,11 @@ namespace
         );
     };
 
+    /**
+     * @brief A macro that generates a compile-time random value based on the current time, file, line, and column.
+     *
+     * @return A compile-time random value.
+     */
 #define COMPILE_TIME_RANDOM()                                                                                          \
     CompileTimeRandomImpl<                                                                                             \
         stringToArray(__TIME__), stringToArray(__FILE__), std::source_location::current().line(),                      \
