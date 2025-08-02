@@ -6,6 +6,7 @@
 
 #include <array>
 #include <charconv>
+#include <ranges>
 #include <variant>
 
 #include "properties/classes/symmetric.hpp"
