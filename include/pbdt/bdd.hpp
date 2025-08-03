@@ -6,6 +6,8 @@
 
 #pragma once
 
+#ifndef PBDT_MODULE
+
 #include <algorithm>
 #include <array>
 #include <ranges>
@@ -13,8 +15,6 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
-
-#ifndef PBDT_MODULE
 
 #include "exstd/callable-traits.hpp"
 #include "exstd/functional.hpp"

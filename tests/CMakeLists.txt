@@ -85,7 +85,28 @@ target_include_directories(
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-# unit tests
+add_library(event-countable-fixture INTERFACE)
+
+target_compile_features(
+    event-countable-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    event-countable-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+add_library(event-count-log-info-fixture INTERFACE)
+
+target_compile_features(
+    event-count-log-info-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    event-count-log-info-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 # Given: Set Category
 # When: Set Category that has product between any two objects
 # Then: 2-Category that has terminal object and each 1-Hom-set has product between any two morphisms in it
@@ -112,27 +133,27 @@ add_header_module_prop_suite(
     FIXTURES runnable-scenario-fixture
 )
 add_header_module_prop_suite(
-    PROP inclusive
-    DEP pbdt
-    NAMESPACE pbdt.unit
-    TARGETS callable-target callable-property
-    FIXTURES callable-target-property-fixture
-)
-
-# integrated tests
-add_header_module_prop_suite(
     PROP projective
     DEP pbdt
     NAMESPACE pbdt.integration
     TARGETS runnable-scenario-with-given-component runnable-scenario-with-when-component
-    FIXTURES runnable-scenario-fixture
+    event-countable-each
+    FIXTURES runnable-scenario-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
     PROP homomorphic
     DEP pbdt
     NAMESPACE pbdt.integration
-    TARGETS runnable-scenario-with-then-component
-    FIXTURES runnable-scenario-fixture
+    TARGETS runnable-scenario-with-then-component event-countable-sum-with-accumulate
+    event-countable-some-failed-with-accumulate
+    FIXTURES runnable-scenario-fixture event-countable-fixture
+)
+add_header_module_prop_suite(
+    PROP inclusive
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS callable-target callable-property
+    FIXTURES callable-target-property-fixture
 )
 add_header_module_prop_suite(
     PROP mutual-exclusive
@@ -140,4 +161,11 @@ add_header_module_prop_suite(
     NAMESPACE pbdt.integration
     TARGETS range-domain-with-callable-target
     FIXTURES callable-target-property-fixture range-domain-fixture
+)
+add_header_module_prop_suite(
+    PROP symmetric
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS event-count-log-info-forward event-count-log-info-backward
+    FIXTURES event-count-log-info-fixture
 )
