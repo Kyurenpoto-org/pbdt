@@ -6,12 +6,13 @@
 
 #pragma once
 
+#ifndef PBDT_MODULE
+
 #include <algorithm>
+#include <format>
 #include <ranges>
 #include <source_location>
 #include <string>
-
-#ifndef PBDT_MODULE
 
 #include "exstd/functional.hpp"
 
@@ -102,11 +103,64 @@ namespace pbdt::test_context
                 return failed != 0;
             }
 
-            // constexpr operator std::string() const
-            //{
-            //     return "Passed: " + stringify(passed) + "\n" + "Failed: " + stringify(failed) + "\n"
-            //          + "Skipped: " + stringify(skipped) + "\n";
-            // }
+            constexpr size_t sum() const
+            {
+                return passed + failed + skipped;
+            }
+
+            enum class EachName
+            {
+                PASSED,
+                FAILED,
+                SKIPPED,
+            };
+
+            struct Each
+            {
+                constexpr Each(const size_t amount, const size_t rate) :
+                    amount{
+                        amount,
+                    },
+                    rate{
+                        rate,
+                    }
+                {
+                }
+
+                operator std::string() const
+                {
+                    return std::format("{:>5} ({:>3}%)", amount, rate);
+                }
+
+            private:
+                const size_t amount;
+                const size_t rate;
+            };
+
+            template <EachName Name>
+            constexpr Each each() const
+            {
+                const size_t amount = [this]()
+                {
+                    if constexpr (Name == EachName::PASSED)
+                    {
+                        return passed;
+                    }
+                    else if constexpr (Name == EachName::FAILED)
+                    {
+                        return failed;
+                    }
+                    else
+                    {
+                        return skipped;
+                    }
+                }();
+
+                return Each{
+                    amount,
+                    sum() == 0 ? 0 : amount * 100 / sum(),
+                };
+            }
 
         private:
             constexpr EventCountable(const size_t passed, const size_t failed, const size_t skipped) :
@@ -142,14 +196,14 @@ namespace pbdt::test_context
                 if (expression)
                 {
                     return TestContext{
-                        assertions.pass(),
+                        assertionEvents.pass(),
                         // failures,
                     };
                 }
                 else
                 {
                     return TestContext{
-                        assertions.fail(),
+                        assertionEvents.fail(),
                         // failures + std::string(StringifiedLocation{ location }),
                     };
                 }
@@ -158,39 +212,50 @@ namespace pbdt::test_context
             constexpr TestContext accumulate(const TestContext context) const
             {
                 return TestContext{
-                    assertions + context.assertions,
+                    assertionEvents + context.assertionEvents,
                     // failures + context.failures,
                 };
             }
 
             constexpr bool passable() const
             {
-                return !assertions.someFailed();
+                return !assertionEvents.someFailed();
+            }
+
+            constexpr size_t sumOfAssertions() const
+            {
+                return assertionEvents.sum();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachAssertions() const
+            {
+                return assertionEvents.each<Name>();
             }
 
             // constexpr std::string description() const
             //{
             //     if (passable())
             //     {
-            //         return "<Assertions>\n" + std::string(assertions);
+            //         return "<Assertions>\n" + std::string(assertionEvents);
             //     }
             //     else
             //     {
-            //         return failures + "\n\n<Assertions>\n" + std::string(assertions);
+            //         return failures + "\n\n<Assertions>\n" + std::string(assertionEvents);
             //     }
             // }
 
         private:
             constexpr TestContext(
-                const EventCountable assertions
+                const EventCountable assertionEvents
                 //, const std::string failures
             ) :
-                assertions(assertions) //,
+                assertionEvents(assertionEvents) //,
             // failures(failures)
             {
             }
 
-            const EventCountable assertions;
+            EventCountable assertionEvents;
             // const std::string failures;
         };
 
@@ -213,69 +278,66 @@ namespace pbdt::test_context
             {
                 return SampledTestContext{
                     EventCountable::prototype(),
-                    //{},
+                    TestContext::prototype(),
                 };
             }
 
             template <typename Test>
-            constexpr SampledTestContext accumulate( // const std::string sample,
-                Test&& test
-            ) const
+            constexpr SampledTestContext accumulate(Test&& test) const
             {
-                if (samples.someFailed())
+                if (sampleTestEvents.someFailed())
                 {
                     return SampledTestContext{
-                        samples.skip(),
-                        // failures,
-                    };
-                }
-
-                const TestContext context = test();
-                if (context.passable())
-                {
-                    return SampledTestContext{
-                        samples.pass(),
-                        // failures,
+                        sampleTestEvents.skip(),
+                        assertionContext,
                     };
                 }
                 else
                 {
+                    const TestContext context = test();
                     return SampledTestContext{
-                        samples.fail(),
-                        // failures + context.description(),
+                        context.passable() ? sampleTestEvents.pass() : sampleTestEvents.fail(),
+                        assertionContext.accumulate(context),
                     };
                 }
             }
 
             constexpr bool passable() const
             {
-                return !samples.someFailed();
+                return !sampleTestEvents.someFailed();
             }
 
-            // constexpr std::string description() const
-            //{
-            //     if (passable())
-            //     {
-            //         return "<Samples>\n" + std::string(samples);
-            //     }
-            //     else
-            //     {
-            //         return failures + "\n\n<Samples>\n" + std::string(samples);
-            //     }
-            // }
+            constexpr size_t sumOfAssertions() const
+            {
+                return assertionContext.sumOfAssertions();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachAssertions() const
+            {
+                return assertionContext.eachAssertions<Name>();
+            }
+
+            constexpr size_t sumOfSampleTests() const
+            {
+                return sampleTestEvents.sum();
+            }
+
+            template <EventCountable::EachName Name>
+            constexpr EventCountable::Each eachSampleTests() const
+            {
+                return sampleTestEvents.each<Name>();
+            }
 
         private:
-            constexpr SampledTestContext(
-                const EventCountable samples
-                //, const std::string failures
-            ) :
-                samples(samples) //,
-            // failures(failures)
+            constexpr SampledTestContext(const EventCountable sampleTestEvents, const TestContext assertionContext) :
+                sampleTestEvents(sampleTestEvents),
+                assertionContext(assertionContext)
             {
             }
 
-            EventCountable samples;
-            // std::string failures;
+            EventCountable sampleTestEvents;
+            TestContext assertionContext;
         };
     }
 

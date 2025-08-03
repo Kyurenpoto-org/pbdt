@@ -24,14 +24,14 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
     }
 
     template <size_t Idx>
-    using A = std::conjunction<
+    using Truth = std::conjunction<
         typename MutualExclusiveRequirements::template ConstituentA<
             typename MutualExclusiveRequirements::template A<Idx>>,
         std::negation<typename MutualExclusiveRequirements::template ConstituentB<
             typename MutualExclusiveRequirements::template A<Idx>>>>;
 
     template <size_t Idx>
-    using B = std::conjunction<
+    using Falsity = std::conjunction<
         std::negation<typename MutualExclusiveRequirements::template ConstituentA<
             typename MutualExclusiveRequirements::template B<Idx>>>,
         typename MutualExclusiveRequirements::template ConstituentB<
