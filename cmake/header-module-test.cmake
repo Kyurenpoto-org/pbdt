@@ -72,16 +72,18 @@ function(add_header_module_prop_suite)
     endif()
 
     function(add_suite SUITE_TYPE INNER_DEP)
-        add_executable(${SUITE_PROP}-${SUITE_TYPE} "src/${SUITE_PROP}-${SUITE_TYPE}.cpp")
+        if(NOT TARGET ${SUITE_PROP}-${SUITE_TYPE})
+            add_executable(${SUITE_PROP}-${SUITE_TYPE} "src/${SUITE_PROP}-${SUITE_TYPE}.cpp")
 
-        target_compile_features(
-            ${SUITE_PROP}-${SUITE_TYPE}
-            PRIVATE cxx_std_23
-        )
-        target_link_libraries(
-            ${SUITE_PROP}-${SUITE_TYPE}
-            PRIVATE ${INNER_DEP}
-        )
+            target_compile_features(
+                ${SUITE_PROP}-${SUITE_TYPE}
+                PRIVATE cxx_std_23
+            )
+            target_link_libraries(
+                ${SUITE_PROP}-${SUITE_TYPE}
+                PRIVATE ${INNER_DEP}
+            )
+        endif()
 
         if(SUITE_FIXTURES)
             foreach(fixture IN LISTS SUITE_FIXTURES)
