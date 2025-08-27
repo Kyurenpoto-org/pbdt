@@ -85,24 +85,47 @@ namespace
     };
 
     /**
-     * @brief Asserts two invariants for both truth set and falsity set.
+     * @brief Performs a compile-time proposition assertion.
      *
-     * @tparam Idx the index to be asserted.
+     * @tparam Idx
      */
     template <size_t Idx>
-    struct IndexedTypeAssertion
+    struct IndexedCompileTimePropositionAssertion
     {
         template <typename Validatable>
-        void operator()(const Validatable&) const
+        void operator()(const Validatable& validatable) const
         {
-            typeAssert<typename Validatable::template Truth<Idx>, typename Validatable::template Falsity<Idx>>();
+            compileTimePropositionAssert(validatable.template truth<Idx>(), validatable.template falsity<Idx>());
         }
 
     private:
-        template <typename Truth, typename Falsity>
-        void typeAssert() const
+        void compileTimePropositionAssert(const auto truth, const auto falsity) const
         {
-            static_assert(Truth::value && Falsity::value);
+            constexpr bool compileTimeTruth = truth();
+            constexpr bool compileTimeFalsity = falsity();
+            static_assert(compileTimeTruth && compileTimeFalsity);
+        }
+    };
+
+    /**
+     * @brief Performs a run-time proposition assertion.
+     *
+     * @tparam Idx
+     */
+    template <size_t Idx>
+    struct IndexedRunTimePropositionAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            dynamic_assert(validatable.template truth<Idx>() && validatable.template falsity<Idx>());
+        }
+
+        void runTimePropositionAssert(const auto truth, const auto falsity) const
+        {
+            const bool runTimeTruth = truth();
+            const bool runTimeFalsity = falsity();
+            dynamic_assert(runTimeTruth && runTimeFalsity);
         }
     };
 }
@@ -166,17 +189,34 @@ namespace
     };
 
     /**
-     * @brief Validates type requirements.
+     * @brief Validates compile-time proposition requirements.
      *
-     * @details Iterative validation with type assertion.
+     * @details Iterative validation with compile-time proposition assertion.
      *
-     * @tparam Validatable The type must provide size(), Truth<Idx>, Falsity<Idx> members.
+     * @tparam Validatable The type must provide size(), truth<Idx>(), and falsity<Idx>() members.
      *
-     * @see IterativevalidationBase
-     * @see IndexedTypeAssertion
+     * @see IterativeValidationBase
+     * @see IndexedCompileTimePropositionAssertion
      */
     template <typename Validatable>
-    struct TypeValidationBase : public IterativeValidationBase<Validatable, IndexedTypeAssertion>
+    struct CompileTimePropositionValidationBase :
+        public IterativeValidationBase<Validatable, IndexedCompileTimePropositionAssertion>
+    {
+    };
+
+    /**
+     * @brief Validates run-time proposition requirements.
+     *
+     * @details Iterative validation with run-time proposition assertion.
+     *
+     * @tparam Validatable The type must provide size(), truth<Idx>(), and falsity<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedRunTimePropositionAssertion
+     */
+    template <typename Validatable>
+    struct RunTimePropositionValidationBase :
+        public IterativeValidationBase<Validatable, IndexedRunTimePropositionAssertion>
     {
     };
 }

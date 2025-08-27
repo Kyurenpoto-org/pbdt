@@ -16,7 +16,8 @@
  * @tparam MutualExclusiveRequirements
  */
 template <typename MutualExclusiveRequirements>
-struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
+struct MutualExclusiveTypeValidation :
+    CompileTimePropositionValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
 {
     static constexpr size_t size()
     {
@@ -31,11 +32,29 @@ struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeVal
             typename MutualExclusiveRequirements::template A<Idx>>>>;
 
     template <size_t Idx>
+    constexpr auto truth() const
+    {
+        return []()
+        {
+            return Truth<Idx>::value;
+        };
+    }
+
+    template <size_t Idx>
     using Falsity = std::conjunction<
         std::negation<typename MutualExclusiveRequirements::template ConstituentA<
             typename MutualExclusiveRequirements::template B<Idx>>>,
         typename MutualExclusiveRequirements::template ConstituentB<
             typename MutualExclusiveRequirements::template B<Idx>>>;
+
+    template <size_t Idx>
+    constexpr auto falsity() const
+    {
+        return []()
+        {
+            return Falsity<Idx>::value;
+        };
+    }
 };
 
 #include "generators/types/callable-type.hpp"

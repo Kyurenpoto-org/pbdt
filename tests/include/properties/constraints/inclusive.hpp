@@ -16,7 +16,7 @@
  * @tparam InclusiveRequirements
  */
 template <typename InclusiveRequirements>
-struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<InclusiveRequirements>>
+struct InclusiveTypeValidation : CompileTimePropositionValidationBase<InclusiveTypeValidation<InclusiveRequirements>>
 {
     static constexpr size_t size()
     {
@@ -30,10 +30,28 @@ struct InclusiveTypeValidation : TypeValidationBase<InclusiveTypeValidation<Incl
         typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template Origin<Idx>>>;
 
     template <size_t Idx>
+    constexpr auto truth() const
+    {
+        return []()
+        {
+            return Truth<Idx>::value;
+        };
+    }
+
+    template <size_t Idx>
     using Falsity = std::disjunction<
         typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template Complement<Idx>>,
         std::negation<typename InclusiveRequirements::template BeIncluded<
             typename InclusiveRequirements::template Complement<Idx>>>>;
+
+    template <size_t Idx>
+    constexpr auto falsity() const
+    {
+        return []()
+        {
+            return Falsity<Idx>::value;
+        };
+    }
 };
 
 #include "generators/types/callable-type.hpp"
