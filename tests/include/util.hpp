@@ -39,9 +39,9 @@ namespace
     private:
         void compileTimeValueAssert(const auto a, const auto b) const
         {
-            const auto runTimeA = a();
-            const auto runTimeB = b();
-            dynamic_assert(runTimeA == runTimeB);
+            constexpr auto compileTimeA = a();
+            constexpr auto compileTimeB = b();
+            static_assert(compileTimeA == compileTimeB);
         }
     };
 
@@ -74,7 +74,7 @@ namespace
      * @tparam Idx the index to be asserted.
      */
     template <size_t Idx>
-    struct IndexedTwoWayAssertion
+    struct IndexedTwoWayValueAssertion
     {
         template <typename Validatable>
         void operator()(const Validatable& validatable) const
@@ -143,7 +143,7 @@ namespace
      * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
      *
      * @see IterativeValidationBase
-     * @see IndexedTwoWayAssertion
+     * @see IndexedRunTimeValueAssertion
      */
     template <typename Validatable>
     struct RunTimeValueValidationBase : public IterativeValidationBase<Validatable, IndexedRunTimeValueAssertion>
@@ -158,10 +158,10 @@ namespace
      * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
      *
      * @see IterativeValidationBase
-     * @see IndexedTwoWayAssertion
+     * @see IndexedTwoWayValueAssertion
      */
     template <typename Validatable>
-    struct ValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayAssertion>
+    struct TwoWayValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayValueAssertion>
     {
     };
 
