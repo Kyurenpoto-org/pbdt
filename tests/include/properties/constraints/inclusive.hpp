@@ -14,6 +14,9 @@
  * @brief A type validation structure that checks inclusive properties.
  *
  * @tparam InclusiveRequirements
+ *
+ * @see CompileTimePropositionValidationBase
+ * @see TypeProposition
  */
 template <typename InclusiveRequirements>
 struct InclusiveTypeValidation : CompileTimePropositionValidationBase<InclusiveTypeValidation<InclusiveRequirements>>
@@ -23,34 +26,24 @@ struct InclusiveTypeValidation : CompileTimePropositionValidationBase<InclusiveT
         return InclusiveRequirements::size();
     }
 
-    template <size_t Idx>
-    using Truth = std::disjunction<
-        std::negation<
-            typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template Origin<Idx>>>,
-        typename InclusiveRequirements::template BeIncluded<typename InclusiveRequirements::template Origin<Idx>>>;
+    template <typename T>
+    struct Inclusive :
+        TypeProposition<std::disjunction<
+            std::negation<typename InclusiveRequirements::template Includer<T>>,
+            typename InclusiveRequirements::template BeIncluded<T>>>
+    {
+    };
 
     template <size_t Idx>
     constexpr auto truth() const
     {
-        return []()
-        {
-            return Truth<Idx>::value;
-        };
+        return Inclusive<typename InclusiveRequirements::template Origin<Idx>>{};
     }
-
-    template <size_t Idx>
-    using Falsity = std::disjunction<
-        typename InclusiveRequirements::template Includer<typename InclusiveRequirements::template Complement<Idx>>,
-        std::negation<typename InclusiveRequirements::template BeIncluded<
-            typename InclusiveRequirements::template Complement<Idx>>>>;
 
     template <size_t Idx>
     constexpr auto falsity() const
     {
-        return []()
-        {
-            return Falsity<Idx>::value;
-        };
+        return Inclusive<typename InclusiveRequirements::template Complement<Idx>>{};
     }
 };
 

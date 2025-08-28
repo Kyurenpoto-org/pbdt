@@ -221,6 +221,23 @@ namespace
     };
 }
 
+namespace
+{
+    /**
+     * @brief Base structure for type proposition.
+     *
+     * @tparam T The type must provide 'value' member.
+     */
+    template <typename T>
+    struct TypeProposition
+    {
+        constexpr bool operator()() const
+        {
+            return T::value;
+        }
+    };
+}
+
 // https://gist.github.com/KoneLinx/d3601597248bed423daf1a7cf7bd9533
 namespace
 {

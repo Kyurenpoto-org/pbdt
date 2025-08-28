@@ -14,6 +14,9 @@
  * @brief A type validation structure that checks mutual exclusive properties.
  *
  * @tparam MutualExclusiveRequirements
+ *
+ * @see CompileTimePropositionValidationBase
+ * @see TypeProposition
  */
 template <typename MutualExclusiveRequirements>
 struct MutualExclusiveTypeValidation :
@@ -24,36 +27,28 @@ struct MutualExclusiveTypeValidation :
         return MutualExclusiveRequirements::size();
     }
 
-    template <size_t Idx>
-    using Truth = std::conjunction<
-        typename MutualExclusiveRequirements::template ConstituentA<
-            typename MutualExclusiveRequirements::template A<Idx>>,
-        std::negation<typename MutualExclusiveRequirements::template ConstituentB<
-            typename MutualExclusiveRequirements::template A<Idx>>>>;
+    template <typename T>
+    struct MutualExclusive :
+        TypeProposition<std::conjunction<
+            std::disjunction<
+                typename MutualExclusiveRequirements::template ConstituentA<T>,
+                typename MutualExclusiveRequirements::template ConstituentB<T>>,
+            std::negation<std::conjunction<
+                typename MutualExclusiveRequirements::template ConstituentA<T>,
+                typename MutualExclusiveRequirements::template ConstituentB<T>>>>>
+    {
+    };
 
     template <size_t Idx>
     constexpr auto truth() const
     {
-        return []()
-        {
-            return Truth<Idx>::value;
-        };
+        return MutualExclusive<typename MutualExclusiveRequirements::template A<Idx>>{};
     }
-
-    template <size_t Idx>
-    using Falsity = std::conjunction<
-        std::negation<typename MutualExclusiveRequirements::template ConstituentA<
-            typename MutualExclusiveRequirements::template B<Idx>>>,
-        typename MutualExclusiveRequirements::template ConstituentB<
-            typename MutualExclusiveRequirements::template B<Idx>>>;
 
     template <size_t Idx>
     constexpr auto falsity() const
     {
-        return []()
-        {
-            return Falsity<Idx>::value;
-        };
+        return MutualExclusive<typename MutualExclusiveRequirements::template B<Idx>>{};
     }
 };
 
