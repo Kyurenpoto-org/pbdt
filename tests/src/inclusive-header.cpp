@@ -6,13 +6,16 @@
 
 #include <array>
 
+#include "properties/classes/inclusive.hpp"
 #include "properties/constraints/inclusive.hpp"
 
 #include "exstd/callable-traits.hpp"
 #include "pbdt/constraints.hpp"
+#include "pbdt/log-info.hpp"
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-constraints.hpp"
+#include "wrapped-deps/for-test-context.hpp"
 
 void callableTarget()
 {
@@ -28,16 +31,26 @@ void callableProperty()
     acceptable.run();
 }
 
+void eventCountLogInfo()
+{
+    const InclusiveStringValidation<
+        InclusiveEventCountLogInfoRequirements<EventCountableWrap, pbdt::log_info::detail::EventCountLogInfo>>
+        acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
             "callable-target",
             "callable-property",
+            "event-count-log-info",
         },
         std::array{
             callableTarget,
             callableProperty,
+            eventCountLogInfo,
         }
     )
         .run(argc, argv);

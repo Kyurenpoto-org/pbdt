@@ -118,7 +118,7 @@ namespace
         template <typename Validatable>
         void operator()(const Validatable& validatable) const
         {
-            dynamic_assert(validatable.template truth<Idx>() && validatable.template falsity<Idx>());
+            runTimePropositionAssert(validatable.template truth<Idx>(), validatable.template falsity<Idx>());
         }
 
         void runTimePropositionAssert(const auto truth, const auto falsity) const
