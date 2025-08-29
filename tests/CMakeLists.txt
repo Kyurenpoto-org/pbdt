@@ -136,8 +136,8 @@ add_header_module_prop_suite(
     PROP inclusive
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS callable-target callable-property
-    FIXTURES callable-target-property-fixture
+    TARGETS callable-target callable-property event-count-log-info
+    FIXTURES callable-target-property-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
     PROP projective
