@@ -127,13 +127,13 @@ struct InclusiveEventCountLogInfoRequirements
     template <size_t Idx>
     std::string origin() const
     {
-        return eventCountable.each<0>(VALUES.template a<Idx>());
+        return eventCountable.template each<0>(VALUES.template a<Idx>());
     }
 
     template <size_t Idx>
     std::string complement() const
     {
-        return eventCountable.each<0>(VALUES.template a<Idx>().pass());
+        return eventCountable.template each<0>(VALUES.template a<Idx>().pass());
     }
 
     template <size_t Idx>
@@ -152,7 +152,7 @@ struct InclusiveEventCountLogInfoRequirements
     template <size_t Idx>
     std::string beIncluded() const
     {
-        return eventCountable.each<0>(VALUES.template a<Idx>());
+        return eventCountable.template each<0>(VALUES.template a<Idx>());
     }
 
 private:
