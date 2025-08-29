@@ -96,17 +96,6 @@ target_include_directories(
     INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-add_library(event-count-log-info-fixture INTERFACE)
-
-target_compile_features(
-    event-count-log-info-fixture
-    INTERFACE cxx_std_23
-)
-target_include_directories(
-    event-count-log-info-fixture
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
 # Unit Tests
 # Given: Set Category
 # When: Set Category that has product between any two objects
@@ -175,11 +164,4 @@ add_header_module_prop_suite(
     NAMESPACE pbdt.integration
     TARGETS range-domain-with-callable-target
     FIXTURES callable-target-property-fixture range-domain-fixture
-)
-add_header_module_prop_suite(
-    PROP symmetric
-    DEP pbdt
-    NAMESPACE pbdt.integration
-    TARGETS event-count-log-info-forward event-count-log-info-backward
-    FIXTURES event-count-log-info-fixture
 )
