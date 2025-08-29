@@ -15,8 +15,6 @@ module;
 
 export module pbdt.log_info;
 
-import pbdt.test_context;
-
 export {
 #include "pbdt/log-info.hpp"
 }

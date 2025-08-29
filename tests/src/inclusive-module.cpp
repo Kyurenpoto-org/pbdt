@@ -32,8 +32,9 @@ void callableProperty()
 
 void eventCountLogInfo()
 {
-    const InclusiveStringValidation<
-        InclusiveEventCountLogInfoRequirements<EventCountableWrap, pbdt::log_info::detail::EventCountLogInfo>>
+    const InclusiveStringValidation<InclusiveEventCountLogInfoRequirements<
+        EventCountableWrap,
+        pbdt::log_info::detail::EventCountLogInfo<pbdt::test_context::detail::EventCountable::Each>>>
         acceptable;
     acceptable.run();
 }

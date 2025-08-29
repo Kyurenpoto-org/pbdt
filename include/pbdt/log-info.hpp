@@ -13,12 +13,15 @@
 #include <string_view>
 #include <variant>
 
-#include "pbdt/test-context.hpp"
-
 #endif
 
 namespace pbdt::log_info::detail
 {
+    template <typename T>
+    concept LogInfo = requires(T x) {
+        { x } -> std::convertible_to<std::string>;
+    };
+
     template <auto>
     struct NonTypePlaceHolder
     {
@@ -184,10 +187,10 @@ namespace pbdt::log_info::detail
         static constexpr std::string_view FORMAT = "{} skipped";
     };
 
-    template <ColoredString::Color COLOR>
+    template <LogInfo EachInfo, ColoredString::Color COLOR>
     struct ColoredEach
     {
-        constexpr ColoredEach(const pbdt::test_context::detail::EventCountable::Each each) :
+        constexpr ColoredEach(const EachInfo each) :
             each{
                 each,
             }
@@ -205,21 +208,15 @@ namespace pbdt::log_info::detail
         }
 
     private:
-        pbdt::test_context::detail::EventCountable::Each each;
+        EachInfo each;
         EachFormatable<COLOR> formatable{};
     };
 
-    /*
-     * @todo EventCountable에 대한 의존성을 인터페이스에 대한 의존성으로 교체
-     * 대칭성이 아닌 다른 속성
-     * Each.toString()이 EvnetCountable.toString()에 포함
-     */
+    template <LogInfo EachInfo>
     struct EventCountLogInfo
     {
         constexpr EventCountLogInfo(
-            const pbdt::test_context::detail::EventCountable::Each passed,
-            const pbdt::test_context::detail::EventCountable::Each failed,
-            const pbdt::test_context::detail::EventCountable::Each skipped, const size_t total
+            const EachInfo passed, const EachInfo failed, const EachInfo skipped, const size_t total
         ) :
             passed(passed),
             failed(failed),
@@ -238,16 +235,16 @@ namespace pbdt::log_info::detail
 
     private:
         template <ColoredString::Color COLOR>
-        std::string coloredEach(const pbdt::test_context::detail::EventCountable::Each& each) const
+        std::string coloredEach(const EachInfo& each) const
         {
-            return ColoredEach<COLOR>{
+            return ColoredEach<EachInfo, COLOR>{
                 each,
             };
         }
 
-        pbdt::test_context::detail::EventCountable::Each passed;
-        pbdt::test_context::detail::EventCountable::Each failed;
-        pbdt::test_context::detail::EventCountable::Each skipped;
+        EachInfo passed;
+        EachInfo failed;
+        EachInfo skipped;
         size_t total;
     };
 }
