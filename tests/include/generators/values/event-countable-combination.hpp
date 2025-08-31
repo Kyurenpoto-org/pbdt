@@ -22,10 +22,10 @@ namespace Countable
             };
         }
 
-        constexpr EventCountable operator()(const EventCountable x) const
+        constexpr EventCountable operator()(EventCountable&& x) const
         {
             return std::visit(
-                [x](const auto event)
+                [&x](const auto event)
                 {
                     return event(x);
                 },
@@ -36,7 +36,7 @@ namespace Countable
     private:
         struct Pass
         {
-            constexpr EventCountable operator()(const EventCountable x) const
+            constexpr EventCountable operator()(const EventCountable& x) const
             {
                 return x.pass();
             }
@@ -44,7 +44,7 @@ namespace Countable
 
         struct Fail
         {
-            constexpr EventCountable operator()(const EventCountable x) const
+            constexpr EventCountable operator()(const EventCountable& x) const
             {
                 return x.fail();
             }
@@ -52,7 +52,7 @@ namespace Countable
 
         struct Skip
         {
-            constexpr EventCountable operator()(const EventCountable x) const
+            constexpr EventCountable operator()(const EventCountable& x) const
             {
                 return x.skip();
             }
