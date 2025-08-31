@@ -114,7 +114,6 @@ target_sources(
 	${CMAKE_CURRENT_SOURCE_DIR}/src/constraints.cppm
 	${CMAKE_CURRENT_SOURCE_DIR}/src/test-context.cppm
 	${CMAKE_CURRENT_SOURCE_DIR}/src/bdd.cppm
-	${CMAKE_CURRENT_SOURCE_DIR}/src/log-info.cppm
 )
 
 if(PBDT_BUILD_TESTS)
