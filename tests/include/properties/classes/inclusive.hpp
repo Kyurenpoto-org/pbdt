@@ -121,13 +121,13 @@ struct InclusiveEventCountableStringifyRequirements
     template <size_t Idx>
     std::string origin() const
     {
-        return eventCountable.template each<0>(VALUES.template a<Idx>());
+        return VALUES.template a<Idx>().template each<EventCountable::EachName::PASSED>();
     }
 
     template <size_t Idx>
     std::string complement() const
     {
-        return eventCountable.template each<0>(VALUES.template a<Idx>().pass());
+        return VALUES.template a<Idx>().pass().template each<EventCountable::EachName::PASSED>();
     }
 
     template <size_t Idx>
@@ -139,12 +139,11 @@ struct InclusiveEventCountableStringifyRequirements
     template <size_t Idx>
     std::string beIncluded() const
     {
-        return eventCountable.template each<0>(VALUES.template a<Idx>());
+        return VALUES.template a<Idx>().template each<EventCountable::EachName::PASSED>();
     }
 
 private:
     static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
-    static constexpr EventCountable eventCountable{};
 };

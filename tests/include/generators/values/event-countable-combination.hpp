@@ -7,9 +7,65 @@
 #pragma once
 
 #include <array>
+#include <variant>
 
 namespace Countable
 {
+    template <typename EventCountable>
+    struct EventContainer
+    {
+        template <size_t N>
+        static constexpr EventContainer prototype()
+        {
+            return EventContainer{
+                std::variant_alternative_t<N, std::variant<Pass, Fail, Skip>>{},
+            };
+        }
+
+        constexpr EventCountable operator()(const EventCountable x) const
+        {
+            return std::visit(
+                [x](const auto event)
+                {
+                    return event(x);
+                },
+                event
+            );
+        }
+
+    private:
+        struct Pass
+        {
+            constexpr EventCountable operator()(const EventCountable x) const
+            {
+                return x.pass();
+            }
+        };
+
+        struct Fail
+        {
+            constexpr EventCountable operator()(const EventCountable x) const
+            {
+                return x.fail();
+            }
+        };
+
+        struct Skip
+        {
+            constexpr EventCountable operator()(const EventCountable x) const
+            {
+                return x.skip();
+            }
+        };
+
+        constexpr EventContainer(std::variant<Pass, Fail, Skip>&& event) :
+            event(std::move(event))
+        {
+        }
+
+        std::variant<Pass, Fail, Skip> event;
+    };
+
     template <typename EventCountable, size_t... Ns>
     struct EventCountableDoubleValueCombination
     {
@@ -36,11 +92,11 @@ namespace Countable
         {
             if constexpr (Idx == 0)
             {
-                return eventCountable.prototype();
+                return EventCountable::prototype();
             }
             else
             {
-                return EventCountable::template op<opIndex<Idx>()>()(value<Idx - 1>());
+                return EventContainer<EventCountable>::template prototype<opIndex<Idx>()>()(value<Idx - 1>());
             }
         }
 
@@ -67,7 +123,6 @@ namespace Countable
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
         static constexpr std::array<size_t, COMBINATION_INDEX_LIMIT> NS_VALUE{ Ns... };
-        static constexpr EventCountable eventCountable{};
     };
 
     template <typename EventCountable, size_t... Ns>
@@ -99,11 +154,13 @@ namespace Countable
         {
             if constexpr (Idx == 0)
             {
-                return eventCountable.prototype();
+                return EventCountable::prototype();
             }
             else
             {
-                return EventCountable::template op<opIndexA<Idx, Drop>()>()(valueA<Idx - 1, Drop>());
+                return EventContainer<EventCountable>::template prototype<opIndexA<Idx, Drop>()>()(
+                    valueA<Idx - 1, Drop>()
+                );
             }
         }
 
@@ -112,11 +169,13 @@ namespace Countable
         {
             if constexpr (Idx == 0)
             {
-                return eventCountable.prototype();
+                return EventCountable::prototype();
             }
             else
             {
-                return EventCountable::template op<opIndexB<Idx, Drop>()>()(valueB<Idx - 1, Drop>());
+                return EventContainer<EventCountable>::template prototype<opIndexB<Idx, Drop>()>()(
+                    valueB<Idx - 1, Drop>()
+                );
             }
         }
 
@@ -145,6 +204,5 @@ namespace Countable
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
         static constexpr std::array<size_t, COMBINATION_INDEX_LIMIT> NS_VALUE{ Ns... };
-        static constexpr EventCountable eventCountable{};
     };
 };

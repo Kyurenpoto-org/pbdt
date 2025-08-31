@@ -13,7 +13,6 @@
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-bdd.hpp"
-#include "wrapped-deps/for-test-context.hpp"
 
 void runnableScenarioWithGivenComponent()
 {
@@ -38,7 +37,8 @@ void runnableScenarioWithWhenComponent()
 
 void eventCountableEach()
 {
-    const DoubleProjectiveRuntimeValueValidation<ProjectiveEventCountableEachRequirements<EventCountableWrap>>
+    const DoubleProjectiveRuntimeValueValidation<
+        ProjectiveEventCountableEachRequirements<pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
 }

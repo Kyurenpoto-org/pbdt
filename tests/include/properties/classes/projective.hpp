@@ -290,9 +290,9 @@ struct ProjectiveEventCountableEachRequirements
     auto morph(Dependencies&& dependencies, Value&& value) const
     {
         return std::array{
-            static_cast<std::string>(EventCountable::template each<0>(dependencies[0] + value)),
-            static_cast<std::string>(EventCountable::template each<1>(dependencies[1] + value)),
-            static_cast<std::string>(EventCountable::template each<2>(dependencies[2] + value)),
+            static_cast<std::string>((dependencies[0] + value).template each<EventCountable::EachName::PASSED>()),
+            static_cast<std::string>((dependencies[1] + value).template each<EventCountable::EachName::FAILED>()),
+            static_cast<std::string>((dependencies[2] + value).template each<EventCountable::EachName::SKIPPED>()),
         };
     }
 

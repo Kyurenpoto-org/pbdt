@@ -14,7 +14,6 @@
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-constraints.hpp"
-#include "wrapped-deps/for-test-context.hpp"
 
 void callableTarget()
 {
@@ -32,7 +31,9 @@ void callableProperty()
 
 void eventCountable()
 {
-    const InclusiveStringValidation<InclusiveEventCountableStringifyRequirements<EventCountableWrap>> acceptable;
+    const InclusiveStringValidation<
+        InclusiveEventCountableStringifyRequirements<pbdt::test_context::detail::EventCountable>>
+        acceptable;
     acceptable.run();
 }
 
