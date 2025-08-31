@@ -30,12 +30,9 @@ void callableProperty()
     acceptable.run();
 }
 
-void eventCountLogInfo()
+void eventCountable()
 {
-    const InclusiveStringValidation<InclusiveEventCountLogInfoRequirements<
-        EventCountableWrap,
-        pbdt::log_info::detail::EventCountLogInfo<pbdt::test_context::detail::EventCountable::Each>>>
-        acceptable;
+    const InclusiveStringValidation<InclusiveEventCountableStringifyRequirements<EventCountableWrap>> acceptable;
     acceptable.run();
 }
 
@@ -45,12 +42,12 @@ int main(int argc, const char* const* argv)
         std::array{
             "callable-target",
             "callable-property",
-            "event-count-log-info",
+            "event-countable-stringify",
         },
         std::array{
             callableTarget,
             callableProperty,
-            eventCountLogInfo,
+            eventCountable,
         }
     )
         .run(argc, argv);

@@ -41,7 +41,7 @@ struct InclusiveStringValidation : RunTimePropositionValidationBase<InclusiveStr
 
         bool operator()() const
         {
-            return !comparable.includerContains(partial) || comparable.beIncludedContains(partial);
+            return comparable.contains(partial);
         }
 
     private:
@@ -69,14 +69,9 @@ struct InclusiveStringValidation : RunTimePropositionValidationBase<InclusiveStr
             };
         }
 
-        bool includerContains(std::string_view partial) const
+        bool contains(std::string_view partial) const
         {
-            return includer.contains(partial);
-        }
-
-        bool beIncludedContains(std::string_view partial) const
-        {
-            return beIncluded.contains(partial);
+            return !includer.contains(partial) || beIncluded.contains(partial);
         }
 
     private:
@@ -111,13 +106,12 @@ private:
 #include "generators/values/event-countable-combination.hpp"
 
 /**
- * @brief A structure that defines inclusive requirements for EventCountableLogInfo.
+ * @brief A structure that defines inclusive requirements for EventCountable.
  *
  * @tparam EventCountable
- * @tparam EventCountableLogInfo
  */
-template <typename EventCountable, typename EventCountLogInfo>
-struct InclusiveEventCountLogInfoRequirements
+template <typename EventCountable>
+struct InclusiveEventCountableStringifyRequirements
 {
     static constexpr size_t size()
     {
@@ -139,14 +133,7 @@ struct InclusiveEventCountLogInfoRequirements
     template <size_t Idx>
     std::string includer() const
     {
-        constexpr auto x = VALUES.template a<Idx>();
-
-        return EventCountLogInfo{
-            eventCountable.template each<0>(x),
-            eventCountable.template each<1>(x),
-            eventCountable.template each<2>(x),
-            x.sum(),
-        };
+        return VALUES.template a<Idx>();
     }
 
     template <size_t Idx>
