@@ -158,8 +158,19 @@ namespace pbdt::test_context
 
                 return Each{
                     amount,
-                    sum() == 0 ? 0 : amount * 100 / sum(),
+                    rate(amount),
                 };
+            }
+
+            operator std::string() const
+            {
+                return std::format(
+                    "\033[32m{:>5} ({:>3}%) passed\033[0m, "
+                    "\033[31m{:>5} ({:>3}%) failed\033[0m, "
+                    "\033[33m{:>5} ({:>3}%) skipped\033[0m"
+                    " | {}",
+                    passed, rate(passed), failed, rate(failed), skipped, rate(skipped), sum()
+                );
             }
 
         private:
@@ -168,6 +179,11 @@ namespace pbdt::test_context
                 failed(failed),
                 skipped(skipped)
             {
+            }
+
+            constexpr size_t rate(const size_t amount) const
+            {
+                return sum() == 0 ? 0 : amount * 100 / sum();
             }
 
             size_t passed;
