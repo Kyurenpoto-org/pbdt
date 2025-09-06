@@ -125,7 +125,7 @@ add_header_module_prop_suite(
     PROP inclusive
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS callable-target callable-property event-countable-stringify-old event-countable-stringify
+    TARGETS callable-target callable-property event-countable-stringify
     FIXTURES callable-target-property-fixture event-countable-fixture
 )
 add_header_module_prop_suite(

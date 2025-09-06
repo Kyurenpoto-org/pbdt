@@ -29,14 +29,6 @@ void callableProperty()
     acceptable.run();
 }
 
-void eventCountableOld()
-{
-    const InclusiveStringValidation<
-        InclusiveEventCountableStringifyRequirements<pbdt::test_context::detail::EventCountable>>
-        acceptable;
-    acceptable.run();
-}
-
 void eventCountable()
 {
     const InclusiveStringPiecesValidation<
@@ -51,13 +43,11 @@ int main(int argc, const char* const* argv)
         std::array{
             "callable-target",
             "callable-property",
-            "event-countable-stringify-old",
             "event-countable-stringify",
         },
         std::array{
             callableTarget,
             callableProperty,
-            eventCountableOld,
             eventCountable,
         }
     )
