@@ -14,28 +14,42 @@
  * @brief A type validation structure that checks mutual exclusive properties.
  *
  * @tparam MutualExclusiveRequirements
+ *
+ * @see CompileTimePropositionValidationBase
+ * @see TypeProposition
  */
 template <typename MutualExclusiveRequirements>
-struct MutualExclusiveTypeValidation : TypeValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
+struct MutualExclusiveTypeValidation :
+    CompileTimePropositionValidationBase<MutualExclusiveTypeValidation<MutualExclusiveRequirements>>
 {
     static constexpr size_t size()
     {
         return MutualExclusiveRequirements::size();
     }
 
-    template <size_t Idx>
-    using Truth = std::conjunction<
-        typename MutualExclusiveRequirements::template ConstituentA<
-            typename MutualExclusiveRequirements::template A<Idx>>,
-        std::negation<typename MutualExclusiveRequirements::template ConstituentB<
-            typename MutualExclusiveRequirements::template A<Idx>>>>;
+    template <typename T>
+    struct MutualExclusive :
+        TypeProposition<std::conjunction<
+            std::disjunction<
+                typename MutualExclusiveRequirements::template ConstituentA<T>,
+                typename MutualExclusiveRequirements::template ConstituentB<T>>,
+            std::negation<std::conjunction<
+                typename MutualExclusiveRequirements::template ConstituentA<T>,
+                typename MutualExclusiveRequirements::template ConstituentB<T>>>>>
+    {
+    };
 
     template <size_t Idx>
-    using Falsity = std::conjunction<
-        std::negation<typename MutualExclusiveRequirements::template ConstituentA<
-            typename MutualExclusiveRequirements::template B<Idx>>>,
-        typename MutualExclusiveRequirements::template ConstituentB<
-            typename MutualExclusiveRequirements::template B<Idx>>>;
+    constexpr auto truth() const
+    {
+        return MutualExclusive<typename MutualExclusiveRequirements::template A<Idx>>{};
+    }
+
+    template <size_t Idx>
+    constexpr auto falsity() const
+    {
+        return MutualExclusive<typename MutualExclusiveRequirements::template B<Idx>>{};
+    }
 };
 
 #include "generators/types/callable-type.hpp"

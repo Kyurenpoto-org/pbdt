@@ -39,9 +39,9 @@ namespace
     private:
         void compileTimeValueAssert(const auto a, const auto b) const
         {
-            const auto runTimeA = a();
-            const auto runTimeB = b();
-            dynamic_assert(runTimeA == runTimeB);
+            constexpr auto compileTimeA = a();
+            constexpr auto compileTimeB = b();
+            static_assert(compileTimeA == compileTimeB);
         }
     };
 
@@ -74,7 +74,7 @@ namespace
      * @tparam Idx the index to be asserted.
      */
     template <size_t Idx>
-    struct IndexedTwoWayAssertion
+    struct IndexedTwoWayValueAssertion
     {
         template <typename Validatable>
         void operator()(const Validatable& validatable) const
@@ -85,24 +85,47 @@ namespace
     };
 
     /**
-     * @brief Asserts two invariants for both truth set and falsity set.
+     * @brief Performs a compile-time proposition assertion.
      *
-     * @tparam Idx the index to be asserted.
+     * @tparam Idx
      */
     template <size_t Idx>
-    struct IndexedTypeAssertion
+    struct IndexedCompileTimePropositionAssertion
     {
         template <typename Validatable>
-        void operator()(const Validatable&) const
+        void operator()(const Validatable& validatable) const
         {
-            typeAssert<typename Validatable::template Truth<Idx>, typename Validatable::template Falsity<Idx>>();
+            compileTimePropositionAssert(validatable.template truth<Idx>(), validatable.template falsity<Idx>());
         }
 
     private:
-        template <typename Truth, typename Falsity>
-        void typeAssert() const
+        void compileTimePropositionAssert(const auto truth, const auto falsity) const
         {
-            static_assert(Truth::value && Falsity::value);
+            constexpr bool compileTimeTruth = truth();
+            constexpr bool compileTimeFalsity = falsity();
+            static_assert(compileTimeTruth && compileTimeFalsity);
+        }
+    };
+
+    /**
+     * @brief Performs a run-time proposition assertion.
+     *
+     * @tparam Idx
+     */
+    template <size_t Idx>
+    struct IndexedRunTimePropositionAssertion
+    {
+        template <typename Validatable>
+        void operator()(const Validatable& validatable) const
+        {
+            runTimePropositionAssert(validatable.template truth<Idx>(), validatable.template falsity<Idx>());
+        }
+
+        void runTimePropositionAssert(const auto truth, const auto falsity) const
+        {
+            const bool runTimeTruth = truth();
+            const bool runTimeFalsity = falsity();
+            dynamic_assert(runTimeTruth && runTimeFalsity);
         }
     };
 }
@@ -143,7 +166,7 @@ namespace
      * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
      *
      * @see IterativeValidationBase
-     * @see IndexedTwoWayAssertion
+     * @see IndexedRunTimeValueAssertion
      */
     template <typename Validatable>
     struct RunTimeValueValidationBase : public IterativeValidationBase<Validatable, IndexedRunTimeValueAssertion>
@@ -158,26 +181,60 @@ namespace
      * @tparam Validatable The type must provide size(), a<Idx>(), and b<Idx>() members.
      *
      * @see IterativeValidationBase
-     * @see IndexedTwoWayAssertion
+     * @see IndexedTwoWayValueAssertion
      */
     template <typename Validatable>
-    struct ValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayAssertion>
+    struct TwoWayValueValidationBase : public IterativeValidationBase<Validatable, IndexedTwoWayValueAssertion>
     {
     };
 
     /**
-     * @brief Validates type requirements.
+     * @brief Validates compile-time proposition requirements.
      *
-     * @details Iterative validation with type assertion.
+     * @details Iterative validation with compile-time proposition assertion.
      *
-     * @tparam Validatable The type must provide size(), Truth<Idx>, Falsity<Idx> members.
+     * @tparam Validatable The type must provide size(), truth<Idx>(), and falsity<Idx>() members.
      *
-     * @see IterativevalidationBase
-     * @see IndexedTypeAssertion
+     * @see IterativeValidationBase
+     * @see IndexedCompileTimePropositionAssertion
      */
     template <typename Validatable>
-    struct TypeValidationBase : public IterativeValidationBase<Validatable, IndexedTypeAssertion>
+    struct CompileTimePropositionValidationBase :
+        public IterativeValidationBase<Validatable, IndexedCompileTimePropositionAssertion>
     {
+    };
+
+    /**
+     * @brief Validates run-time proposition requirements.
+     *
+     * @details Iterative validation with run-time proposition assertion.
+     *
+     * @tparam Validatable The type must provide size(), truth<Idx>(), and falsity<Idx>() members.
+     *
+     * @see IterativeValidationBase
+     * @see IndexedRunTimePropositionAssertion
+     */
+    template <typename Validatable>
+    struct RunTimePropositionValidationBase :
+        public IterativeValidationBase<Validatable, IndexedRunTimePropositionAssertion>
+    {
+    };
+}
+
+namespace
+{
+    /**
+     * @brief Base structure for type proposition.
+     *
+     * @tparam T The type must provide 'value' member.
+     */
+    template <typename T>
+    struct TypeProposition
+    {
+        constexpr bool operator()() const
+        {
+            return T::value;
+        }
     };
 }
 

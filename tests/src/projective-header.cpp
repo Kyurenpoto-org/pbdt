@@ -9,11 +9,9 @@
 #include "properties/classes/projective.hpp"
 
 #include "pbdt/bdd.hpp"
-#include "pbdt/test-context.hpp"
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-bdd.hpp"
-#include "wrapped-deps/for-test-context.hpp"
 
 void runnableScenarioWithGivenComponent()
 {
@@ -36,25 +34,16 @@ void runnableScenarioWithWhenComponent()
     acceptableR.run();
 }
 
-void eventCountableEach()
-{
-    const DoubleProjectiveRuntimeValueValidation<ProjectiveEventCountableEachRequirements<EventCountableWrap>>
-        acceptable;
-    acceptable.run();
-}
-
 int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
             "runnable-scenario-with-given-component",
             "runnable-scenario-with-when-component",
-            "event-countable-each",
         },
         std::array{
             runnableScenarioWithGivenComponent,
             runnableScenarioWithWhenComponent,
-            eventCountableEach,
         }
     )
         .run(argc, argv);
