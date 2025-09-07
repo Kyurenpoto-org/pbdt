@@ -22,35 +22,6 @@ namespace pbdt::test_context
 {
     namespace detail
     {
-        constexpr std::string stringify(size_t value)
-        {
-            if (value == 0)
-            {
-                return "0";
-            }
-
-            std::string result;
-            constexpr std::string_view lookup[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-            while (value != 0)
-            {
-                result = std::string(lookup[value % 10]) + result;
-                value /= 10;
-            }
-
-            return result;
-        }
-
-        struct StringifiedLocation
-        {
-            constexpr operator std::string() const
-            {
-                return std::string(location.file_name()) + "(" + stringify(location.line()) + ","
-                     + stringify(location.column()) + ")\n";
-            }
-
-            const std::source_location location;
-        };
-
         struct EventCountable
         {
             static constexpr EventCountable prototype()
@@ -106,60 +77,6 @@ namespace pbdt::test_context
             constexpr size_t sum() const
             {
                 return passed + failed + skipped;
-            }
-
-            enum class EachName
-            {
-                PASSED,
-                FAILED,
-                SKIPPED,
-            };
-
-            struct Each
-            {
-                constexpr Each(const size_t amount, const size_t rate) :
-                    amount{
-                        amount,
-                    },
-                    rate{
-                        rate,
-                    }
-                {
-                }
-
-                operator std::string() const
-                {
-                    return std::format("{:>5} ({:>3}%)", amount, rate);
-                }
-
-            private:
-                const size_t amount;
-                const size_t rate;
-            };
-
-            template <EachName Name>
-            constexpr Each each() const
-            {
-                const size_t amount = [this]()
-                {
-                    if constexpr (Name == EachName::PASSED)
-                    {
-                        return passed;
-                    }
-                    else if constexpr (Name == EachName::FAILED)
-                    {
-                        return failed;
-                    }
-                    else
-                    {
-                        return skipped;
-                    }
-                }();
-
-                return Each{
-                    amount,
-                    rate(amount),
-                };
             }
 
             operator std::string() const
@@ -238,17 +155,6 @@ namespace pbdt::test_context
                 return !assertionEvents.someFailed();
             }
 
-            constexpr size_t sumOfAssertions() const
-            {
-                return assertionEvents.sum();
-            }
-
-            template <EventCountable::EachName Name>
-            constexpr EventCountable::Each eachAssertions() const
-            {
-                return assertionEvents.each<Name>();
-            }
-
             // constexpr std::string description() const
             //{
             //     if (passable())
@@ -321,28 +227,6 @@ namespace pbdt::test_context
             constexpr bool passable() const
             {
                 return !sampleTestEvents.someFailed();
-            }
-
-            constexpr size_t sumOfAssertions() const
-            {
-                return assertionContext.sumOfAssertions();
-            }
-
-            template <EventCountable::EachName Name>
-            constexpr EventCountable::Each eachAssertions() const
-            {
-                return assertionContext.eachAssertions<Name>();
-            }
-
-            constexpr size_t sumOfSampleTests() const
-            {
-                return sampleTestEvents.sum();
-            }
-
-            template <EventCountable::EachName Name>
-            constexpr EventCountable::Each eachSampleTests() const
-            {
-                return sampleTestEvents.each<Name>();
             }
 
         private:
