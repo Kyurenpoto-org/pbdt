@@ -7,9 +7,98 @@
 #pragma once
 
 #include <array>
+#include <ranges>
+#include <vector>
 
 namespace Countable
 {
+    template <size_t INDEX, size_t... INDEX_LIMITS>
+    struct MultiIndex
+    {
+        static constexpr size_t DIM = sizeof...(INDEX_LIMITS);
+
+        consteval std::array<size_t, DIM> value() const
+        {
+            std::array<size_t, DIM> arr{};
+            size_t idx = INDEX;
+            for (size_t i = 0; i < DIM; ++i)
+            {
+                arr[i] = idx % LIMITS[i];
+                idx /= LIMITS[i];
+            }
+
+            return arr;
+        }
+
+    private:
+        static constexpr std::array<size_t, DIM> LIMITS{ INDEX_LIMITS... };
+    };
+
+    /**
+     * @brief Generates a sequence of EventCountable values based on the provided indice in compile-time.
+     *
+     * @tparam Range
+     */
+    template <std::ranges::input_range Range>
+    struct EventCountableSequence
+    {
+        consteval EventCountableSequence(Range indice) :
+            indice(indice)
+        {
+        }
+
+        template <typename EventCountable, size_t N>
+        consteval std::array<EventCountable, N> value() const
+        {
+            return toArr<EventCountable>(generate<EventCountable>(), std::make_index_sequence<N>{});
+        }
+
+    private:
+        template <typename EventCountable>
+        consteval std::vector<EventCountable> generate() const
+        {
+            std::vector<EventCountable> vec;
+            vec.reserve(indice.size());
+            vec.push_back(EventCountable::prototype());
+
+            static constexpr std::array<EventCountable (EventCountable::*)() const, 3> EVENT_METHODS{
+                &EventCountable::pass,
+                &EventCountable::fail,
+                &EventCountable::skip,
+            };
+
+            for (size_t i = 0; i < indice.size() - 1; ++i)
+            {
+                vec.push_back((vec[i].*EVENT_METHODS[indice[i]])());
+            }
+
+            return vec;
+        }
+
+        template <typename EventCountable, size_t... INDICE>
+        consteval std::array<EventCountable, sizeof...(INDICE)>
+        toArr(std::vector<EventCountable> x, std::index_sequence<INDICE...>) const
+        {
+            return { x[INDICE]... };
+        }
+
+        Range indice;
+    };
+
+    template <std::ranges::input_range Range>
+    EventCountableSequence(Range) -> EventCountableSequence<Range>;
+
+    /**
+     * @brief Generates combinations of two EventCountable values for each index.
+     *
+     * @details Each pair selected from same EventCountable sequence.
+     *
+     * @tparam EventCountable
+     * @tparam Ns
+     *
+     * @see MultiIndex
+     * @see EventCountableSequence
+     */
     template <typename EventCountable, size_t... Ns>
     struct EventCountableDoubleValueCombination
     {
@@ -21,55 +110,45 @@ namespace Countable
         template <size_t Idx>
         constexpr auto a() const
         {
-            return value<opCountForA<Idx>()>();
+            return SEQUENCE[INDICE[Idx][0]];
         }
 
         template <size_t Idx>
         constexpr auto b() const
         {
-            return value<opCountForB<Idx>()>();
+            return SEQUENCE[INDICE[Idx][1]];
         }
 
     private:
-        template <size_t Idx>
-        constexpr auto value() const
-        {
-            if constexpr (Idx == 0)
-            {
-                return eventCountable.prototype();
-            }
-            else
-            {
-                return EventCountable::template op<opIndex<Idx>()>()(value<Idx - 1>());
-            }
-        }
-
-        template <size_t Idx>
-        static consteval size_t opCountForA()
-        {
-            return NS_VALUE[Idx] % COMBINATION_INDEX_LIMIT;
-        }
-
-        template <size_t Idx>
-        static consteval size_t opCountForB()
-        {
-            return NS_VALUE[Idx] / COMBINATION_INDEX_LIMIT % COMBINATION_INDEX_LIMIT;
-        }
-
-        template <size_t Idx>
-        static consteval size_t opIndex()
-        {
-            return NS_VALUE[Idx - 1] / COMBINATION_DOUBLE_INDEX_LIMIT % OP_VARIETY_LIMIT;
-        }
-
         static constexpr size_t COMBINATION_INDEX_LIMIT = sizeof...(Ns);
-        static constexpr size_t COMBINATION_DOUBLE_INDEX_LIMIT = COMBINATION_INDEX_LIMIT * COMBINATION_INDEX_LIMIT;
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
-        static constexpr std::array<size_t, COMBINATION_INDEX_LIMIT> NS_VALUE{ Ns... };
-        static constexpr EventCountable eventCountable{};
+        static constexpr auto INDICE = std::array{
+            (MultiIndex<Ns, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT>{}.value())...
+        };
+        static constexpr auto SEQUENCE = EventCountableSequence{
+            INDICE
+            | std::views::transform(
+                [](const auto& x)
+                {
+                    return x[2];
+                }
+            )
+        }.template value<EventCountable, COMBINATION_INDEX_LIMIT>();
     };
 
+    /**
+     * @brief Generates combinations of two EventCountable arrays for each index.
+     *
+     * @details Each pair selected from different EventCountable sequence.
+     * Each element in the array is generated by dropping one operation from three operations.
+     *
+     * @tparam EventCountable
+     * @tparam Ns
+     *
+     * @see MultiIndex
+     * @see EventCountableSequence
+     */
     template <typename EventCountable, size_t... Ns>
     struct EventCountableSingleDropCombination
     {
@@ -77,9 +156,9 @@ namespace Countable
         constexpr auto a() const
         {
             return std::array{
-                valueA<opCount<Idx>(), 0>(),
-                valueA<opCount<Idx>(), 1>(),
-                valueA<opCount<Idx>(), 2>(),
+                SEQUENCES[0][0][INDICE[Idx][0]],
+                SEQUENCES[0][1][INDICE[Idx][0]],
+                SEQUENCES[0][2][INDICE[Idx][0]],
             };
         }
 
@@ -87,64 +166,84 @@ namespace Countable
         constexpr auto b() const
         {
             return std::array{
-                valueB<opCount<Idx>(), 0>(),
-                valueB<opCount<Idx>(), 1>(),
-                valueB<opCount<Idx>(), 2>(),
+                SEQUENCES[1][0][INDICE[Idx][0]],
+                SEQUENCES[1][1][INDICE[Idx][0]],
+                SEQUENCES[1][2][INDICE[Idx][0]],
             };
         }
 
     private:
-        template <size_t Idx, size_t Drop>
-        constexpr auto valueA() const
-        {
-            if constexpr (Idx == 0)
-            {
-                return eventCountable.prototype();
-            }
-            else
-            {
-                return EventCountable::template op<opIndexA<Idx, Drop>()>()(valueA<Idx - 1, Drop>());
-            }
-        }
-
-        template <size_t Idx, size_t Drop>
-        constexpr auto valueB() const
-        {
-            if constexpr (Idx == 0)
-            {
-                return eventCountable.prototype();
-            }
-            else
-            {
-                return EventCountable::template op<opIndexB<Idx, Drop>()>()(valueB<Idx - 1, Drop>());
-            }
-        }
-
-        template <size_t Idx>
-        static consteval size_t opCount()
-        {
-            return NS_VALUE[Idx] % COMBINATION_INDEX_LIMIT;
-        }
-
-        template <size_t Idx, size_t Drop>
-        static consteval size_t opIndexA()
-        {
-            return (NS_VALUE[Idx - 1] / COMBINATION_INDEX_LIMIT % (OP_VARIETY_LIMIT - 1) + Drop + 1) % OP_VARIETY_LIMIT;
-        }
-
-        template <size_t Idx, size_t Drop>
-        static consteval size_t opIndexB()
-        {
-            return (NS_VALUE[Idx - 1] / COMBINATION_INDEX_LIMIT / (OP_VARIETY_LIMIT - 1) % (OP_VARIETY_LIMIT - 1) + Drop
-                    + 1)
-                 % OP_VARIETY_LIMIT;
-        }
-
         static constexpr size_t COMBINATION_INDEX_LIMIT = sizeof...(Ns);
-        static constexpr size_t COMBINATION_DOUBLE_INDEX_LIMIT = COMBINATION_INDEX_LIMIT * COMBINATION_INDEX_LIMIT;
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
-        static constexpr std::array<size_t, COMBINATION_INDEX_LIMIT> NS_VALUE{ Ns... };
-        static constexpr EventCountable eventCountable{};
+        static constexpr auto INDICE = std::array{
+            (MultiIndex<Ns, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT - 1, OP_VARIETY_LIMIT - 1>{}.value())...
+        };
+        static constexpr auto SEQUENCES = std::array{
+            std::array{
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return (x[1] + 1) % OP_VARIETY_LIMIT;
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return (x[1] + 2) % OP_VARIETY_LIMIT;
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return x[1];
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+            },
+            std::array{
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return (x[2] + 1) % OP_VARIETY_LIMIT;
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return (x[2] + 2) % OP_VARIETY_LIMIT;
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+                EventCountableSequence{
+                    INDICE
+                        | std::views::transform(
+                            [](const auto& x)
+                            {
+                                return x[2];
+                            }
+                        ),
+                }
+                    .template value<EventCountable, COMBINATION_INDEX_LIMIT>(),
+            },
+        };
     };
 };

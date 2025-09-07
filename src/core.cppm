@@ -14,5 +14,4 @@ import exstd;
 
 export import pbdt.bdd;
 export import pbdt.constraints;
-export import pbdt.log_info;
 export import pbdt.test_context;

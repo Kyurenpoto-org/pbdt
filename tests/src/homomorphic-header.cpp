@@ -13,7 +13,6 @@
 
 #include "suite-runner.hpp"
 #include "wrapped-deps/for-bdd.hpp"
-#include "wrapped-deps/for-test-context.hpp"
 
 void runnableScenarioWithThenComponent()
 {
@@ -24,14 +23,16 @@ void runnableScenarioWithThenComponent()
 
 void eventCountableSumWithAccumulate()
 {
-    const HomomorphicValueValidation<HomomorphicEventCountableSumWithAccumulateRequirements<EventCountableWrap>>
+    const HomomorphicValueValidation<
+        HomomorphicEventCountableSumWithAccumulateRequirements<pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
 }
 
 void eventCountableSomeFailedWithAccumulate()
 {
-    const HomomorphicValueValidation<HomomorphicEventCountableSomeFailedWithAccumulateRequirements<EventCountableWrap>>
+    const HomomorphicValueValidation<
+        HomomorphicEventCountableSomeFailedWithAccumulateRequirements<pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
 }

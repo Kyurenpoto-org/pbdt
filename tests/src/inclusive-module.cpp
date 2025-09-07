@@ -6,6 +6,7 @@
 
 #include <array>
 
+#include "properties/classes/inclusive.hpp"
 #include "properties/constraints/inclusive.hpp"
 
 import exstd;
@@ -28,16 +29,26 @@ void callableProperty()
     acceptable.run();
 }
 
+void eventCountable()
+{
+    const InclusiveStringPiecesValidation<
+        InclusiveStringifiedEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
+        acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
             "callable-target",
             "callable-property",
+            "event-countable-stringify",
         },
         std::array{
             callableTarget,
             callableProperty,
+            eventCountable,
         }
     )
         .run(argc, argv);

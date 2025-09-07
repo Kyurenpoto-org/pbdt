@@ -16,7 +16,7 @@
  */
 template <typename ToComparable, typename AssociativeRequirements>
 struct AssociativeValueValidation :
-    ValueValidationBase<AssociativeValueValidation<ToComparable, AssociativeRequirements>>
+    TwoWayValueValidationBase<AssociativeValueValidation<ToComparable, AssociativeRequirements>>
 {
     static constexpr size_t size()
     {
