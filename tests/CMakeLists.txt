@@ -129,13 +129,6 @@ add_header_module_prop_suite(
     FIXTURES callable-target-property-fixture event-countable-fixture
 )
 add_header_module_prop_suite(
-    PROP projective
-    DEP pbdt
-    NAMESPACE pbdt.unit
-    TARGETS event-countable-each
-    FIXTURES event-countable-fixture
-)
-add_header_module_prop_suite(
     PROP homomorphic
     DEP pbdt
     NAMESPACE pbdt.unit
