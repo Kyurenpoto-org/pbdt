@@ -31,7 +31,7 @@ namespace pbdt::test_context
         struct EventCountable
         {
             /**
-             * @brief Creates a prototype EventCountable with zero counts.
+             * @brief Construct a prototype EventCountable with zero counts.
              *
              * @return constexpr EventCountable
              */
@@ -45,7 +45,7 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Counts a passed event.
+             * @brief Count a passed event.
              *
              * @return constexpr EventCountable
              */
@@ -59,7 +59,7 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Counts a failed event.
+             * @brief Count a failed event.
              *
              * @return constexpr EventCountable
              */
@@ -73,7 +73,7 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Counts a skipped event.
+             * @brief Count a skipped event.
              *
              * @return constexpr EventCountable
              */
@@ -87,7 +87,7 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Accumulates another EventCountable into this one.
+             * @brief Accumulate another EventCountable into this one.
              *
              * @param other
              * @return constexpr EventCountable
@@ -102,7 +102,9 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Checks if there are any failed events.
+             * @brief Check if there are any failed events.
+             *
+             * @details This must be satisfied with homomorphic property.
              *
              * @return constexpr bool
              */
@@ -114,6 +116,8 @@ namespace pbdt::test_context
             /**
              * @brief Compute the total number of events.
              *
+             * @details This must be satisfied with homomorphic property.
+             *
              * @return constexpr size_t
              */
             constexpr size_t sum() const
@@ -122,7 +126,7 @@ namespace pbdt::test_context
             }
 
             /**
-             * @brief Formats the event counts as a string.
+             * @brief Format the event counts as a string.
              *
              * @details The format includes the number and percentage of each type of events.
              * This must be satisfied with inclusive property.
@@ -241,16 +245,26 @@ namespace pbdt::test_context
             std::source_location location;
         };
 
+        /**
+         * @brief Expectation context structure
+         *
+         * @details This structure is used to construct expectation context from expectation chain.
+         *
+         * @tparam N
+         */
         template <size_t N>
         struct ExpectationContext
         {
-            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
-                operands{
-                    operands,
-                }
-            {
-            }
-
+            /**
+             * @brief Expand expectation chain.
+             *
+             * @param operand
+             * @param message
+             * @param location
+             * @return constexpr ExpectationContext<N + 1>
+             *
+             * @todo Replace operand to expression result with skip flag to hide implementation
+             */
             constexpr ExpectationContext<N + 1> expect(
                 const ExpectationOperand::Operand operand, const std::string_view message,
                 const std::source_location location = std::source_location::current()
@@ -259,7 +273,14 @@ namespace pbdt::test_context
                 return expand(ExpectationOperand{ operand, message, location });
             }
 
-            constexpr EventCountable countEvents() const
+            /**
+             * @brief Count the number of each event types.
+             *
+             * @details This must be satisfied with homomorphic, associative and commutative property.
+             *
+             * @return constexpr EventCountable
+             */
+            constexpr EventCountable countedEvents() const
             {
                 EventCountable context = EventCountable::prototype();
                 for (const auto& operand : operands)
@@ -270,6 +291,9 @@ namespace pbdt::test_context
                 return context;
             }
 
+            /**
+             * @brief Stringifiable Failure report structure
+             */
             struct FailureReport
             {
                 constexpr FailureReport(const std::array<ExpectationOperand, N> operands) :
@@ -279,6 +303,11 @@ namespace pbdt::test_context
                 {
                 }
 
+                /**
+                 * @brief Format failure report as a string
+                 *
+                 * @return std::string
+                 */
                 operator std::string() const
                 {
                     std::string result;
@@ -289,25 +318,23 @@ namespace pbdt::test_context
                             continue;
                         }
 
-                        result += std::string(operand.reportFailure()) + "\n";
+                        result += static_cast<std::string>(operand.reportFailure()) + "\n";
                     }
                     return result;
                 }
 
             private:
-                constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
-                {
-                    std::array<ExpectationOperand, N + 1> newOperands;
-                    std::copy(operands.begin(), operands.end(), newOperands.begin());
-                    newOperands[N] = operand;
-
-                    return ExpectationContext<N + 1>{ newOperands };
-                }
-
                 std::array<ExpectationOperand, N> operands;
             };
 
-            constexpr FailureReport reportFailures() const
+            /**
+             * @brief Construct failure report
+             *
+             * @details This must be satisfied with homomorphic and associative property.
+             *
+             * @return constexpr FailureReport
+             */
+            constexpr FailureReport failureReport() const
             {
                 return FailureReport{ operands };
             }
@@ -318,6 +345,15 @@ namespace pbdt::test_context
                     operands,
                 }
             {
+            }
+
+            constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
+            {
+                std::array<ExpectationOperand, N + 1> newOperands;
+                std::copy(operands.begin(), operands.end(), newOperands.begin());
+                newOperands[N] = operand;
+
+                return ExpectationContext<N + 1>{ newOperands };
             }
 
             std::array<ExpectationOperand, N> operands;
