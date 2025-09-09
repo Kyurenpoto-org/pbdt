@@ -102,19 +102,36 @@ namespace Countable
     template <typename EventCountable, size_t... Ns>
     struct EventCountableDoubleValueCombination
     {
+        /**
+         * @brief The size of index range.
+         *
+         * @return constexpr size_t
+         */
         static constexpr size_t size()
         {
             return COMBINATION_INDEX_LIMIT;
         }
 
+        /**
+         * @brief The first value of EventCountable pair for the given index.
+         *
+         * @tparam Idx
+         * @return constexpr EventCountable
+         */
         template <size_t Idx>
-        constexpr auto a() const
+        constexpr EventCountable a() const
         {
             return SEQUENCE[INDICE[Idx][0]];
         }
 
+        /**
+         * @brief The second value of EventCountable pair for the given index.
+         *
+         * @tparam Idx
+         * @return constexpr EventCountable
+         */
         template <size_t Idx>
-        constexpr auto b() const
+        constexpr EventCountable b() const
         {
             return SEQUENCE[INDICE[Idx][1]];
         }
@@ -152,20 +169,32 @@ namespace Countable
     template <typename EventCountable, size_t... Ns>
     struct EventCountableSingleDropCombination
     {
+        /**
+         * @brief The first value of EventCountable array pair for the given index.
+         *
+         * @tparam Idx
+         * @return constexpr std::array<EventCountable, 3>
+         */
         template <size_t Idx>
-        constexpr auto a() const
+        constexpr std::array<EventCountable, 3> a() const
         {
-            return std::array{
+            return {
                 SEQUENCES[0][0][INDICE[Idx][0]],
                 SEQUENCES[0][1][INDICE[Idx][0]],
                 SEQUENCES[0][2][INDICE[Idx][0]],
             };
         }
 
+        /**
+         * @brief The second value of EventCountable array pair for the given index.
+         *
+         * @tparam Idx
+         * @return constexpr std::array<EventCountable, 3>
+         */
         template <size_t Idx>
-        constexpr auto b() const
+        constexpr std::array<EventCountable, 3> b() const
         {
-            return std::array{
+            return {
                 SEQUENCES[1][0][INDICE[Idx][0]],
                 SEQUENCES[1][1][INDICE[Idx][0]],
                 SEQUENCES[1][2][INDICE[Idx][0]],

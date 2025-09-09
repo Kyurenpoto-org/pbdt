@@ -13,20 +13,53 @@
 /**
  * @brief A string validation structure that checks inclusive properties.
  *
+ * @details Inclusive property: If A implies B, then not A or B must be true.
+ *
  * @tparam InclusiveRequirements
  *
  * @see RunTimePropositionValidationBase
- * @see TypeProposition
  */
 template <typename InclusiveRequirements>
 struct InclusiveStringPiecesValidation :
     RunTimePropositionValidationBase<InclusiveStringPiecesValidation<InclusiveRequirements>>
 {
+    /**
+     * @brief The size of index range.
+     *
+     * @details Same as InclusiveRequirements::size().
+     *
+     * @return constexpr size_t
+     */
     static constexpr size_t size()
     {
         return InclusiveRequirements::size();
     }
 
+    /**
+     * @brief Construct the truth set proposition for the given index.
+     *
+     * @tparam Idx
+     * @return auto The callable that same as () -> bool.
+     */
+    template <size_t Idx>
+    auto truth() const
+    {
+        return comparisonFactory<Idx>().comparison(requirements.template origin<Idx>());
+    }
+
+    /**
+     * @brief Construct the falsity set proposition for the given index.
+     *
+     * @tparam Idx
+     * @return auto The callable that same as () -> bool.
+     */
+    template <size_t Idx>
+    auto falsity() const
+    {
+        return comparisonFactory<Idx>().comparison(requirements.template complement<Idx>());
+    }
+
+private:
     template <typename Comparable>
     struct InclusiveComparison
     {
@@ -78,22 +111,10 @@ struct InclusiveStringPiecesValidation :
     };
 
     template <size_t Idx>
-    auto truth() const
+    Inclusive<typename InclusiveRequirements::Antecedent, typename InclusiveRequirements::Consequent>
+    comparisonFactory() const
     {
-        return comparisonFactory<Idx>().comparison(requirements.template origin<Idx>());
-    }
-
-    template <size_t Idx>
-    auto falsity() const
-    {
-        return comparisonFactory<Idx>().comparison(requirements.template complement<Idx>());
-    }
-
-private:
-    template <size_t Idx>
-    auto comparisonFactory() const
-    {
-        return Inclusive<typename InclusiveRequirements::Antecedent, typename InclusiveRequirements::Consequent>{
+        return {
             requirements.template antecedent<Idx>(),
             requirements.template consequent<Idx>(),
         };
@@ -105,30 +126,52 @@ private:
 #include "generators/values/event-countable-combination.hpp"
 
 /**
- * @brief A structure that defines inclusive requirements for EventCountable.
+ * @brief A structure that defines inclusive requirements for EventCountable::operator std::string().
  *
  * @tparam EventCountable
+ *
+ * @see EventCountable::operator std::string()
  */
 template <typename EventCountable>
 struct InclusiveStringifiedEventCountableRequirements
 {
+    /**
+     * @brief The size of index range.
+     *
+     * @return constexpr size_t
+     */
     static constexpr size_t size()
     {
         return VALUES.size();
     }
 
+    /**
+     * @brief Construct the origin string pieces for the given index.
+     *
+     * @tparam Idx
+     * @return std::array<std::string, 4>
+     */
     template <size_t Idx>
     std::array<std::string, 4> origin() const
     {
         return split(VALUES.template a<Idx>());
     }
 
+    /**
+     * @brief Construct the complement string pieces for the given index.
+     *
+     * @tparam Idx
+     * @return std::array<std::string, 4>
+     */
     template <size_t Idx>
     std::array<std::string, 4> complement() const
     {
         return split(VALUES.template a<Idx>().pass().fail().skip());
     }
 
+    /**
+     * @brief The antecedent callable structure.
+     */
     struct Antecedent
     {
         Antecedent(const std::string sup) :
@@ -146,14 +189,23 @@ struct InclusiveStringifiedEventCountableRequirements
         std::string sup;
     };
 
+    /**
+     * @brief Construct the antecedent callable for the given index.
+     *
+     * @tparam Idx
+     * @return Antecedent
+     */
     template <size_t Idx>
-    auto antecedent() const
+    Antecedent antecedent() const
     {
-        return Antecedent{
+        return {
             VALUES.template a<Idx>(),
         };
     }
 
+    /**
+     * @brief The consequent callable structure.
+     */
     struct Consequent
     {
         Consequent(const std::array<std::string, 3> subA, const std::array<std::string, 3> subB) :
@@ -182,14 +234,20 @@ struct InclusiveStringifiedEventCountableRequirements
         const std::array<std::string, 3> subB;
     };
 
+    /**
+     * @brief Construct the consequent callable for the given index.
+     *
+     * @tparam Idx
+     * @return Consequent
+     */
     template <size_t Idx>
-    auto consequent() const
+    Consequent consequent() const
     {
         const auto base = VALUES.template a<Idx>();
         const auto a = DROPS.template a<Idx>();
         const auto b = DROPS.template b<Idx>();
 
-        return Consequent{
+        return {
             std::array{
                 static_cast<std::string>(base + a[0]),
                 static_cast<std::string>(base + a[1]),

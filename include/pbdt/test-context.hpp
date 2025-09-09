@@ -22,8 +22,19 @@ namespace pbdt::test_context
 {
     namespace detail
     {
+        /**
+         * @brief Event counting structure
+         *
+         * @details This structure is used to count the number of passed, failed, and skipped events.
+         *
+         */
         struct EventCountable
         {
+            /**
+             * @brief Creates a prototype EventCountable with zero counts.
+             *
+             * @return constexpr EventCountable
+             */
             static constexpr EventCountable prototype()
             {
                 return EventCountable{
@@ -33,6 +44,11 @@ namespace pbdt::test_context
                 };
             }
 
+            /**
+             * @brief Counts a passed event.
+             *
+             * @return constexpr EventCountable
+             */
             constexpr EventCountable pass() const
             {
                 return EventCountable{
@@ -42,6 +58,11 @@ namespace pbdt::test_context
                 };
             }
 
+            /**
+             * @brief Counts a failed event.
+             *
+             * @return constexpr EventCountable
+             */
             constexpr EventCountable fail() const
             {
                 return EventCountable{
@@ -51,6 +72,11 @@ namespace pbdt::test_context
                 };
             }
 
+            /**
+             * @brief Counts a skipped event.
+             *
+             * @return constexpr EventCountable
+             */
             constexpr EventCountable skip() const
             {
                 return EventCountable{
@@ -60,6 +86,12 @@ namespace pbdt::test_context
                 };
             }
 
+            /**
+             * @brief Accumulates another EventCountable into this one.
+             *
+             * @param other
+             * @return constexpr EventCountable
+             */
             constexpr EventCountable accumulate(const EventCountable other) const
             {
                 return EventCountable{
@@ -69,16 +101,34 @@ namespace pbdt::test_context
                 };
             }
 
+            /**
+             * @brief Checks if there are any failed events.
+             *
+             * @return constexpr bool
+             */
             constexpr bool someFailed() const
             {
                 return failed != 0;
             }
 
+            /**
+             * @brief Compute the total number of events.
+             *
+             * @return constexpr size_t
+             */
             constexpr size_t sum() const
             {
                 return passed + failed + skipped;
             }
 
+            /**
+             * @brief Formats the event counts as a string.
+             *
+             * @details The format includes the number and percentage of each type of events.
+             * This must be satisfied with inclusive property.
+             *
+             * @return std::string
+             */
             operator std::string() const
             {
                 return std::format(
@@ -113,6 +163,174 @@ namespace pbdt::test_context
             return lhs.accumulate(rhs);
         }
 
+        struct ExpectationOperand
+        {
+            enum class Operand
+            {
+                PASS,
+                FAIL,
+                SKIP,
+            };
+
+            constexpr ExpectationOperand(
+                const Operand operand, const std::string_view message, const std::source_location location
+            ) :
+                operand{
+                    operand,
+                },
+                message{
+                    message,
+                },
+                location{
+                    location,
+                }
+            {
+            }
+
+            constexpr EventCountable countEvent(const EventCountable context) const
+            {
+                switch (operand)
+                {
+                case Operand::PASS:
+                    return context.pass();
+                case Operand::FAIL:
+                    return context.fail();
+                case Operand::SKIP:
+                    return context.skip();
+                }
+            }
+
+            struct FailureReason
+            {
+                constexpr FailureReason(
+                    const std::string_view message,
+                    const std::source_location location = std::source_location::current()
+                ) :
+                    message{
+                        message,
+                    },
+                    location{
+                        location,
+                    }
+                {
+                }
+
+                operator std::string() const
+                {
+                    return std::format(
+                        "{}({},{})\n{}", location.file_name(), location.line(), location.column(), message
+                    );
+                }
+
+            private:
+                std::string_view message;
+                std::source_location location;
+            };
+
+            constexpr FailureReason reportFailure() const
+            {
+                return FailureReason{
+                    message,
+                    location,
+                };
+            }
+
+        private:
+            Operand operand;
+            std::string_view message;
+            std::source_location location;
+        };
+
+        template <size_t N>
+        struct ExpectationContext
+        {
+            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
+                operands{
+                    operands,
+                }
+            {
+            }
+
+            constexpr ExpectationContext<N + 1> expect(
+                const ExpectationOperand::Operand operand, const std::string_view message,
+                const std::source_location location = std::source_location::current()
+            ) const
+            {
+                return expand(ExpectationOperand{ operand, message, location });
+            }
+
+            constexpr EventCountable countEvents() const
+            {
+                EventCountable context = EventCountable::prototype();
+                for (const auto& operand : operands)
+                {
+                    context = operand.countEvent(context);
+                }
+
+                return context;
+            }
+
+            struct FailureReport
+            {
+                constexpr FailureReport(const std::array<ExpectationOperand, N> operands) :
+                    operands{
+                        operands,
+                    }
+                {
+                }
+
+                operator std::string() const
+                {
+                    std::string result;
+                    for (const auto& operand : operands)
+                    {
+                        if (!operand.countEvent(EventCountable::prototype()).someFailed())
+                        {
+                            continue;
+                        }
+
+                        result += std::string(operand.reportFailure()) + "\n";
+                    }
+                    return result;
+                }
+
+            private:
+                constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
+                {
+                    std::array<ExpectationOperand, N + 1> newOperands;
+                    std::copy(operands.begin(), operands.end(), newOperands.begin());
+                    newOperands[N] = operand;
+
+                    return ExpectationContext<N + 1>{ newOperands };
+                }
+
+                std::array<ExpectationOperand, N> operands;
+            };
+
+            constexpr FailureReport reportFailures() const
+            {
+                return FailureReport{ operands };
+            }
+
+        private:
+            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
+                operands{
+                    operands,
+                }
+            {
+            }
+
+            std::array<ExpectationOperand, N> operands;
+        };
+
+        /*
+         * @todo Non-param failures
+         * 1. ~string concat~
+         * 2. ~string array~
+         * 3. failure class tuple
+         * non-branch
+         * affect to `then` clause
+         */
         struct TestContext
         {
             static constexpr TestContext prototype()
@@ -194,6 +412,10 @@ namespace pbdt::test_context
 
     namespace detail
     {
+        /*
+         * @todo param failures
+         * static/dynamic array of ExpectationContext<N>, samples, results
+         */
         struct SampledTestContext
         {
             static constexpr SampledTestContext prototype()
@@ -241,6 +463,15 @@ namespace pbdt::test_context
         };
     }
 
+    // test 함수의 리턴 타입은 (샘플, 결과, 판별)
+    // 컨텍스트는 내부적으로 판별 값을 이벤트 카운팅으로 집계
+    // 또한 판별 값이 실패인 경우 나머지 값을 배열에 누적
+    // 샘플 배열이 정적 배열인지 동적 배열인지 정해지지 않음
+    // 따라서 배열의 타입을 템플릿 인자로 전달
+    // 배열의 원소 타입에서 최소한 판별 타입은 사용되지 않음
+    // 따라서 test 함수의 리턴 타입을 이용해서 누적 배열의 원소의 타입을 얻어내야 함
+    // 또한 컨텍스트 누적을 위해서 누적 변수의 타입을 varaint로 설정해야 함
+    // 일단 샘플의 갯수를 컴파일 타임에 알 수 있다고 가정
     template <typename Samples, typename Test>
     constexpr detail::SampledTestContext parameterizedContext(Samples&& samples, Test&& test)
     {
