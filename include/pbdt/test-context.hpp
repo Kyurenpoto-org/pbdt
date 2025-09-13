@@ -272,13 +272,6 @@ namespace pbdt::test_context
         template <size_t N>
         struct ExpectationContext
         {
-            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
-                operands{
-                    operands,
-                }
-            {
-            }
-
             /**
              * @brief Construct expectation chain.
              *
@@ -343,24 +336,10 @@ namespace pbdt::test_context
             constexpr ExpectationContext<N + M> accumulate(const ExpectationContext<M> context) const
                 requires(N + M != 0)
             {
-                return context.concatFront(operands);
-            }
-
-            /**
-             * @brief Implementation of accumulate.
-             *
-             * @pre Only if not first expectations
-             *
-             * @tparam M
-             */
-            template <size_t M>
-            constexpr ExpectationContext<N + M> concatFront(const std::array<ExpectationOperand, M>& ops) const
-                requires(N + M != 0)
-            {
                 std::vector<ExpectationOperand> newOperands;
                 newOperands.reserve(N + M);
-                newOperands.insert(newOperands.end(), ops.begin(), ops.end());
                 newOperands.insert(newOperands.end(), operands.begin(), operands.end());
+                newOperands.insert(newOperands.end(), context.operands.begin(), context.operands.end());
 
                 return {
                     exstd::vecToArr(newOperands, std::make_index_sequence<N + M>{}),
@@ -450,6 +429,16 @@ namespace pbdt::test_context
             }
 
         private:
+            template <size_t M>
+            friend struct ExpectationContext;
+
+            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
+                operands{
+                    operands,
+                }
+            {
+            }
+
             constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
             {
                 std::vector<ExpectationOperand> newOperands;
