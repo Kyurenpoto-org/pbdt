@@ -10,35 +10,10 @@
 #include <ranges>
 #include <vector>
 
+#include "generators/multi-index.hpp"
+
 namespace Countable
 {
-    template <size_t INDEX, size_t... INDEX_LIMITS>
-    struct MultiIndex
-    {
-        static constexpr size_t DIM = sizeof...(INDEX_LIMITS);
-
-        consteval std::array<size_t, DIM> value() const
-        {
-            std::array<size_t, DIM> arr{};
-            size_t idx = INDEX;
-            for (size_t i = 0; i < DIM; ++i)
-            {
-                arr[i] = idx % LIMITS[i];
-                idx /= LIMITS[i];
-            }
-
-            return arr;
-        }
-
-    private:
-        static constexpr std::array<size_t, DIM> LIMITS{ INDEX_LIMITS... };
-    };
-
-    /**
-     * @brief Generates a sequence of EventCountable values based on the provided indice in compile-time.
-     *
-     * @tparam Range
-     */
     template <std::ranges::input_range Range>
     struct EventCountableSequence
     {
@@ -50,7 +25,7 @@ namespace Countable
         template <typename EventCountable, size_t N>
         consteval std::array<EventCountable, N> value() const
         {
-            return toArr<EventCountable>(generate<EventCountable>(), std::make_index_sequence<N>{});
+            return toArr(generate<EventCountable>(), std::make_index_sequence<N>{});
         }
 
     private:
@@ -95,9 +70,6 @@ namespace Countable
      *
      * @tparam EventCountable
      * @tparam Ns
-     *
-     * @see MultiIndex
-     * @see EventCountableSequence
      */
     template <typename EventCountable, size_t... Ns>
     struct EventCountableDoubleValueCombination
@@ -115,25 +87,25 @@ namespace Countable
         /**
          * @brief The first value of EventCountable pair for the given index.
          *
-         * @tparam Idx
+         * @tparam IDX
          * @return constexpr EventCountable
          */
-        template <size_t Idx>
+        template <size_t IDX>
         constexpr EventCountable a() const
         {
-            return SEQUENCE[INDICE[Idx][0]];
+            return SEQUENCE[INDICE[IDX][0]];
         }
 
         /**
          * @brief The second value of EventCountable pair for the given index.
          *
-         * @tparam Idx
+         * @tparam IDX
          * @return constexpr EventCountable
          */
-        template <size_t Idx>
+        template <size_t IDX>
         constexpr EventCountable b() const
         {
-            return SEQUENCE[INDICE[Idx][1]];
+            return SEQUENCE[INDICE[IDX][1]];
         }
 
     private:
@@ -141,7 +113,7 @@ namespace Countable
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
         static constexpr auto INDICE = std::array{
-            (MultiIndex<Ns, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT>{}.value())...
+            (Util::MultiIndex<Ns, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT>{}.value())...
         };
         static constexpr auto SEQUENCE = EventCountableSequence{
             INDICE
@@ -162,9 +134,6 @@ namespace Countable
      *
      * @tparam EventCountable
      * @tparam Ns
-     *
-     * @see MultiIndex
-     * @see EventCountableSequence
      */
     template <typename EventCountable, size_t... Ns>
     struct EventCountableSingleDropCombination
@@ -172,32 +141,32 @@ namespace Countable
         /**
          * @brief The first value of EventCountable array pair for the given index.
          *
-         * @tparam Idx
+         * @tparam IDX
          * @return constexpr std::array<EventCountable, 3>
          */
-        template <size_t Idx>
+        template <size_t IDX>
         constexpr std::array<EventCountable, 3> a() const
         {
             return {
-                SEQUENCES[0][0][INDICE[Idx][0]],
-                SEQUENCES[0][1][INDICE[Idx][0]],
-                SEQUENCES[0][2][INDICE[Idx][0]],
+                SEQUENCES[0][0][INDICE[IDX][0]],
+                SEQUENCES[0][1][INDICE[IDX][0]],
+                SEQUENCES[0][2][INDICE[IDX][0]],
             };
         }
 
         /**
          * @brief The second value of EventCountable array pair for the given index.
          *
-         * @tparam Idx
+         * @tparam IDX
          * @return constexpr std::array<EventCountable, 3>
          */
-        template <size_t Idx>
+        template <size_t IDX>
         constexpr std::array<EventCountable, 3> b() const
         {
             return {
-                SEQUENCES[1][0][INDICE[Idx][0]],
-                SEQUENCES[1][1][INDICE[Idx][0]],
-                SEQUENCES[1][2][INDICE[Idx][0]],
+                SEQUENCES[1][0][INDICE[IDX][0]],
+                SEQUENCES[1][1][INDICE[IDX][0]],
+                SEQUENCES[1][2][INDICE[IDX][0]],
             };
         }
 
@@ -206,7 +175,7 @@ namespace Countable
         static constexpr size_t OP_VARIETY_LIMIT = 3;
 
         static constexpr auto INDICE = std::array{
-            (MultiIndex<Ns, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT - 1, OP_VARIETY_LIMIT - 1>{}.value())...
+            (Util::MultiIndex<Ns, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT - 1, OP_VARIETY_LIMIT - 1>{}.value())...
         };
         static constexpr auto SEQUENCES = std::array{
             std::array{

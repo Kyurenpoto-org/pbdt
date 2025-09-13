@@ -9,12 +9,15 @@
 #ifndef PBDT_MODULE
 
 #include <algorithm>
+#include <array>
 #include <format>
 #include <ranges>
 #include <source_location>
 #include <string>
+#include <vector>
 
 #include "exstd/functional.hpp"
+#include "exstd/ranges.hpp"
 
 #endif
 
@@ -177,6 +180,17 @@ namespace pbdt::test_context
             };
 
             constexpr ExpectationOperand(
+                const bool expression, const std::string_view message, const std::source_location location
+            ) :
+                ExpectationOperand{
+                    expression ? Operand::PASS : Operand::FAIL,
+                    message,
+                    location,
+                }
+            {
+            }
+
+            constexpr ExpectationOperand(
                 const Operand operand, const std::string_view message, const std::source_location location
             ) :
                 operand{
@@ -191,6 +205,7 @@ namespace pbdt::test_context
             {
             }
 
+            template <typename EventCountable>
             constexpr EventCountable countEvent(const EventCountable context) const
             {
                 switch (operand)
@@ -201,6 +216,8 @@ namespace pbdt::test_context
                     return context.fail();
                 case Operand::SKIP:
                     return context.skip();
+                default:
+                    std::unreachable();
                 }
             }
 
@@ -255,22 +272,99 @@ namespace pbdt::test_context
         template <size_t N>
         struct ExpectationContext
         {
+            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
+                operands{
+                    operands,
+                }
+            {
+            }
+
+            /**
+             * @brief Construct expectation chain.
+             *
+             * @pre Only if the first expectation
+             *
+             * @param expression
+             * @param message
+             * @param location
+             * @return constexpr ExpectationContext<1>
+             */
+            static constexpr ExpectationContext<1> expect(
+                const bool expression, const std::string_view message,
+                const std::source_location location = std::source_location::current()
+            )
+                requires(N == 0)
+            {
+                return {
+                    std::array{
+                        ExpectationOperand{
+                            expression,
+                            message,
+                            location,
+                        },
+                    },
+                };
+            }
+
             /**
              * @brief Expand expectation chain.
              *
-             * @param operand
+             * @pre Only if not the first expectation
+             *
+             * @param expression
              * @param message
              * @param location
              * @return constexpr ExpectationContext<N + 1>
-             *
-             * @todo Replace operand to expression result with skip flag to hide implementation
              */
             constexpr ExpectationContext<N + 1> expect(
-                const ExpectationOperand::Operand operand, const std::string_view message,
+                const bool expression, const std::string_view message,
                 const std::source_location location = std::source_location::current()
             ) const
+                requires(N != 0)
             {
-                return expand(ExpectationOperand{ operand, message, location });
+                return expand(
+                    ExpectationOperand{
+                        expression,
+                        message,
+                        location,
+                    }
+                );
+            }
+
+            /**
+             * @brief Accumulate expectation chain.
+             *
+             * @pre Only if not the first expectation
+             *
+             * @param context
+             * @return constexpr ExpectationContext<N + M>
+             */
+            template <size_t M>
+            constexpr ExpectationContext<N + M> accumulate(const ExpectationContext<M> context) const
+                requires(N + M != 0)
+            {
+                return context.concatFront(operands);
+            }
+
+            /**
+             * @brief Implementation of accumulate.
+             *
+             * @pre Only if not first expectations
+             *
+             * @tparam M
+             */
+            template <size_t M>
+            constexpr ExpectationContext<N + M> concatFront(const std::array<ExpectationOperand, M>& ops) const
+                requires(N + M != 0)
+            {
+                std::vector<ExpectationOperand> newOperands;
+                newOperands.reserve(N + M);
+                newOperands.insert(newOperands.end(), ops.begin(), ops.end());
+                newOperands.insert(newOperands.end(), operands.begin(), operands.end());
+
+                return {
+                    exstd::vecToArr(newOperands, std::make_index_sequence<N + M>{}),
+                };
             }
 
             /**
@@ -278,9 +372,14 @@ namespace pbdt::test_context
              *
              * @details This must be satisfied with homomorphic, associative and commutative property.
              *
+             * @pre Only if not the first expectation
+             *
+             * @tparam EventCountable
              * @return constexpr EventCountable
              */
+            template <typename EventCountable>
             constexpr EventCountable countedEvents() const
+                requires(N != 0)
             {
                 EventCountable context = EventCountable::prototype();
                 for (const auto& operand : operands)
@@ -293,7 +392,13 @@ namespace pbdt::test_context
 
             /**
              * @brief Stringifiable Failure report structure
+             *
+             * @pre Only if not the first expectation
+             *
+             * @tparam EventCountable
              */
+            template <typename EventCountable>
+                requires(N != 0)
             struct FailureReport
             {
                 constexpr FailureReport(const std::array<ExpectationOperand, N> operands) :
@@ -332,32 +437,39 @@ namespace pbdt::test_context
              *
              * @details This must be satisfied with homomorphic and associative property.
              *
-             * @return constexpr FailureReport
+             * @pre Only if not the first expectation
+             *
+             * @tparam EventCountable
+             * @return constexpr FailureReport<EventCountable>
              */
-            constexpr FailureReport failureReport() const
+            template <typename EventCountable>
+            constexpr FailureReport<EventCountable> failureReport() const
+                requires(N != 0)
             {
-                return FailureReport{ operands };
+                return FailureReport<EventCountable>{ operands };
             }
 
         private:
-            constexpr ExpectationContext(const std::array<ExpectationOperand, N> operands) :
-                operands{
-                    operands,
-                }
-            {
-            }
-
             constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
             {
-                std::array<ExpectationOperand, N + 1> newOperands;
-                std::copy(operands.begin(), operands.end(), newOperands.begin());
-                newOperands[N] = operand;
+                std::vector<ExpectationOperand> newOperands;
+                newOperands.reserve(N + 1);
+                newOperands.insert(newOperands.end(), operands.begin(), operands.end());
+                newOperands.push_back(operand);
 
-                return ExpectationContext<N + 1>{ newOperands };
+                return {
+                    exstd::vecToArr(newOperands, std::make_index_sequence<N + 1>{}),
+                };
             }
 
             std::array<ExpectationOperand, N> operands;
         };
+
+        template <size_t N, size_t M>
+        constexpr ExpectationContext<N + M> operator+(const ExpectationContext<N> lhs, const ExpectationContext<M> rhs)
+        {
+            return lhs.accumulate(rhs);
+        }
 
         /*
          * @todo Non-param failures

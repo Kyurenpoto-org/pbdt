@@ -499,4 +499,10 @@ namespace exstd
             return result;
         }
     }
+
+    template <typename T, size_t... INDICE>
+    constexpr std::array<T, sizeof...(INDICE)> vecToArr(const std::vector<T> x, const std::index_sequence<INDICE...>)
+    {
+        return { x[INDICE]... };
+    }
 }

@@ -133,6 +133,7 @@ add_header_module_prop_suite(
     DEP pbdt
     NAMESPACE pbdt.unit
     TARGETS event-countable-sum-with-accumulate event-countable-some-failed-with-accumulate
+    expectation-context-count-and-report
     FIXTURES event-countable-fixture
 )
 

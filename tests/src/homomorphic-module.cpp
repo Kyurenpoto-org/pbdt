@@ -37,6 +37,14 @@ void eventCountableSomeFailedWithAccumulate()
     acceptable.run();
 }
 
+void expectationContextCountAndReport()
+{
+    const HomomorphicRunTimeValueValidation<HomomorphicExpectationContextRequirements<
+        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>>
+        acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
@@ -44,11 +52,13 @@ int main(int argc, const char* const* argv)
             "runnable-scenario-with-then-component",
             "event-countable-sum-with-accumulate",
             "event-countable-some-failed-with-accumulate",
+            "expectation-context-count-and-report",
         },
         std::array{
             runnableScenarioWithThenComponent,
             eventCountableSumWithAccumulate,
             eventCountableSomeFailedWithAccumulate,
+            expectationContextCountAndReport,
         }
     )
         .run(argc, argv);

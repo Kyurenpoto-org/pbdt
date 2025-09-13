@@ -35,16 +35,16 @@ struct HomomorphicValueValidation : TwoWayValueValidationBase<HomomorphicValueVa
     /**
      * @brief Construct the operand-before-morph callable for the given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto The callable that same as () -> decltype(morph(beforeMorphOp(a, b))).
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr auto a() const
     {
         return []()
         {
-            return requirements.template morph<Idx>(
-                requirements.beforeMorphOp(requirements.template a<Idx>(), requirements.template b<Idx>())
+            return requirements.template morph<IDX>(
+                requirements.beforeMorphOp(requirements.template a<IDX>(), requirements.template b<IDX>())
             );
         };
     }
@@ -52,17 +52,81 @@ struct HomomorphicValueValidation : TwoWayValueValidationBase<HomomorphicValueVa
     /**
      * @brief Construct the operand-after-morph callable for the given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto The callable that same as () -> decltype(afterMorphOp(morph(a), morph(b))).
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr auto b() const
     {
         return []()
         {
             return requirements.afterMorphOp(
-                requirements.template morph<Idx>(requirements.template a<Idx>()),
-                requirements.template morph<Idx>(requirements.template b<Idx>())
+                requirements.template morph<IDX>(requirements.template a<IDX>()),
+                requirements.template morph<IDX>(requirements.template b<IDX>())
+            );
+        };
+    }
+
+private:
+    static constexpr HomomorphicRequirements requirements{};
+};
+
+/**
+ * @brief A value validation structure that checks homomorphic requirements in run-time.
+ *
+ * @details Homomorphic property: morph(a op b) == morph(a) op' morph(b).
+ *
+ * @tparam HomomorphicRequirements
+ *
+ * @see RunTimeValueValidationBase
+ */
+template <typename HomomorphicRequirements>
+struct HomomorphicRunTimeValueValidation :
+    RunTimeValueValidationBase<HomomorphicRunTimeValueValidation<HomomorphicRequirements>>
+{
+    /**
+     * @brief The size of index range.
+     *
+     * @details Same as HomomorphicRequirements::size().
+     *
+     * @return constexpr size_t
+     */
+    static constexpr size_t size()
+    {
+        return HomomorphicRequirements::size();
+    }
+
+    /**
+     * @brief Construct the operand-before-morph callable for the given index.
+     *
+     * @tparam IDX
+     * @return auto The callable that same as () -> decltype(morph(beforeMorphOp(a, b))).
+     */
+    template <size_t IDX>
+    auto a() const
+    {
+        return []()
+        {
+            return requirements.template morph<IDX>(
+                requirements.beforeMorphOp(requirements.template a<IDX>(), requirements.template b<IDX>())
+            );
+        };
+    }
+
+    /**
+     * @brief Construct the operand-after-morph callable for the given index.
+     *
+     * @tparam IDX
+     * @return auto The callable that same as () -> decltype(afterMorphOp(morph(a), morph(b))).
+     */
+    template <size_t IDX>
+    auto b() const
+    {
+        return []()
+        {
+            return requirements.afterMorphOp(
+                requirements.template morph<IDX>(requirements.template a<IDX>()),
+                requirements.template morph<IDX>(requirements.template b<IDX>())
             );
         };
     }
@@ -72,6 +136,7 @@ private:
 };
 
 #include "generators/values/event-countable-combination.hpp"
+#include "generators/values/expectation-context-combination.hpp"
 #include "generators/values/runnable-double-combination.hpp"
 
 /**
@@ -97,38 +162,38 @@ struct HomomorphicRunnableScenarioWithThenRequirements
     /**
      * @brief Get the property object A for the given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto The callable that same as () -> decltype(propA()).
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr auto a() const
     {
-        return std::get<Idx>(COMBINATIONS).template propA<Expect>();
+        return std::get<IDX>(COMBINATIONS).template propA<Expect>();
     }
 
     /**
      * @brief Get the property object B for the given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto The callable that same as () -> decltype(propA()).
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr auto b() const
     {
-        return std::get<Idx>(COMBINATIONS).template propB<Expect>();
+        return std::get<IDX>(COMBINATIONS).template propB<Expect>();
     }
 
     /**
      * @brief Construct the RunnableScenario object from property object and check passable for given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @tparam Prop
      * @return constexpr bool
      */
-    template <size_t Idx, typename Prop>
+    template <size_t IDX, typename Prop>
     constexpr bool morph(Prop&& prop) const
     {
-        constexpr auto combination = std::get<Idx>(COMBINATIONS);
+        constexpr auto combination = std::get<IDX>(COMBINATIONS);
 
         return runnableScenario(combination.target(), std::forward<Prop>(prop), combination.domain()).run().passable();
     }
@@ -190,25 +255,25 @@ struct HomomorphicEventCountableSumWithAccumulateRequirements
     /**
      * @brief Get the EventCountable object A for given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr EventCountable a() const
     {
-        return COMBINATIONS.template a<Idx>();
+        return COMBINATIONS.template a<IDX>();
     }
 
     /**
      * @brief Get the EventCountable object B for given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr auto
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr EventCountable b() const
     {
-        return COMBINATIONS.template b<Idx>();
+        return COMBINATIONS.template b<IDX>();
     }
 
     /**
@@ -276,25 +341,25 @@ struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
     /**
      * @brief Get the EventCountable object A for given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr EventCountable
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr EventCountable a() const
     {
-        return COMBINATIONS.template a<Idx>();
+        return COMBINATIONS.template a<IDX>();
     }
 
     /**
      * @brief Get the EventCountable object B for given index.
      *
-     * @tparam Idx
+     * @tparam IDX
      * @return constexpr EventCountable
      */
-    template <size_t Idx>
+    template <size_t IDX>
     constexpr EventCountable b() const
     {
-        return COMBINATIONS.template b<Idx>();
+        return COMBINATIONS.template b<IDX>();
     }
 
     /**
@@ -327,7 +392,7 @@ struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
      *
      * @param a
      * @param b
-     * @return EventCountable
+     * @return bool
      */
     constexpr bool afterMorphOp(const bool a, const bool b) const
     {
@@ -337,5 +402,101 @@ struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
 private:
     static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
+};
+
+/**
+ * @brief A structure that defines homomorphic requirements for ExpectationContext<N>::countedEvents() and
+ * ExpectationContext<N>::failureReport() with operator+(ExpectationContext<N>, ExpectationContext<M>).
+ *
+ * @tparam ExpectationContext
+ * @tparam EventCountable
+ */
+template <template <size_t> typename ExpectationContext, typename EventCountable>
+struct HomomorphicExpectationContextRequirements
+{
+    /**
+     * @brief The size of index range.
+     *
+     * @return constexpr size_t
+     */
+    static constexpr size_t size()
+    {
+        return COMBINATIONS.size();
+    }
+
+    /**
+     * @brief Get the ExpectationContext object A for given index.
+     *
+     * @tparam IDX
+     * @return ExpectationContext<N> N is arbitrary size
+     */
+    template <size_t IDX>
+    auto a() const
+    {
+        return COMBINATIONS.template a<IDX>();
+    }
+
+    /**
+     * @brief Get the ExpectationContext object B for given index.
+     *
+     * @tparam IDX
+     * @return ExpectationContext<N> N is arbitrary size
+     */
+    template <size_t IDX>
+    auto b() const
+    {
+        return COMBINATIONS.template b<IDX>();
+    }
+
+    /**
+     * @brief Stringify each of counted events and failure report.
+     *
+     * @tparam size_t Ignored parameter
+     * @tparam N
+     * @param context
+     * @return std::array<std::string, 2>
+     */
+    template <size_t, size_t N>
+    std::array<std::string, 2> morph(const ExpectationContext<N> context) const
+    {
+        return {
+            static_cast<std::string>(context.template countedEvents<EventCountable>()),
+            static_cast<std::string>(context.template failureReport<EventCountable>()),
+        };
+    }
+
+    /**
+     * @brief Compute accumulate-before-count-and-report expression.
+     *
+     * @param a
+     * @param b
+     * @return ExpectationContext<N + M> N and M is size of each of A and B
+     */
+    template <size_t N, size_t M>
+    ExpectationContext<N + M> beforeMorphOp(const ExpectationContext<N> a, const ExpectationContext<M> b) const
+    {
+        return a + b;
+    }
+
+    /**
+     * @brief Compute accumulate-after-count-and-report expression.
+     *
+     * @param a
+     * @param b
+     * @return std::array<std::string, 2>
+     */
+    std::array<std::string, 2>
+    afterMorphOp(const std::array<std::string, 2> a, const std::array<std::string, 2> b) const
+    {
+        return {
+            a[0] + b[0],
+            a[1] + b[1],
+        };
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Expandable::ExpectationContextDoubleValueCombination<
+        ExpectationContext, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };
