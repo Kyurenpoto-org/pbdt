@@ -3,15 +3,26 @@
 # SPDX-License-Identifier: MIT
 
 # fixtures
+add_library(pbdt-base-fixture INTERFACE)
+
+target_compile_features(
+    pbdt-base-fixture
+    INTERFACE cxx_std_23
+)
+target_include_directories(
+    pbdt-base-fixture
+    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 add_library(given-component-fixture STATIC)
 
 target_compile_features(
     given-component-fixture
     PUBLIC cxx_std_23
 )
-target_include_directories(
+target_link_libraries(
     given-component-fixture
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC pbdt-base-fixture
 )
 target_sources(
     given-component-fixture
@@ -24,9 +35,9 @@ target_compile_features(
     when-component-fixture
     PUBLIC cxx_std_23
 )
-target_include_directories(
+target_link_libraries(
     when-component-fixture
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC pbdt-base-fixture
 )
 target_sources(
     when-component-fixture
@@ -39,9 +50,9 @@ target_compile_features(
     then-component-fixture
     PUBLIC cxx_std_23
 )
-target_include_directories(
+target_link_libraries(
     then-component-fixture
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC pbdt-base-fixture
 )
 target_sources(
     then-component-fixture
@@ -54,46 +65,13 @@ target_compile_features(
     runnable-scenario-fixture
     PUBLIC cxx_std_23
 )
-target_include_directories(
+target_link_libraries(
     runnable-scenario-fixture
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
+    PUBLIC pbdt-base-fixture
 )
 target_sources(
     runnable-scenario-fixture
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/instanciation/runnable-combination.cpp
-)
-
-add_library(callable-target-property-fixture INTERFACE)
-
-target_compile_features(
-    callable-target-property-fixture
-    INTERFACE cxx_std_23
-)
-target_include_directories(
-    callable-target-property-fixture
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-add_library(range-domain-fixture INTERFACE)
-
-target_compile_features(
-    range-domain-fixture
-    INTERFACE cxx_std_23
-)
-target_include_directories(
-    range-domain-fixture
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
-
-add_library(event-countable-fixture INTERFACE)
-
-target_compile_features(
-    event-countable-fixture
-    INTERFACE cxx_std_23
-)
-target_include_directories(
-    event-countable-fixture
-    INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 # Unit Tests
@@ -126,7 +104,7 @@ add_header_module_prop_suite(
     DEP pbdt
     NAMESPACE pbdt.unit
     TARGETS callable-target callable-property event-countable-stringify
-    FIXTURES callable-target-property-fixture event-countable-fixture
+    FIXTURES pbdt-base-fixture
 )
 add_header_module_prop_suite(
     PROP homomorphic
@@ -134,7 +112,7 @@ add_header_module_prop_suite(
     NAMESPACE pbdt.unit
     TARGETS event-countable-sum-with-accumulate event-countable-some-failed-with-accumulate
     expectation-context-count-and-report
-    FIXTURES event-countable-fixture
+    FIXTURES pbdt-base-fixture
 )
 
 # Integration Tests
@@ -157,5 +135,5 @@ add_header_module_prop_suite(
     DEP pbdt
     NAMESPACE pbdt.integration
     TARGETS range-domain-with-callable-target
-    FIXTURES callable-target-property-fixture range-domain-fixture
+    FIXTURES pbdt-base-fixture
 )
