@@ -118,33 +118,44 @@
   ],
   "buildPresets": [
     {
+      "name": "ninja-base",
+      "hidden": true,
+      "nativeToolOptions": ["-d", "stats"]
+    },
+    {
       "name": "x64-debug",
       "displayName": "x64 Debug",
+      "inherits": "ninja-base",
       "configurePreset": "x64-debug"
     },
     {
       "name": "x64-release",
       "displayName": "x64 Release",
+      "inherits": "ninja-base",
       "configurePreset": "x64-release"
     },
     {
       "name": "linux-debug",
       "displayName": "Linux Debug",
+      "inherits": "ninja-base",
       "configurePreset": "linux-debug"
     },
     {
       "name": "linux-release",
       "displayName": "Linux Release",
+      "inherits": "ninja-base",
       "configurePreset": "linux-release"
     },
     {
       "name": "macos-debug",
       "displayName": "MacOS Debug",
+      "inherits": "ninja-base",
       "configurePreset": "macos-debug"
     },
     {
       "name": "macos-release",
       "displayName": "MacOS Release",
+      "inherits": "ninja-base",
       "configurePreset": "macos-release"
     }
   ],
