@@ -395,14 +395,13 @@ namespace pbdt::test_context
                 operator std::string() const
                 {
                     std::string result;
+                    auto out = std::back_inserter(result);
                     for (const auto& operand : operands)
                     {
-                        if (!operand.countEvent(EventCountable::prototype()).someFailed())
+                        if (operand.countEvent(EventCountable::prototype()).someFailed())
                         {
-                            continue;
+                            std::format_to(out, "{}\n", static_cast<std::string>(operand.reportFailure()));
                         }
-
-                        result += static_cast<std::string>(operand.reportFailure()) + "\n";
                     }
                     return result;
                 }
