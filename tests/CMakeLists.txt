@@ -113,6 +113,13 @@ add_header_module_prop_suite(
     TARGETS event-countable expectation-context
     FIXTURES pbdt-base-fixture
 )
+add_header_module_prop_suite(
+    PROP commutative
+    DEP pbdt
+    NAMESPACE pbdt.unit
+    TARGETS expectation-context
+    FIXTURES pbdt-base-fixture
+)
 
 # Integration Tests
 add_header_module_prop_suite(
