@@ -600,15 +600,6 @@ namespace pbdt::test_context
         };
     }
 
-    // test 함수의 리턴 타입은 (샘플, 결과, 판별)
-    // 컨텍스트는 내부적으로 판별 값을 이벤트 카운팅으로 집계
-    // 또한 판별 값이 실패인 경우 나머지 값을 배열에 누적
-    // 샘플 배열이 정적 배열인지 동적 배열인지 정해지지 않음
-    // 따라서 배열의 타입을 템플릿 인자로 전달
-    // 배열의 원소 타입에서 최소한 판별 타입은 사용되지 않음
-    // 따라서 test 함수의 리턴 타입을 이용해서 누적 배열의 원소의 타입을 얻어내야 함
-    // 또한 컨텍스트 누적을 위해서 누적 변수의 타입을 varaint로 설정해야 함
-    // 일단 샘플의 갯수를 컴파일 타임에 알 수 있다고 가정
     template <typename Samples, typename Test>
     constexpr detail::SampledTestContext parameterizedContext(Samples&& samples, Test&& test)
     {
