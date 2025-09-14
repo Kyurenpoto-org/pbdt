@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <tuple>
+
 #include "util.hpp"
 
 /**
@@ -234,99 +236,13 @@ private:
 };
 
 /**
- * @brief A structure that defines homomorphic requirements for EventCountable::sum()
+ * @brief A structure that defines homomorphic requirements for EventCountable::sum() and EventCountable::someFailed()
  * with operator+(EventCountable, EventCountable).
  *
  * @tparam EventCountable
  */
 template <typename EventCountable>
-struct HomomorphicEventCountableSumWithAccumulateRequirements
-{
-    /**
-     * @brief The size of index range.
-     *
-     * @return constexpr size_t
-     */
-    static constexpr size_t size()
-    {
-        return COMBINATIONS.size();
-    }
-
-    /**
-     * @brief Get the EventCountable object A for given index.
-     *
-     * @tparam IDX
-     * @return constexpr auto
-     */
-    template <size_t IDX>
-    constexpr EventCountable a() const
-    {
-        return COMBINATIONS.template a<IDX>();
-    }
-
-    /**
-     * @brief Get the EventCountable object B for given index.
-     *
-     * @tparam IDX
-     * @return constexpr auto
-     */
-    template <size_t IDX>
-    constexpr EventCountable b() const
-    {
-        return COMBINATIONS.template b<IDX>();
-    }
-
-    /**
-     * @brief Compute sum of all event counts.
-     *
-     * @tparam size_t Ignored parameter
-     * @param events
-     * @return constexpr size_t
-     */
-    template <size_t>
-    constexpr size_t morph(const EventCountable events) const
-    {
-        return events.sum();
-    }
-
-    /**
-     * @brief Compute accumulate-before-sum expression.
-     *
-     * @param a
-     * @param b
-     * @return EventCountable
-     */
-    constexpr EventCountable beforeMorphOp(const EventCountable a, const EventCountable b) const
-    {
-        return a + b;
-    }
-
-    /**
-     * @brief Compute accumulate-after-sum expression.
-     *
-     * @param a
-     * @param b
-     * @return constexpr size_t
-     */
-    constexpr size_t afterMorphOp(const size_t a, const size_t b) const
-    {
-        return a + b;
-    }
-
-private:
-    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
-        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
-        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
-};
-
-/**
- * @brief A structure that defines homomorphic requirements for EventCountable::someFailed()
- * with operator+(EventCountable, EventCountable).
- *
- * @tparam EventCountable
- */
-template <typename EventCountable>
-struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
+struct HomomorphicEventCountableRequirements
 {
     /**
      * @brief The size of index range.
@@ -363,24 +279,27 @@ struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
     }
 
     /**
-     * @brief Check if some events failed.
+     * @brief Compute sum of all event counts & Check if some events failed.
      *
      * @tparam size_t Ignored parameter
      * @param events
-     * @return constexpr bool
+     * @return constexpr std::tuple<size_t, bool>
      */
     template <size_t>
-    constexpr bool morph(const EventCountable events) const
+    constexpr std::tuple<size_t, bool> morph(const EventCountable events) const
     {
-        return events.someFailed();
+        return {
+            events.sum(),
+            events.someFailed(),
+        };
     }
 
     /**
-     * @brief Compute accumulate-before-some-failed expression.
+     * @brief Compute accumulate-before-sum-and-some-failed expression.
      *
      * @param a
      * @param b
-     * @return EventCountable
+     * @return constexpr EventCountable
      */
     constexpr EventCountable beforeMorphOp(const EventCountable a, const EventCountable b) const
     {
@@ -388,15 +307,19 @@ struct HomomorphicEventCountableSomeFailedWithAccumulateRequirements
     }
 
     /**
-     * @brief Compute accumulate-after-some-failed expression.
+     * @brief Compute accumulate-after-sum-and-some-failed expression.
      *
      * @param a
      * @param b
-     * @return bool
+     * @return constepxr std::tuple<size_t, bool>
      */
-    constexpr bool afterMorphOp(const bool a, const bool b) const
+    constexpr std::tuple<size_t, bool>
+    afterMorphOp(const std::tuple<size_t, bool> a, const std::tuple<size_t, bool> b) const
     {
-        return a || b;
+        return {
+            std::get<0>(a) + std::get<0>(b),
+            std::get<1>(a) || std::get<1>(b),
+        };
     }
 
 private:

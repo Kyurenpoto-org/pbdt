@@ -32,7 +32,7 @@ void callableProperty()
 void eventCountable()
 {
     const InclusiveStringPiecesValidation<
-        InclusiveStringifiedEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
+        InclusiveEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
 }
@@ -43,7 +43,7 @@ int main(int argc, const char* const* argv)
         std::array{
             "callable-target",
             "callable-property",
-            "event-countable-stringify",
+            "event-countable",
         },
         std::array{
             callableTarget,

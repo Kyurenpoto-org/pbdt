@@ -103,15 +103,14 @@ add_header_module_prop_suite(
     PROP inclusive
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS callable-target callable-property event-countable-stringify
+    TARGETS callable-target callable-property event-countable
     FIXTURES pbdt-base-fixture
 )
 add_header_module_prop_suite(
     PROP homomorphic
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS event-countable-sum-with-accumulate event-countable-some-failed-with-accumulate
-    expectation-context-count-and-report
+    TARGETS event-countable expectation-context
     FIXTURES pbdt-base-fixture
 )
 

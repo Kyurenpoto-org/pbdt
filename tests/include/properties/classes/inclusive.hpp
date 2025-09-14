@@ -133,7 +133,7 @@ private:
  * @see EventCountable::operator std::string()
  */
 template <typename EventCountable>
-struct InclusiveStringifiedEventCountableRequirements
+struct InclusiveEventCountableRequirements
 {
     /**
      * @brief The size of index range.
