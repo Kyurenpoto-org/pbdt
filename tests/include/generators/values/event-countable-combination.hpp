@@ -25,12 +25,12 @@ namespace Countable
         template <typename EventCountable, size_t N>
         consteval std::array<EventCountable, N> value() const
         {
-            return toArr(generate<EventCountable>(), std::make_index_sequence<N>{});
+            return generate<EventCountable>(std::make_index_sequence<N>{});
         }
 
     private:
-        template <typename EventCountable>
-        consteval std::vector<EventCountable> generate() const
+        template <typename EventCountable, size_t... INDICE>
+        consteval std::array<EventCountable, sizeof...(INDICE)> generate(std::index_sequence<INDICE...>) const
         {
             std::vector<EventCountable> vec;
             vec.reserve(indice.size());
@@ -47,14 +47,7 @@ namespace Countable
                 vec.push_back((vec[i].*EVENT_METHODS[indice[i]])());
             }
 
-            return vec;
-        }
-
-        template <typename EventCountable, size_t... INDICE>
-        consteval std::array<EventCountable, sizeof...(INDICE)>
-        toArr(std::vector<EventCountable> x, std::index_sequence<INDICE...>) const
-        {
-            return { x[INDICE]... };
+            return { vec[INDICE]... };
         }
 
         Range indice;

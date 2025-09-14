@@ -8,7 +8,7 @@
 
 #include <array>
 #include <ranges>
-#include <tuple>
+#include <variant>
 
 namespace Expandable
 {
@@ -23,41 +23,41 @@ namespace Expandable
         template <template <size_t> typename ExpectationContext, size_t N>
         consteval auto value() const
         {
-            return generate<ExpectationContext>(std::tuple<>{}, std::make_index_sequence<N>{});
+            return generate<ExpectationContext>(std::make_index_sequence<N>{});
         }
 
     private:
-        template <template <size_t> typename ExpectationContext, typename Tuple, size_t CURRENT, size_t... REST>
-        consteval auto generate(const Tuple tup, std::index_sequence<CURRENT, REST...>) const
+        template <template <size_t> typename ExpectationContext, size_t... INDICE>
+        consteval std::array<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>
+        generate(std::index_sequence<INDICE...>) const
         {
-            if constexpr (sizeof...(REST) == 0)
+            constexpr size_t N = sizeof...(INDICE);
+            std::vector<std::variant<ExpectationContext<INDICE + 1>...>> vec;
+            vec.reserve(N);
+            vec.push_back(ExpectationContext<0>::expect(indice[0] == 0, ""));
+
+            for (size_t i = 1; i < N; ++i)
             {
-                return catNext(tup);
-            }
-            else if constexpr (CURRENT == 0)
-            {
-                return generate<ExpectationContext>(
-                    std::tuple{
-                        ExpectationContext<0>::expect(indice[0] == 0, ""),
-                    },
-                    std::index_sequence<REST...>{}
+                vec.push_back(
+                    std::visit(
+                        [&](const auto& x) -> std::variant<ExpectationContext<INDICE + 1>...>
+                        {
+                            if constexpr (std::is_same_v<std::decay_t<decltype(x)>, ExpectationContext<N>>)
+                            {
+                                throw "Unreachable: ExpectationContext<N> encountered in ExpectationContextSequence "
+                                      "generation";
+                            }
+                            else
+                            {
+                                return x.expect(indice[i] == 0, "");
+                            }
+                        },
+                        vec[i - 1]
+                    )
                 );
             }
-            else
-            {
-                return generate<ExpectationContext>(catNext(tup), std::index_sequence<REST...>{});
-            }
-        }
 
-        template <template <size_t> typename ExpectationContext, size_t... INDICE>
-        consteval std::tuple<ExpectationContext<INDICE>..., ExpectationContext<sizeof...(INDICE) + 1>>
-        catNext(const std::tuple<ExpectationContext<INDICE>...> tup) const
-        {
-            return std::tuple_cat(
-                tup, std::tuple{
-                         std::get<sizeof...(INDICE) - 1>(tup).expect(indice[sizeof...(INDICE)] == 0, ""),
-                     }
-            );
+            return { vec[INDICE]... };
         }
 
         Range indice;
@@ -96,7 +96,7 @@ namespace Expandable
         template <size_t IDX>
         constexpr auto a() const
         {
-            return std::get<INDICE[IDX][0]>(SEQUENCE);
+            return std::get<ExpectationContext<INDICE[IDX][0] + 1>>(SEQUENCE[INDICE[IDX][0]]);
         }
 
         /**
@@ -108,7 +108,7 @@ namespace Expandable
         template <size_t IDX>
         constexpr auto b() const
         {
-            return std::get<INDICE[IDX][1]>(SEQUENCE);
+            return std::get<ExpectationContext<INDICE[IDX][1] + 1>>(SEQUENCE[INDICE[IDX][1]]);
         }
 
     private:
