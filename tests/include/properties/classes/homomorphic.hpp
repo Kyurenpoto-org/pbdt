@@ -419,7 +419,7 @@ struct HomomorphicExpectationContextRequirements
     }
 
 private:
-    static constexpr auto COMBINATIONS = Expandable::ExpectationContextDoubleValueCombination<
+    static constexpr auto COMBINATIONS = Expandable::ExpectationContextTripleValueCombination<
         ExpectationContext, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };

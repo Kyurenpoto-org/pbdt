@@ -32,6 +32,14 @@ void then()
     acceptable.run();
 }
 
+void expectationContext()
+{
+    using REQ = AssociativeExpectationContextRequirements<
+        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>;
+    const AssociativeRunTimeValueValidation<typename REQ::ToComparable, REQ> acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
@@ -39,11 +47,13 @@ int main(int argc, const char* const* argv)
             "given",
             "when",
             "then",
+            "expectation-context",
         },
         std::array{
             given,
             when,
             then,
+            expectationContext,
         }
     )
         .run(argc, argv);

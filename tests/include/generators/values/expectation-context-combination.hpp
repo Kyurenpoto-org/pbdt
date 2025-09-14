@@ -10,6 +10,8 @@
 #include <ranges>
 #include <variant>
 
+#include "generators/multi-index.hpp"
+
 namespace Expandable
 {
     template <std::ranges::input_range Range>
@@ -67,15 +69,15 @@ namespace Expandable
     ExpectationContextSequence(Range) -> ExpectationContextSequence<Range>;
 
     /**
-     * @brief Generates combinations of two ExpectationContext values for each index.
+     * @brief Generates combinations of three ExpectationContext values for each index.
      *
-     * @details Each pair selected from same ExpectationContext sequence.
+     * @details Each triplet selected from same ExpectationContext sequence.
      *
      * @tparam ExpectationContext
      * @tparam Ns
      */
     template <template <size_t> typename ExpectationContext, size_t... Ns>
-    struct ExpectationContextDoubleValueCombination
+    struct ExpectationContextTripleValueCombination
     {
         /**
          * @brief The size of index range.
@@ -88,7 +90,7 @@ namespace Expandable
         }
 
         /**
-         * @brief The first value of ExpectationContext pair for the given index.
+         * @brief The first value of ExpectationContext triplet for the given index.
          *
          * @tparam IDX
          * @return constexpr ExpectationContext
@@ -100,7 +102,7 @@ namespace Expandable
         }
 
         /**
-         * @brief The second value of ExpectationContext pair for the given index.
+         * @brief The second value of ExpectationContext triplet for the given index.
          *
          * @tparam IDX
          * @return constexpr ExpectationContext
@@ -111,19 +113,33 @@ namespace Expandable
             return std::get<ExpectationContext<INDICE[IDX][1] + 1>>(SEQUENCE[INDICE[IDX][1]]);
         }
 
+        /**
+         * @brief The third value of ExpectationContext triplet for the given index.
+         *
+         * @tparam IDX
+         * @return constexpr ExpectationContext
+         */
+        template <size_t IDX>
+        constexpr auto c() const
+        {
+            return std::get<ExpectationContext<INDICE[IDX][2] + 1>>(SEQUENCE[INDICE[IDX][2]]);
+        }
+
     private:
         static constexpr size_t COMBINATION_INDEX_LIMIT = sizeof...(Ns);
         static constexpr size_t OP_VARIETY_LIMIT = 2;
 
         static constexpr auto INDICE = std::array{
-            (Util::MultiIndex<Ns, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT>{}.value())...
+            (Util::MultiIndex<
+                 Ns, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, COMBINATION_INDEX_LIMIT, OP_VARIETY_LIMIT>{}
+                 .value())...
         };
         static constexpr auto SEQUENCE = ExpectationContextSequence{
             INDICE
             | std::views::transform(
                 [](const auto& x)
                 {
-                    return x[2];
+                    return x[3];
                 }
             )
         }.template value<ExpectationContext, COMBINATION_INDEX_LIMIT>();
