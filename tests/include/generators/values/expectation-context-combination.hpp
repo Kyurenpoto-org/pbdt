@@ -11,6 +11,7 @@
 #include <variant>
 
 #include "generators/multi-index.hpp"
+#include "generators/sequence-from-indice.hpp"
 
 namespace Expandable
 {
@@ -18,7 +19,11 @@ namespace Expandable
     struct ExpectationContextSequence
     {
         consteval ExpectationContextSequence(Range indice) :
-            indice(indice)
+            ExpectationContextSequence{
+                Util::SequenceFromIndice<Range>{
+                    indice,
+                },
+            }
         {
         }
 
@@ -29,40 +34,45 @@ namespace Expandable
         }
 
     private:
+        consteval ExpectationContextSequence(Util::SequenceFromIndice<Range> sequence) :
+            sequence{
+                sequence,
+            }
+        {
+        }
+
         template <template <size_t> typename ExpectationContext, size_t... INDICE>
         consteval std::array<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>
         generate(std::index_sequence<INDICE...>) const
         {
-            constexpr size_t N = sizeof...(INDICE);
-            std::vector<std::variant<ExpectationContext<INDICE + 1>...>> vec;
-            vec.reserve(N);
-            vec.push_back(ExpectationContext<0>::expect(indice[0] == 0, ""));
-
-            for (size_t i = 1; i < N; ++i)
-            {
-                vec.push_back(
-                    std::visit(
-                        [&](const auto& x) -> std::variant<ExpectationContext<INDICE + 1>...>
+            return sequence.value<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>(
+                [](const size_t idx)
+                {
+                    return ExpectationContext<0>::expect(idx == 0, "");
+                },
+                []<typename T>(const T& x, const size_t idx)
+                {
+                    return std::visit(
+                        [&idx](const auto& x) -> T
                         {
-                            if constexpr (std::is_same_v<std::decay_t<decltype(x)>, ExpectationContext<N>>)
+                            if constexpr (std::is_same_v<
+                                              std::decay_t<decltype(x)>, ExpectationContext<sizeof...(INDICE)>>)
                             {
                                 throw "Unreachable: ExpectationContext<N> encountered in ExpectationContextSequence "
                                       "generation";
                             }
                             else
                             {
-                                return x.expect(indice[i] == 0, "");
+                                return x.expect(idx == 0, "");
                             }
                         },
-                        vec[i - 1]
-                    )
-                );
-            }
-
-            return { vec[INDICE]... };
+                        x
+                    );
+                }
+            );
         }
 
-        Range indice;
+        Util::SequenceFromIndice<Range> sequence;
     };
 
     template <std::ranges::input_range Range>

@@ -8,9 +8,9 @@
 
 #include <array>
 #include <ranges>
-#include <vector>
 
 #include "generators/multi-index.hpp"
+#include "generators/sequence-from-indice.hpp"
 
 namespace Countable
 {
@@ -18,39 +18,44 @@ namespace Countable
     struct EventCountableSequence
     {
         consteval EventCountableSequence(Range indice) :
-            indice(indice)
+            EventCountableSequence{
+                Util::SequenceFromIndice<Range>{
+                    indice,
+                },
+            }
         {
         }
 
         template <typename EventCountable, size_t N>
         consteval std::array<EventCountable, N> value() const
         {
-            return generate<EventCountable>(std::make_index_sequence<N>{});
+            return sequence.value<EventCountable, N>(
+                [](const size_t idx)
+                {
+                    return EventCountable::prototype();
+                },
+                []<typename T>(const T& x, const size_t idx)
+                {
+                    static constexpr std::array<EventCountable (EventCountable::*)() const, 3> EVENT_METHODS{
+                        &EventCountable::pass,
+                        &EventCountable::fail,
+                        &EventCountable::skip,
+                    };
+
+                    return (x.*EVENT_METHODS[idx])();
+                }
+            );
         }
 
     private:
-        template <typename EventCountable, size_t... INDICE>
-        consteval std::array<EventCountable, sizeof...(INDICE)> generate(std::index_sequence<INDICE...>) const
-        {
-            std::vector<EventCountable> vec;
-            vec.reserve(indice.size());
-            vec.push_back(EventCountable::prototype());
-
-            static constexpr std::array<EventCountable (EventCountable::*)() const, 3> EVENT_METHODS{
-                &EventCountable::pass,
-                &EventCountable::fail,
-                &EventCountable::skip,
-            };
-
-            for (size_t i = 0; i < indice.size() - 1; ++i)
-            {
-                vec.push_back((vec[i].*EVENT_METHODS[indice[i]])());
+        consteval EventCountableSequence(Util::SequenceFromIndice<Range> sequence) :
+            sequence{
+                sequence,
             }
-
-            return { vec[INDICE]... };
+        {
         }
 
-        Range indice;
+        Util::SequenceFromIndice<Range> sequence;
     };
 
     template <std::ranges::input_range Range>
