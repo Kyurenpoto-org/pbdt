@@ -45,7 +45,7 @@ namespace Expandable
         consteval std::array<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>
         generate(std::index_sequence<INDICE...>) const
         {
-            return sequence.value<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>(
+            return sequence.template value<std::variant<ExpectationContext<INDICE + 1>...>, sizeof...(INDICE)>(
                 [](const size_t idx)
                 {
                     return ExpectationContext<0>::expect(idx == 0, "");

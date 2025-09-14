@@ -29,7 +29,7 @@ namespace Countable
         template <typename EventCountable, size_t N>
         consteval std::array<EventCountable, N> value() const
         {
-            return sequence.value<EventCountable, N>(
+            return sequence.template value<EventCountable, N>(
                 [](const size_t idx)
                 {
                     return EventCountable::prototype();
