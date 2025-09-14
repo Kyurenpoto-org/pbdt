@@ -500,9 +500,50 @@ namespace exstd
         }
     }
 
-    template <typename T, size_t... INDICE>
-    constexpr std::array<T, sizeof...(INDICE)> vecToArr(const std::vector<T> x, const std::index_sequence<INDICE...>)
+    namespace detail
     {
-        return { x[INDICE]... };
+        struct ExpandArrayImpl
+        {
+            template <typename Array, typename Other>
+            constexpr auto operator()(Array&& arr, Other&& other) const
+            {
+                if constexpr (ArrayForm<Other>)
+                {
+                    return impl(
+                        arr, other, std::make_index_sequence<std::tuple_size_v<std::decay_t<Array>>>{},
+                        std::make_index_sequence<std::tuple_size_v<std::decay_t<Other>>>{}
+                    );
+                }
+                else
+                {
+                    return impl(arr, other, std::make_index_sequence<std::tuple_size_v<std::decay_t<Array>>>{});
+                }
+            }
+
+        private:
+            template <typename T, size_t... INDICE>
+            constexpr std::array<T, (sizeof...(INDICE)) + 1>
+            impl(const std::array<T, sizeof...(INDICE)>& arr, const T& other, std::index_sequence<INDICE...>) const
+            {
+                return {
+                    arr[INDICE]...,
+                    other,
+                };
+            }
+
+            template <typename T, size_t... INDICE1, size_t... INDICE2>
+            constexpr std::array<T, (sizeof...(INDICE1)) + (sizeof...(INDICE2))> impl(
+                const std::array<T, sizeof...(INDICE1)>& arr1, const std::array<T, sizeof...(INDICE2)>& arr2,
+                std::index_sequence<INDICE1...>, std::index_sequence<INDICE2...>
+            ) const
+            {
+                return {
+                    arr1[INDICE1]...,
+                    arr2[INDICE2]...,
+                };
+            }
+        };
     }
+
+    constexpr detail::ExpandArrayImpl expandArray;
 }

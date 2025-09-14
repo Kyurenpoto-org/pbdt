@@ -14,7 +14,6 @@
 #include <ranges>
 #include <source_location>
 #include <string>
-#include <vector>
 
 #include "exstd/functional.hpp"
 #include "exstd/ranges.hpp"
@@ -336,14 +335,7 @@ namespace pbdt::test_context
             constexpr ExpectationContext<N + M> accumulate(const ExpectationContext<M> context) const
                 requires(N + M != 0)
             {
-                std::vector<ExpectationOperand> newOperands;
-                newOperands.reserve(N + M);
-                newOperands.insert(newOperands.end(), operands.begin(), operands.end());
-                newOperands.insert(newOperands.end(), context.operands.begin(), context.operands.end());
-
-                return {
-                    exstd::vecToArr(newOperands, std::make_index_sequence<N + M>{}),
-                };
+                return exstd::expandArray(operands, context.operands);
             }
 
             /**
@@ -440,14 +432,7 @@ namespace pbdt::test_context
 
             constexpr ExpectationContext<N + 1> expand(const ExpectationOperand operand) const
             {
-                std::vector<ExpectationOperand> newOperands;
-                newOperands.reserve(N + 1);
-                newOperands.insert(newOperands.end(), operands.begin(), operands.end());
-                newOperands.push_back(operand);
-
-                return {
-                    exstd::vecToArr(newOperands, std::make_index_sequence<N + 1>{}),
-                };
+                return exstd::expandArray(operands, operand);
             }
 
             std::array<ExpectationOperand, N> operands;

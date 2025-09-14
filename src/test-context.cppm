@@ -12,7 +12,6 @@ module;
 #include <ranges>
 #include <source_location>
 #include <string>
-#include <vector>
 
 #include "pbdt/module-unit-guard.hpp"
 
