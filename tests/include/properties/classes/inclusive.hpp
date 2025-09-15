@@ -95,39 +95,39 @@ struct InclusiveEventCountableRequirements
     }
 
     /**
-     * @brief Construct the origin string pieces for the given index.
+     * @brief Construct the origin string for the given index.
      *
      * @tparam Idx
-     * @return std::array<std::string, 4>
+     * @return std::string
      */
     template <size_t Idx>
-    std::array<std::string, 3> origin() const
+    std::string origin() const
     {
-        return split(VALUES.template a<Idx>());
+        return splitToVec(VALUES.template a<Idx>(), "|")[0];
     }
 
     /**
-     * @brief Construct the complement string pieces for the given index.
+     * @brief Construct the complement string for the given index.
      *
      * @tparam Idx
-     * @return std::array<std::string, 4>
+     * @return std::string
      */
     template <size_t Idx>
-    std::array<std::string, 3> complement() const
+    std::string complement() const
     {
-        return split(VALUES.template a<Idx>().pass().fail().skip());
+        return splitToVec(VALUES.template a<Idx>().pass().fail().skip(), "|")[0];
     }
 
     /**
      * @brief Construct the antecedent callable for the given index.
      *
      * @tparam Idx
-     * @return Callable that same as (const std::array<std::string, 3>&) -> bool
+     * @return Callable that same as (const std::string) -> bool
      */
     template <size_t Idx>
     auto antecedent() const
     {
-        return [sup = split(VALUES.template a<Idx>())](const std::array<std::string, 3>& pieces)
+        return [sup = splitToVec(VALUES.template a<Idx>(), "|")[0]](const std::string pieces)
         {
             return sup == pieces;
         };
@@ -137,7 +137,7 @@ struct InclusiveEventCountableRequirements
      * @brief Construct the consequent callable for the given index.
      *
      * @tparam Idx
-     * @return Callable that same as (const std::array<std::string, 3>&) -> bool
+     * @return Callable that same as (const std::string) -> bool
      */
     template <size_t Idx>
     auto consequent() const
@@ -146,18 +146,9 @@ struct InclusiveEventCountableRequirements
         const auto a = DROPS.template a<Idx>();
         const auto b = DROPS.template b<Idx>();
 
-        return [subA =
-                    std::array{
-                        split(base + a[0])[0],
-                        split(base + a[1])[1],
-                        split(base + a[2])[2],
-                    },
-                subB =
-                    std::array{
-                        split(base + b[0])[0],
-                        split(base + b[1])[1],
-                        split(base + b[2])[2],
-                    }](const std::array<std::string, 3>& pieces)
+        return
+            [subA = (split(base + a[0])[0] + split(base + a[1])[1] + split(base + a[2])[2]),
+             subB = (split(base + b[0])[0] + split(base + b[1])[1] + split(base + b[2])[2])](const std::string pieces)
         {
             return subA == pieces && subB == pieces;
         };
@@ -166,18 +157,6 @@ struct InclusiveEventCountableRequirements
 private:
     std::array<std::string, 3> split(const std::string str) const
     {
-        auto splitToVec = [](const std::string& str, const std::string_view pattern)
-        {
-            return std::views::split(str, pattern)
-                 | std::views::transform(
-                       [](const auto& x)
-                       {
-                           return std::ranges::to<std::string>(x);
-                       }
-                 )
-                 | std::ranges::to<std::vector<std::string>>();
-        };
-
         const auto x = splitToVec(str, "|");
         const auto y = splitToVec(x[0], ",");
 
@@ -186,6 +165,18 @@ private:
             y[1],
             y[2],
         };
+    }
+
+    std::vector<std::string> splitToVec(const std::string& str, const std::string_view pattern) const
+    {
+        return std::views::split(str, pattern)
+             | std::views::transform(
+                   [](const auto& x)
+                   {
+                       return std::ranges::to<std::string>(x);
+                   }
+             )
+             | std::ranges::to<std::vector<std::string>>();
     }
 
     static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
