@@ -12,7 +12,7 @@
 
 namespace Util
 {
-    template <std::ranges::input_range Range>
+    template <std::ranges::random_access_range Range>
     struct SequenceFromIndice
     {
         consteval SequenceFromIndice(Range indice) :

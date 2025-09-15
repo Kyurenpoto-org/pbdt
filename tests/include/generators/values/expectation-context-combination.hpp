@@ -15,7 +15,7 @@
 
 namespace Expandable
 {
-    template <std::ranges::input_range Range>
+    template <std::ranges::random_access_range Range>
     struct ExpectationContextSequence
     {
         consteval ExpectationContextSequence(Range indice) :
