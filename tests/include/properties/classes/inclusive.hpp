@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <type_traits>
 
 #include "properties/util.hpp"
@@ -44,7 +45,11 @@ struct InclusiveStringPiecesValidation :
     template <size_t Idx>
     auto truth() const
     {
-        return comparisonFactory<Idx>().comparison(requirements.template origin<Idx>());
+        return []()
+        {
+            return !requirements.template antecedent<Idx>()(requirements.template origin<Idx>())
+                || requirements.template consequent<Idx>()(requirements.template origin<Idx>());
+        };
     }
 
     /**
@@ -56,70 +61,14 @@ struct InclusiveStringPiecesValidation :
     template <size_t Idx>
     auto falsity() const
     {
-        return comparisonFactory<Idx>().comparison(requirements.template complement<Idx>());
-    }
-
-private:
-    template <typename Comparable>
-    struct InclusiveComparison
-    {
-        InclusiveComparison(const Comparable comparable, const std::array<std::string, 4> var) :
-            comparable{
-                comparable,
-            },
-            var{
-                var,
-            }
+        return []()
         {
-        }
-
-        bool operator()() const
-        {
-            return comparable.contains(var);
-        }
-
-    private:
-        Comparable comparable;
-        std::array<std::string, 4> var;
-    };
-
-    template <typename Antecedent, typename Consequent>
-    struct Inclusive
-    {
-        Inclusive(const Antecedent antecedent, const Consequent consequent) :
-            antecedent{ antecedent },
-            consequent{ consequent }
-        {
-        }
-
-        InclusiveComparison<Inclusive> comparison(const std::array<std::string, 4> var) const
-        {
-            return InclusiveComparison<Inclusive>{
-                *this,
-                var,
-            };
-        }
-
-        bool contains(const std::array<std::string, 4>& var) const
-        {
-            return !antecedent(var) || consequent(var);
-        }
-
-    private:
-        Antecedent antecedent;
-        Consequent consequent;
-    };
-
-    template <size_t Idx>
-    Inclusive<typename InclusiveRequirements::Antecedent, typename InclusiveRequirements::Consequent>
-    comparisonFactory() const
-    {
-        return {
-            requirements.template antecedent<Idx>(),
-            requirements.template consequent<Idx>(),
+            return !requirements.template antecedent<Idx>()(requirements.template complement<Idx>())
+                || requirements.template consequent<Idx>()(requirements.template complement<Idx>());
         };
     }
 
+private:
     static constexpr InclusiveRequirements requirements{};
 };
 
@@ -152,7 +101,7 @@ struct InclusiveEventCountableRequirements
      * @return std::array<std::string, 4>
      */
     template <size_t Idx>
-    std::array<std::string, 4> origin() const
+    std::array<std::string, 3> origin() const
     {
         return split(VALUES.template a<Idx>());
     }
@@ -164,114 +113,78 @@ struct InclusiveEventCountableRequirements
      * @return std::array<std::string, 4>
      */
     template <size_t Idx>
-    std::array<std::string, 4> complement() const
+    std::array<std::string, 3> complement() const
     {
         return split(VALUES.template a<Idx>().pass().fail().skip());
     }
 
     /**
-     * @brief The antecedent callable structure.
-     */
-    struct Antecedent
-    {
-        Antecedent(const std::string sup) :
-            sup{ sup }
-        {
-        }
-
-        bool operator()(std::array<std::string, 4> pieces) const
-        {
-            return sup.contains(pieces[0]) && sup.contains(pieces[1]) && sup.contains(pieces[2])
-                && sup.contains(pieces[3]);
-        }
-
-    private:
-        std::string sup;
-    };
-
-    /**
      * @brief Construct the antecedent callable for the given index.
      *
      * @tparam Idx
-     * @return Antecedent
+     * @return Callable that same as (const std::array<std::string, 3>&) -> bool
      */
     template <size_t Idx>
-    Antecedent antecedent() const
+    auto antecedent() const
     {
-        return {
-            VALUES.template a<Idx>(),
+        return [sup = split(VALUES.template a<Idx>())](const std::array<std::string, 3>& pieces)
+        {
+            return sup == pieces;
         };
     }
-
-    /**
-     * @brief The consequent callable structure.
-     */
-    struct Consequent
-    {
-        Consequent(const std::array<std::string, 3> subA, const std::array<std::string, 3> subB) :
-            subA{
-                subA,
-            },
-            subB{
-                subB,
-            }
-        {
-        }
-
-        bool operator()(const std::array<std::string, 4> pieces) const
-        {
-            return implement(subA, pieces) && implement(subB, pieces);
-        }
-
-    private:
-        bool implement(const std::array<std::string, 3>& sub, const std::array<std::string, 4>& pieces) const
-        {
-            return sub[0].contains(pieces[0]) && sub[1].contains(pieces[1]) && sub[2].contains(pieces[2])
-                && !sub[0].contains(pieces[3]) && !sub[1].contains(pieces[3]) && !sub[2].contains(pieces[3]);
-        }
-
-        const std::array<std::string, 3> subA;
-        const std::array<std::string, 3> subB;
-    };
 
     /**
      * @brief Construct the consequent callable for the given index.
      *
      * @tparam Idx
-     * @return Consequent
+     * @return Callable that same as (const std::array<std::string, 3>&) -> bool
      */
     template <size_t Idx>
-    Consequent consequent() const
+    auto consequent() const
     {
         const auto base = VALUES.template a<Idx>();
         const auto a = DROPS.template a<Idx>();
         const auto b = DROPS.template b<Idx>();
 
-        return {
-            std::array{
-                static_cast<std::string>(base + a[0]),
-                static_cast<std::string>(base + a[1]),
-                static_cast<std::string>(base + a[2]),
-            },
-            std::array{
-                static_cast<std::string>(base + b[0]),
-                static_cast<std::string>(base + b[1]),
-                static_cast<std::string>(base + b[2]),
-            },
+        return [subA =
+                    std::array{
+                        split(base + a[0])[0],
+                        split(base + a[1])[1],
+                        split(base + a[2])[2],
+                    },
+                subB =
+                    std::array{
+                        split(base + b[0])[0],
+                        split(base + b[1])[1],
+                        split(base + b[2])[2],
+                    }](const std::array<std::string, 3>& pieces)
+        {
+            return subA == pieces && subB == pieces;
         };
     }
 
 private:
-    std::array<std::string, 4> split(std::string str) const
+    std::array<std::string, 3> split(const std::string str) const
     {
-        const auto x = std::views::split(str, "|") | std::ranges::to<std::vector<std::string>>();
-        const auto y = std::views::split(x[0], ",") | std::ranges::to<std::vector<std::string>>();
+        auto splitToVec = [](const std::string& str, const std::string_view pattern)
+        {
+            return std::views::split(str, pattern)
+                 | std::views::transform(
+                       [](const auto& x)
+                       {
+                           return std::ranges::to<std::string>(x);
+                       }
+                 )
+                 | std::ranges::to<std::vector<std::string>>();
+        };
+
+        const auto x = splitToVec(str, "|");
+        const auto y = splitToVec(x[0], ",");
 
         return {
             y[0],
             y[1],
             y[2],
-            x[1],
         };
     }
 
