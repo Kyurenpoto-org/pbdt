@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "util.hpp"
+#include "properties/util.hpp"
 
 /**
  * @brief A value validation structure that checks associative properties.

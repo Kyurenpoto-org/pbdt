@@ -8,7 +8,7 @@
 
 #include <type_traits>
 
-#include "util.hpp"
+#include "properties/util.hpp"
 
 /**
  * @brief A string validation structure that checks inclusive properties.
