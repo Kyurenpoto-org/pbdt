@@ -21,11 +21,14 @@ namespace
      *
      * @details If the expression is false, prints the source location and exits the program.
      */
-    void dynamic_assert(const bool expr, const std::source_location& location = std::source_location::current())
+    void dynamic_assert(
+        const bool expr, const std::string message,
+        const std::source_location& location = std::source_location::current()
+    )
     {
         if (!expr)
         {
-            std::println("{0}({1},{2})", location.file_name(), location.line(), location.column());
+            std::println(stderr, "{}\n{}({},{})", message, location.file_name(), location.line(), location.column());
             std::exit(EXIT_FAILURE);
         }
     }
@@ -103,7 +106,7 @@ namespace
         {
             const auto runTimeA = a();
             const auto runTimeB = b();
-            dynamic_assert(runTimeA == runTimeB);
+            dynamic_assert(runTimeA == runTimeB, std::format("IndexedRunTimeValueAssertion<{}>", Idx));
         }
     };
 
@@ -176,7 +179,7 @@ namespace
         {
             const bool runTimeTruth = truth();
             const bool runTimeFalsity = falsity();
-            dynamic_assert(runTimeTruth && runTimeFalsity);
+            dynamic_assert(runTimeTruth && runTimeFalsity, std::format("IndexedRunTimePropositionAssertion<{}>", Idx));
         }
     };
 
