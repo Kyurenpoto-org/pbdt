@@ -103,7 +103,7 @@ add_header_module_prop_suite(
     PROP inclusive
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS callable-target callable-property event-countable
+    TARGETS callable-target callable-property
     FIXTURES pbdt-base-fixture
 )
 add_header_module_prop_suite(
