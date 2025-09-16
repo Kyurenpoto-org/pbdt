@@ -323,7 +323,7 @@ struct HomomorphicEventCountableRequirements
     }
 
 private:
-    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
+    static constexpr auto COMBINATIONS = Countable::EventCountableTripleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };

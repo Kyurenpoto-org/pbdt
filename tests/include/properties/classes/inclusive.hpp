@@ -179,7 +179,7 @@ private:
              | std::ranges::to<std::vector<std::string>>();
     }
 
-    static constexpr auto VALUES = Countable::EventCountableDoubleValueCombination<
+    static constexpr auto VALUES = Countable::EventCountableTripleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 

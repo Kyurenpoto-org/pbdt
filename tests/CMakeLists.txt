@@ -89,7 +89,7 @@ add_header_module_prop_suite(
     PROP associative
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS given when then expectation-context
+    TARGETS given when then event-countable expectation-context
     FIXTURES given-component-fixture when-component-fixture then-component-fixture
 )
 add_header_module_prop_suite(

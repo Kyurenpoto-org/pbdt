@@ -135,7 +135,7 @@ struct CommutativeEventCountableRequirements
     }
 
 private:
-    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
+    static constexpr auto COMBINATIONS = Countable::EventCountableTripleValueCombination<
         EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
         COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
 };
@@ -187,6 +187,8 @@ struct CommutativeExpectationContextRequirements
     /**
      * @brief Compute accumulate expression.
      *
+     * @tparam N
+     * @tparam M
      * @param a
      * @param b
      * @return ExpectationContext<N + M> N and M is size of each of A and B

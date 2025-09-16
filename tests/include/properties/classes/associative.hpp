@@ -141,6 +141,7 @@ private:
 };
 
 #include "generators/values/composable-callable.hpp"
+#include "generators/values/event-countable-combination.hpp"
 #include "generators/values/expectation-context-combination.hpp"
 #include "generators/values/foldable-callable.hpp"
 #include "generators/values/productable-container.hpp"
@@ -378,6 +379,84 @@ private:
 };
 
 /**
+ * @brief A structure that defines associative requirements for EventCountable::operator std::string() with
+ * operator+(EventCountable EventCountable).
+ *
+ * @tparam EventCountable
+ */
+template <typename EventCountable>
+struct AssociativeEventCountableRequirements
+{
+    /**
+     * @brief The size of index range.
+     *
+     * @return constexpr size_t
+     */
+    static constexpr size_t size()
+    {
+        return COMBINATIONS.size();
+    }
+
+    /**
+     * @brief Get the EventCountable object A for given index.
+     *
+     * @tparam IDX
+     * @return EventCountable
+     */
+    template <size_t IDX>
+    auto a() const
+    {
+        return COMBINATIONS.template a<IDX>();
+    }
+
+    /**
+     * @brief Get the EventCountable object B for given index.
+     *
+     * @tparam IDX
+     * @return EventCountable
+     */
+    template <size_t IDX>
+    auto b() const
+    {
+        return COMBINATIONS.template b<IDX>();
+    }
+
+    /**
+     * @brief Get the EventCountable object C for given index.
+     *
+     * @tparam IDX
+     * @return EventCountable
+     */
+    template <size_t IDX>
+    auto c() const
+    {
+        return COMBINATIONS.template c<IDX>();
+    }
+
+    /**
+     * @brief Compute accumulate expression.
+     *
+     * @param a
+     * @param b
+     * @return EventCountable
+     */
+    EventCountable closedOp(const EventCountable a, const EventCountable b) const
+    {
+        return a + b;
+    }
+
+    std::string toComparable(const EventCountable context) const
+    {
+        return context;
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Countable::EventCountableTripleValueCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
+};
+
+/**
  * @brief A structure that defines associative requirements for ExpectationContext<N>::countedEvents() and
  * ExpectationContext<N>::failureReport() with operator+(ExpectationContext<N>, ExpectationContext<M>).
  *
@@ -436,6 +515,8 @@ struct AssociativeExpectationContextRequirements
     /**
      * @brief Compute accumulate expression.
      *
+     * @tparam N
+     * @tparam M
      * @param a
      * @param b
      * @return ExpectationContext<N + M> N and M is size of each of A and B
