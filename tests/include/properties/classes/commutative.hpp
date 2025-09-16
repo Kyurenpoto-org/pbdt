@@ -72,7 +72,74 @@ private:
     static constexpr CommutativeRequirements requirements{};
 };
 
+#include "generators/values/event-countable-combination.hpp"
 #include "generators/values/expectation-context-combination.hpp"
+
+/**
+ * @brief A structure that defines commutative requirements for EventCountable::operator std::string() with
+ * operator+(EventCountable, EventCountable).
+ *
+ * @tparam EventCountable
+ */
+template <typename EventCountable>
+struct CommutativeEventCountableRequirements
+{
+    /**
+     * @brief The size of index range.
+     *
+     * @return constexpr size_t
+     */
+    static constexpr size_t size()
+    {
+        return COMBINATIONS.size();
+    }
+
+    /**
+     * @brief Get the EventCountable object A for given index.
+     *
+     * @tparam IDX
+     * @return EventCountable
+     */
+    template <size_t IDX>
+    auto a() const
+    {
+        return COMBINATIONS.template a<IDX>();
+    }
+
+    /**
+     * @brief Get the EventCountable object B for given index.
+     *
+     * @tparam IDX
+     * @return EventCountable
+     */
+    template <size_t IDX>
+    auto b() const
+    {
+        return COMBINATIONS.template b<IDX>();
+    }
+
+    /**
+     * @brief Compute accumulate expression.
+     *
+     * @param a
+     * @param b
+     * @return EventCountable
+     */
+    EventCountable closedOp(const EventCountable a, const EventCountable b) const
+    {
+        return a + b;
+    }
+
+    std::string toComparable(const EventCountable events) const
+    {
+        return events;
+    }
+
+private:
+    static constexpr auto COMBINATIONS = Countable::EventCountableDoubleValueCombination<
+        EventCountable, COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(),
+        COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM(), COMPILE_TIME_RANDOM()>{};
+};
 
 /**
  * @brief A structure that defines commutative requirements for ExpectationContext<N>::countedEvents() with

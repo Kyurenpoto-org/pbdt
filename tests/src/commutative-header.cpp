@@ -12,6 +12,14 @@
 
 #include "suite-runner.hpp"
 
+void eventCountable()
+{
+    const CommutativeRunTimeValueValidation<
+        CommutativeEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
+        acceptable;
+    acceptable.run();
+}
+
 void expectationContext()
 {
     const CommutativeRunTimeValueValidation<CommutativeExpectationContextRequirements<
@@ -24,9 +32,11 @@ int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
+            "event-countable",
             "expectation-context",
         },
         std::array{
+            eventCountable,
             expectationContext,
         }
     )

@@ -117,7 +117,7 @@ add_header_module_prop_suite(
     PROP commutative
     DEP pbdt
     NAMESPACE pbdt.unit
-    TARGETS expectation-context
+    TARGETS event-countable expectation-context
     FIXTURES pbdt-base-fixture
 )
 
