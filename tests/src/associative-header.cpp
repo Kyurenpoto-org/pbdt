@@ -34,9 +34,9 @@ void then()
 
 void expectationContext()
 {
-    using REQ = AssociativeExpectationContextRequirements<
-        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>;
-    const AssociativeRunTimeValueValidation<typename REQ::ToComparable, REQ> acceptable;
+    const AssociativeRunTimeValueValidation<AssociativeExpectationContextRequirements<
+        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>>
+        acceptable;
     acceptable.run();
 }
 

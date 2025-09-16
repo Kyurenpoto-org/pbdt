@@ -80,14 +80,13 @@ private:
  *
  * @details Associative property: (a op b) op c == a op (b op c).
  *
- * @tparam ToComparable
  * @tparam AssociativeRequirements
  *
  * @see RunTimeValueValidationBase
  */
-template <typename ToComparable, typename AssociativeRequirements>
+template <typename AssociativeRequirements>
 struct AssociativeRunTimeValueValidation :
-    RunTimeValueValidationBase<AssociativeRunTimeValueValidation<ToComparable, AssociativeRequirements>>
+    RunTimeValueValidationBase<AssociativeRunTimeValueValidation<AssociativeRequirements>>
 {
     /**
      * @brief The size of index range.
@@ -112,7 +111,7 @@ struct AssociativeRunTimeValueValidation :
     {
         return []()
         {
-            return toComparable(requirements.closedOp(
+            return requirements.toComparable(requirements.closedOp(
                 requirements.closedOp(requirements.template a<Idx>(), requirements.template b<Idx>()),
                 requirements.template c<Idx>()
             ));
@@ -130,7 +129,7 @@ struct AssociativeRunTimeValueValidation :
     {
         return []()
         {
-            return toComparable(requirements.closedOp(
+            return requirements.toComparable(requirements.closedOp(
                 requirements.template a<Idx>(),
                 requirements.closedOp(requirements.template b<Idx>(), requirements.template c<Idx>())
             ));
@@ -139,7 +138,6 @@ struct AssociativeRunTimeValueValidation :
 
 private:
     static constexpr AssociativeRequirements requirements{};
-    static constexpr ToComparable toComparable{};
 };
 
 #include "generators/values/composable-callable.hpp"
@@ -448,17 +446,14 @@ struct AssociativeExpectationContextRequirements
         return a + b;
     }
 
-    struct ToComparable
+    template <size_t N>
+    std::array<std::string, 2> toComparable(const ExpectationContext<N> context) const
     {
-        template <size_t N>
-        std::array<std::string, 2> operator()(const ExpectationContext<N> context) const
-        {
-            return {
-                static_cast<std::string>(context.template countedEvents<EventCountable>()),
-                static_cast<std::string>(context.template failureReport<EventCountable>()),
-            };
-        }
-    };
+        return {
+            static_cast<std::string>(context.template countedEvents<EventCountable>()),
+            static_cast<std::string>(context.template failureReport<EventCountable>()),
+        };
+    }
 
 private:
     static constexpr auto COMBINATIONS = Expandable::ExpectationContextTripleValueCombination<

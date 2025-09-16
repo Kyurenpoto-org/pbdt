@@ -13,7 +13,6 @@
  *
  * @details Commutative property: a op b == b op a.
  *
- * @tparam ToComparable
  * @tparam CommutativeRequirements
  *
  * @see RunTimeValueValidationBase
