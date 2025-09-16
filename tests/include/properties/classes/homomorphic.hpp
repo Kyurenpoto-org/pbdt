@@ -109,9 +109,9 @@ struct HomomorphicRunTimeValueValidation :
     {
         return []()
         {
-            return requirements.template morph<IDX>(
+            return requirements.toComparable(requirements.template morph<IDX>(
                 requirements.beforeMorphOp(requirements.template a<IDX>(), requirements.template b<IDX>())
-            );
+            ));
         };
     }
 
@@ -126,10 +126,10 @@ struct HomomorphicRunTimeValueValidation :
     {
         return []()
         {
-            return requirements.afterMorphOp(
+            return requirements.toComparable(requirements.afterMorphOp(
                 requirements.template morph<IDX>(requirements.template a<IDX>()),
                 requirements.template morph<IDX>(requirements.template b<IDX>())
-            );
+            ));
         };
     }
 
@@ -378,13 +378,13 @@ struct HomomorphicExpectationContextRequirements
      * @tparam size_t Ignored parameter
      * @tparam N
      * @param context
-     * @return std::array<std::string, 2>
+     * @return std::tuple<EventCountable, std::string>
      */
     template <size_t, size_t N>
-    std::array<std::string, 2> morph(const ExpectationContext<N> context) const
+    std::tuple<EventCountable, std::string> morph(const ExpectationContext<N> context) const
     {
         return {
-            static_cast<std::string>(context.template countedEvents<EventCountable>()),
+            context.template countedEvents<EventCountable>(),
             static_cast<std::string>(context.template failureReport<EventCountable>()),
         };
     }
@@ -407,14 +407,28 @@ struct HomomorphicExpectationContextRequirements
      *
      * @param a
      * @param b
-     * @return std::array<std::string, 2>
+     * @return std::tuple<EventCountable, std::string>
      */
-    std::array<std::string, 2>
-    afterMorphOp(const std::array<std::string, 2> a, const std::array<std::string, 2> b) const
+    std::tuple<EventCountable, std::string>
+    afterMorphOp(const std::tuple<EventCountable, std::string> a, const std::tuple<EventCountable, std::string> b) const
     {
         return {
-            a[0] + b[0],
-            a[1] + b[1],
+            std::get<0>(a) + std::get<0>(b),
+            std::get<1>(a) + std::get<1>(b),
+        };
+    }
+
+    /**
+     * @brief Convert result to comparable type.
+     *
+     * @param x
+     * @return std::array<std::string, 2>
+     */
+    std::array<std::string, 2> toComparable(const std::tuple<EventCountable, std::string> x) const
+    {
+        return {
+            static_cast<std::string>(std::get<0>(x)),
+            std::get<1>(x),
         };
     }
 

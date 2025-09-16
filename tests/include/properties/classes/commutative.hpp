@@ -129,6 +129,12 @@ struct CommutativeEventCountableRequirements
         return a + b;
     }
 
+    /**
+     * @brief Convert result to comparable type.
+     *
+     * @param events
+     * @return std::string
+     */
     std::string toComparable(const EventCountable events) const
     {
         return events;
@@ -199,6 +205,13 @@ struct CommutativeExpectationContextRequirements
         return a + b;
     }
 
+    /**
+     * @brief Convert result to comparable type.
+     *
+     * @tparam N
+     * @param context
+     * @return std::array<std::string, 2>
+     */
     template <size_t N>
     std::string toComparable(const ExpectationContext<N> context) const
     {

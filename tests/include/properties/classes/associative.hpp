@@ -17,6 +17,8 @@
  * @tparam AssociativeRequirements
  *
  * @see TwoWayValueValidationBase
+ *
+ * @todo Replace ToComparable to inner dependency
  */
 template <typename ToComparable, typename AssociativeRequirements>
 struct AssociativeValueValidation :
@@ -445,9 +447,15 @@ struct AssociativeEventCountableRequirements
         return a + b;
     }
 
-    std::string toComparable(const EventCountable context) const
+    /**
+     * @brief Convert result to comparable type.
+     *
+     * @param events
+     * @return std::string
+     */
+    std::string toComparable(const EventCountable events) const
     {
-        return context;
+        return events;
     }
 
 private:
@@ -527,6 +535,13 @@ struct AssociativeExpectationContextRequirements
         return a + b;
     }
 
+    /**
+     * @brief Convert result to comparable type.
+     *
+     * @tparam N
+     * @param context
+     * @return std::array<std::string, 2>
+     */
     template <size_t N>
     std::array<std::string, 2> toComparable(const ExpectationContext<N> context) const
     {
