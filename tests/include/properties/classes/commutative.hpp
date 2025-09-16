@@ -18,9 +18,9 @@
  *
  * @see RunTimeValueValidationBase
  */
-template <typename ToComparable, typename CommutativeRequirements>
+template <typename CommutativeRequirements>
 struct CommutativeRunTimeValueValidation :
-    RunTimeValueValidationBase<CommutativeRunTimeValueValidation<ToComparable, CommutativeRequirements>>
+    RunTimeValueValidationBase<CommutativeRunTimeValueValidation<CommutativeRequirements>>
 {
     /**
      * @brief The size of index range.
@@ -45,7 +45,9 @@ struct CommutativeRunTimeValueValidation :
     {
         return []()
         {
-            return toComparable(requirements.closedOp(requirements.template a<Idx>(), requirements.template b<Idx>()));
+            return requirements.toComparable(
+                requirements.closedOp(requirements.template a<Idx>(), requirements.template b<Idx>())
+            );
         };
     }
 
@@ -60,13 +62,14 @@ struct CommutativeRunTimeValueValidation :
     {
         return []()
         {
-            return toComparable(requirements.closedOp(requirements.template b<Idx>(), requirements.template a<Idx>()));
+            return requirements.toComparable(
+                requirements.closedOp(requirements.template b<Idx>(), requirements.template a<Idx>())
+            );
         };
     }
 
 private:
     static constexpr CommutativeRequirements requirements{};
-    static constexpr ToComparable toComparable{};
 };
 
 #include "generators/values/expectation-context-combination.hpp"
@@ -128,14 +131,11 @@ struct CommutativeExpectationContextRequirements
         return a + b;
     }
 
-    struct ToComparable
+    template <size_t N>
+    std::string toComparable(const ExpectationContext<N> context) const
     {
-        template <size_t N>
-        std::string operator()(const ExpectationContext<N> context) const
-        {
-            return context.template countedEvents<EventCountable>();
-        }
-    };
+        return context.template countedEvents<EventCountable>();
+    }
 
 private:
     static constexpr auto COMBINATIONS = Expandable::ExpectationContextTripleValueCombination<

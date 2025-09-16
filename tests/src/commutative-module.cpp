@@ -15,9 +15,9 @@ import pbdt;
 
 void expectationContext()
 {
-    using REQ = CommutativeExpectationContextRequirements<
-        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>;
-    const CommutativeRunTimeValueValidation<typename REQ::ToComparable, REQ> acceptable;
+    const CommutativeRunTimeValueValidation<CommutativeExpectationContextRequirements<
+        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>>
+        acceptable;
     acceptable.run();
 }
 
