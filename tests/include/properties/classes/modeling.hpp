@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "util.hpp"
+#include "properties/util.hpp"
 
 template <typename ModelingRequirements>
 struct ModelingValueValidation : TwoWayValueValidationBase<ModelingValueValidation<ModelingRequirements>>

@@ -6,31 +6,23 @@
 
 #include <array>
 
-#include "properties/classes/homomorphic.hpp"
+#include "properties/classes/commutative.hpp"
 
-import exstd;
-import pbdt;
+#include "pbdt/test-context.hpp"
 
 #include "suite-runner.hpp"
-#include "wrapped-deps/for-bdd.hpp"
-
-void runnableScenarioWithThenComponent()
-{
-    const HomomorphicValueValidation<HomomorphicRunnableScenarioWithThenRequirements<Expect, RunnableScenario, Then>>
-        acceptable;
-    acceptable.run();
-}
 
 void eventCountable()
 {
-    const HomomorphicValueValidation<HomomorphicEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
+    const CommutativeRunTimeValueValidation<
+        CommutativeEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
 }
 
 void expectationContext()
 {
-    const HomomorphicRunTimeValueValidation<HomomorphicExpectationContextRequirements<
+    const CommutativeRunTimeValueValidation<CommutativeExpectationContextRequirements<
         pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>>
         acceptable;
     acceptable.run();
@@ -40,12 +32,10 @@ int main(int argc, const char* const* argv)
 {
     suite(
         std::array{
-            "runnable-scenario-with-then-component",
             "event-countable",
             "expectation-context",
         },
         std::array{
-            runnableScenarioWithThenComponent,
             eventCountable,
             expectationContext,
         }
