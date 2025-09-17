@@ -98,7 +98,6 @@ jobs:
         run: |
           add-apt-repository -y universe
           add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          add-apt-repository -y ppa:ubuntu-toolchain-r/questing
           apt-get update
           apt-get install -y gcc-15 g++-15
           update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 60
