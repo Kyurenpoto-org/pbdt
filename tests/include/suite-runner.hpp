@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cstdlib>
+#include <string_view>
 
 template <size_t N>
 struct SuiteRunner
@@ -43,7 +44,7 @@ struct SuiteRunner
             run(
                 [&](const auto& name, auto&& func)
                 {
-                    if (name == argv[1])
+                    if (std::string_view(name) == argv[1])
                     {
                         func();
                     }

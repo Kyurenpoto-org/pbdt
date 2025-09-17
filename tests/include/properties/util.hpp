@@ -13,19 +13,57 @@
 
 namespace
 {
-    void dynamic_assert(const bool expr, const std::source_location& location = std::source_location::current())
+    /**
+     * @brief Performs a run-time assertion.
+     *
+     * @param expr The expression to be asserted.
+     * @param location The source location of the assertion (default is the current location).
+     *
+     * @details If the expression is false, prints the source location and exits the program.
+     */
+    void dynamic_assert(
+        const bool expr, const std::string message,
+        const std::source_location& location = std::source_location::current()
+    )
     {
         if (!expr)
         {
-            std::println("{0}({1},{2})", location.file_name(), location.line(), location.column());
+            std::println(stderr, "{}\n{}({},{})", message, location.file_name(), location.line(), location.column());
             std::exit(EXIT_FAILURE);
         }
     }
+
+    namespace detail
+    {
+        template <typename, typename>
+        struct IndexedAssertionTrait : std::false_type
+        {
+        };
+
+        template <template <size_t> typename T, typename Validatable, size_t Idx>
+            requires(requires(T<Idx> t) { t.template operator()<Validatable>(std::declval<const Validatable&>()); })
+        struct IndexedAssertionTrait<T<Idx>, Validatable> : std::true_type
+        {
+        };
+    }
+
+    /**
+     * @brief A concept that checks if a type T can be used as an indexed assertion for a Validatable type.
+     *
+     * @details This concept checks if T has a templated operator() that can accept a Validatable type.
+     *
+     * @tparam T
+     * @tparam Validatable
+     */
+    template <typename T, typename Validatable>
+    concept IndexedAssertionInterface = detail::IndexedAssertionTrait<T, Validatable>::value;
 
     /**
      * @brief Performs a compile-time value assertion.
      *
      * @tparam Idx the index to be asserted.
+     *
+     * @see IndexedAssertionInterface
      */
     template <size_t Idx>
     struct IndexedCompileTimeValueAssertion
@@ -45,10 +83,14 @@ namespace
         }
     };
 
+    static_assert(IndexedAssertionInterface<IndexedCompileTimeValueAssertion<0>, int>);
+
     /**
      * @brief Performs a run-time value assertion.
      *
      * @tparam Idx the index to be asserted.
+     *
+     * @see IndexedAssertionInterface
      */
     template <size_t Idx>
     struct IndexedRunTimeValueAssertion
@@ -64,14 +106,18 @@ namespace
         {
             const auto runTimeA = a();
             const auto runTimeB = b();
-            dynamic_assert(runTimeA == runTimeB);
+            dynamic_assert(runTimeA == runTimeB, std::format("IndexedRunTimeValueAssertion<{}>", Idx));
         }
     };
+
+    static_assert(IndexedAssertionInterface<IndexedRunTimeValueAssertion<0>, int>);
 
     /**
      * @brief Performs a two-way assertion, checking both compile-time and run-time values.
      *
      * @tparam Idx the index to be asserted.
+     *
+     * @see IndexedAssertionInterface
      */
     template <size_t Idx>
     struct IndexedTwoWayValueAssertion
@@ -84,10 +130,14 @@ namespace
         }
     };
 
+    static_assert(IndexedAssertionInterface<IndexedTwoWayValueAssertion<0>, int>);
+
     /**
      * @brief Performs a compile-time proposition assertion.
      *
-     * @tparam Idx
+     * @tparam Idx the index to be asserted.
+     *
+     * @see IndexedAssertionInterface
      */
     template <size_t Idx>
     struct IndexedCompileTimePropositionAssertion
@@ -107,10 +157,14 @@ namespace
         }
     };
 
+    static_assert(IndexedAssertionInterface<IndexedCompileTimePropositionAssertion<0>, int>);
+
     /**
      * @brief Performs a run-time proposition assertion.
      *
-     * @tparam Idx
+     * @tparam Idx the index to be asserted.
+     *
+     * @see IndexedAssertionInterface
      */
     template <size_t Idx>
     struct IndexedRunTimePropositionAssertion
@@ -125,9 +179,11 @@ namespace
         {
             const bool runTimeTruth = truth();
             const bool runTimeFalsity = falsity();
-            dynamic_assert(runTimeTruth && runTimeFalsity);
+            dynamic_assert(runTimeTruth && runTimeFalsity, std::format("IndexedRunTimePropositionAssertion<{}>", Idx));
         }
     };
+
+    static_assert(IndexedAssertionInterface<IndexedRunTimePropositionAssertion<0>, int>);
 }
 
 namespace
@@ -138,10 +194,13 @@ namespace
      * @tparam Validatable The type to be asserted.
      */
     template <typename Validatable, template <size_t> typename IndexedAssertion>
+        requires(IndexedAssertionInterface<IndexedAssertion<0>, Validatable>)
     struct IterativeValidationBase
     {
         void run() const
         {
+            static_assert(Validatable::size() > 0);
+
             runImpl<Validatable::size() - 1>();
         }
 

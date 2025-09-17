@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "util.hpp"
+#include "properties/util.hpp"
 
 template <typename ProjectiveRequirements>
 struct LeftProjectiveValueValidation : TwoWayValueValidationBase<LeftProjectiveValueValidation<ProjectiveRequirements>>

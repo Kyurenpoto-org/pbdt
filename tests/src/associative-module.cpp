@@ -32,6 +32,22 @@ void then()
     acceptable.run();
 }
 
+void eventCountable()
+{
+    const AssociativeRunTimeValueValidation<
+        AssociativeEventCountableRequirements<pbdt::test_context::detail::EventCountable>>
+        acceptable;
+    acceptable.run();
+}
+
+void expectationContext()
+{
+    const AssociativeRunTimeValueValidation<AssociativeExpectationContextRequirements<
+        pbdt::test_context::detail::ExpectationContext, pbdt::test_context::detail::EventCountable>>
+        acceptable;
+    acceptable.run();
+}
+
 int main(int argc, const char* const* argv)
 {
     suite(
@@ -39,11 +55,15 @@ int main(int argc, const char* const* argv)
             "given",
             "when",
             "then",
+            "event-countable",
+            "expectation-context",
         },
         std::array{
             given,
             when,
             then,
+            eventCountable,
+            expectationContext,
         }
     )
         .run(argc, argv);
