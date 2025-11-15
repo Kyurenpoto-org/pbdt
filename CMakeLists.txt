@@ -66,7 +66,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		set(CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS ${CLANG_SCAN_DEPS_EXECUTABLE})
 	endif()
 
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L/opt/homebrew/opt/llvm/lib/c++ -Wl,-rpath,/opt/homebrew/opt/llvm/lib/c++")
+	execute_process(
+		COMMAND brew --prefix llvm
+		RESULT_VARIABLE brew_result
+		OUTPUT_VARIABLE brew_output
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -L${brew_output}/lib/c++ -Wl,-rpath,${brew_output}/lib/c++")
 endif()
 
 # modules
