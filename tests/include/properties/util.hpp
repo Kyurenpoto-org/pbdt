@@ -7,6 +7,7 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <functional>
 #include <print>
 #include <source_location>
